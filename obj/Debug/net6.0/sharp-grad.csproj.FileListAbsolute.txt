@@ -1,0 +1,15 @@
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.csproj.AssemblyReference.cache
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.AssemblyInfoInputs.cache
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.AssemblyInfo.cs
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.csproj.CoreCompileInputs.cache
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\sharp-grad.exe
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\sharp-grad.deps.json
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\sharp-grad.runtimeconfig.json
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\sharp-grad.dll
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\sharp-grad.pdb
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.dll
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\refint\sharp-grad.dll
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.pdb
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.genruntimeconfig.cache
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\ref\sharp-grad.dll
