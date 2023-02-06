@@ -1,12 +1,10 @@
 public class value{
     public double data,grad;
-    public List<value> children;
+    public List<value> children,topo_sort;
     public string name;
     public delegate void backward_pass();
     public backward_pass backward;
-    public List<value> topo_sort;
     
-
     public value(double data,string name , List<value> children=null){
         this.data = data;
         this.grad=0.0;
