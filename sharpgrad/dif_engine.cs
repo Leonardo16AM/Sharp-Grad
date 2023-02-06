@@ -43,7 +43,6 @@ public class value{
     }
     
     public void backward_pow(){
-        Console.WriteLine($"{this.children[1].data}  - {this.children[0].data}");
         this.children[0].grad+=this.children[1].data * Math.Pow(this.children[0].data,(this.children[1].data-1.0)) * this.grad;
         this.children[0].backward();
     }
