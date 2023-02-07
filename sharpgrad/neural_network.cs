@@ -21,7 +21,7 @@ public class neuron{
         }
         sum+=this.B;
         if(this.act_func){
-            return value.relu(sum);
+            return sum.relu();
         }else{
             return sum;
         }
