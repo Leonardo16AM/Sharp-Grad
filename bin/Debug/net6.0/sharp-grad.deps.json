@@ -7,8 +7,19 @@
   "targets": {
     ".NETCoreApp,Version=v6.0": {
       "sharp-grad/1.0.0": {
+        "dependencies": {
+          "LiveCharts.NetCore": "0.9.7"
+        },
         "runtime": {
           "sharp-grad.dll": {}
+        }
+      },
+      "LiveCharts.NetCore/0.9.7": {
+        "runtime": {
+          "lib/netcoreapp3.1/LiveCharts.dll": {
+            "assemblyVersion": "0.9.7.0",
+            "fileVersion": "0.9.7.0"
+          }
         }
       }
     }
@@ -18,6 +29,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "LiveCharts.NetCore/0.9.7": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vRLJNyQAhYxw8TvGL9tY3Xskhi3JqhC74mWN+KWLheDCqsHpg8CwicLUvz/7MjWhNPcQ3HL1DmiPfnf8QkaAwg==",
+      "path": "livecharts.netcore/0.9.7",
+      "hashPath": "livecharts.netcore.0.9.7.nupkg.sha512"
     }
   }
 }

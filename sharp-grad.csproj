@@ -8,4 +8,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="LiveCharts.NetCore" Version="0.9.7" />
+  </ItemGroup>
+
 </Project>

@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "HlERxO3o/AkTSsoS7Z7dx1JCxTD4Ksld6LnkaVwH4ImytoKCXk7/qW3Qqxc6GzdSx7AuaA3aVGe1ujlCQkHDbQ==",
+  "dgSpecHash": "76TmHfGk4w33sNa9uX1Wri8BiGvct3Ufl4llQj+MivZA+b0JhgzTfA2a6muZVe+fT3OIOz0vcJ3A8iqxqkjwDQ==",
   "success": true,
   "projectFilePath": "D:\\Programming\\Proyectos\\sharp-grad\\sharp-grad.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\leona\\.nuget\\packages\\livecharts.netcore\\0.9.7\\livecharts.netcore.0.9.7.nupkg.sha512"
+  ],
   "logs": []
 }

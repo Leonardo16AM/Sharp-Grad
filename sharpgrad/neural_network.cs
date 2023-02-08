@@ -26,12 +26,6 @@ public class neuron{
             return sum;
         }
     }
-    public void reset_grad(){
-        foreach(value w in this.W){
-            w.grad=0.0;
-        }
-        this.B.grad=0.0;
-    }
 }
 
 public class layer{
@@ -53,11 +47,6 @@ public class layer{
             Y.Add(n.forward(X));
         }
         return Y;
-    }
-    public void reset_grad(){
-        foreach(neuron n in this.neurons){
-            n.reset_grad();
-        }
     }
 }
 
@@ -81,11 +70,5 @@ public class MLP{
             X=Y;
         }
         return X;
-    }
-
-    public void reset_grad(){
-        foreach(layer l in this.layers){
-            l.reset_grad();
-        }
     }
 }

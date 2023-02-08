@@ -14,7 +14,13 @@ public class value{
         this.backward=new backward_pass(backward_empt);
         this.topo_sort=new List<value>();
     }
-    void backward_empt(){return;}
+
+    public void backward_empt(){
+        if(children==null)return;
+        if(children.Count==0)return;
+        children[0].grad += grad;
+    }
+
 
 
     /* BASIC ARITHMETIC OPERATIONS */
@@ -60,14 +66,9 @@ public class value{
         return c;
     }
 
-    public void backward_new(){
-        children[0].grad += grad;
-    }
-
     public static value operator /(value a, value b){
         value c= a*(b^(new value(-1,"-1")));
         value ret=new value(c.data,"/",new List<value>{c});
-        ret.backward = new backward_pass(ret.backward_new);
         return ret;
     }
 
@@ -88,7 +89,6 @@ public class value{
         value la=(new value(0.0,"zero"))-this;
         value c = (((e^this)-(e^la))/((e^this)+(e^la)));
         value ret=new value(c.data,"tanh",new List<value>{c});
-        ret.backward = new backward_pass(ret.backward_new);
         return c;
     }
 
@@ -121,7 +121,16 @@ public class value{
         topo_sort.Reverse();
         foreach(value u in topo_sort){
             u.backward();
+            // Console.WriteLine(u.name+" -> "+u.grad);
         }  
+    }
+    
+    public void reset_grad(){
+        visited= new HashSet<value>();
+        if(children==null)return;
+        foreach(value child in children){
+            child.reset_grad();
+        }
     }
 }   
 

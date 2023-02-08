@@ -13,3 +13,5 @@ D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\refint\sharp-grad.dll
 D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.pdb
 D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.genruntimeconfig.cache
 D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\ref\sharp-grad.dll
+D:\Programming\Proyectos\sharp-grad\bin\Debug\net6.0\LiveCharts.dll
+D:\Programming\Proyectos\sharp-grad\obj\Debug\net6.0\sharp-grad.csproj.CopyComplete
