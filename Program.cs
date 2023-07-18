@@ -5,7 +5,7 @@ scatter(v);
 
 
 
-MLP cerebrin = new MLP(2,new List<int>{32,32,1});
+MLP cerebrin = new MLP(2,new List<int>{8,1});
 
 List<value> X = new List<value>();
 X.Add(new value(v[0].X[0],"a"));
@@ -18,7 +18,7 @@ Console.WriteLine(Y[0].data);
 
 
 int epochs=1000;
-double lr=0.00000000000001;
+double lr=0.0000000001;
 
 for(int i=0;i<epochs;i++){
     Console.WriteLine("Epoch: "+i);
@@ -148,7 +148,7 @@ static class dataset{
             X.Add(rand.Next(-15,15));
             int x=X[0];
             int y=X[1];
-            if(  Math.Pow(x,2)+Math.Pow(y,2)<100 )
+            if(  y>2*x+5 )
                 Y.Add(1);
             else
                 Y.Add(2);
@@ -165,9 +165,10 @@ static class dataset{
 
 
 
-// value a = new value(1.5,"a");
-// value b = new value(2.0,"b");
-// value c = new value(6.0,"b");
+value a = new value(1.5,"a");
+value b = new value(2.0,"b");
+value c = new value(6.0,"b");
+
 // value d=(a+b*c);
 // value e=d/(new value(2.0,"2"));
 // value f=e^(new value(2.0,"2"));
@@ -182,6 +183,7 @@ static class dataset{
 
 // value j= new value(0.5,"j");
 // value k= j.tanh();
+
 // k.grad=1.0;
 // k.backpropagate();
 // Console.WriteLine(j.grad);
