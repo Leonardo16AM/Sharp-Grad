@@ -9,7 +9,7 @@ Scatter(v);
 
 
 
-MLP cerebrin = new(2, new List<int> { 8, 1 });
+MLP cerebrin = new(2, 8, 1);
 
 List<Value> X = new()
 {
@@ -121,6 +121,9 @@ Value MSE(List<Value> Y, List<Value> Y_hat)
 
 void Scatter(List<DataSet.Data> v)
 {
+    Console.Clear();
+    Console.WriteLine("\x1b[3J");
+
     int[,] mat = new int[300, 300];
     for (int i = 0; i < v.Count; i++)
     {

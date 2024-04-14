@@ -2,29 +2,38 @@ using SharpGrad.DifEngine;
 using SharpGrad.NN;
 
 public class MLP
+{
+    public List<Layer> Layers;
+    public int Inputs;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="inputs"></param>
+    /// <param name="count"></param>
+    /// <param name="count"></param>
+    public MLP(params int[] count)
     {
-        public List<Layer> Layers;
-        public int Inputs;
+        if(count.Length < 2)
+            throw new ArgumentException($"{nameof(count)} must have at least 2 elements. Got {count.Length}.");
 
-        public MLP(int inputs, List<int> outputs)
+        Layers = new List<Layer>(count.Length - 1);
+        Inputs = count[0];
+        Layers.Add(new Layer(count[1], Inputs, false));
+        for (int i = 2; i < count.Length; i++)
         {
-            Layers = new List<Layer>();
-            Inputs = inputs;
-            Layers.Add(new Layer(outputs[0], inputs, false));
-            for (int i = 1; i < outputs.Count; i++)
-            {
-                Layers.Add(new Layer(outputs[i], outputs[i - 1], true));
-            }
-        }
-
-        public List<Value> Forward(List<Value> X)
-        {
-            List<Value> Y;
-            foreach (Layer l in Layers)
-            {
-                Y = l.Forward(X);
-                X = Y;
-            }
-            return X;
+            Layers.Add(new Layer(count[i], count[i - 1], true));
         }
     }
+
+    public List<Value> Forward(List<Value> X)
+    {
+        List<Value> Y;
+        foreach (Layer l in Layers)
+        {
+            Y = l.Forward(X);
+            X = Y;
+        }
+        return X;
+    }
+}

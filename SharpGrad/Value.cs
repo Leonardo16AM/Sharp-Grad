@@ -6,6 +6,8 @@ namespace SharpGrad.DifEngine
 {
     public class Value
     {
+        public static readonly Value e = new Value(Math.E, "e");
+
         public const string ReLUName = "ReLU";
         public const string AddName = "+";
         public const string SubName = "-";
@@ -22,10 +24,8 @@ namespace SharpGrad.DifEngine
         public double Data;
         public readonly Value? LeftChildren;
         public readonly Value? RightChildren;
-        public readonly List<Value> TopOSort;
         public readonly string Name;
         private readonly BackwardPass Backward;
-        private readonly HashSet<Value> Visited;
 
         public Value(double data, string name, Value? leftChild = null, Value? rightChild = null)
         {
@@ -45,8 +45,6 @@ namespace SharpGrad.DifEngine
                 //TanhName => BackwardEmpt,
                 _ => BackwardEmpt,
             };
-            TopOSort = new List<Value>();
-            Visited = new HashSet<Value>();
         }
 
 
@@ -60,6 +58,8 @@ namespace SharpGrad.DifEngine
             => new Value(left.Data - right.Data, SubName, left, right);
         public static Value operator -(Value left, Value right)
             => Sub(left, right);
+        public static Value operator -(Value @this)
+            => new Value(-@this.Data, SubName, @this);
 
 
         public static Value Mul(Value left, Value right)
@@ -81,16 +81,13 @@ namespace SharpGrad.DifEngine
 
         #region ACTIVATION FUNCTIONS
         public Value ReLU()
-        {
-            Value c = new Value((Data <= 0) ? 0 : Data, ReLUName, this);
-            return c;
-        }
+            => new Value((Data <= 0) ? 0 : Data, ReLUName, this);
 
         public Value TanH()
         {
-            Value e = new Value(Math.E, "e");
-            Value la = (new Value(0.0, "zero")) - this;
-            Value c = (((e ^ this) - (e ^ la)) / ((e ^ this) + (e ^ la)));
+            Value eThis = Value.e ^ this;
+            Value eLa = Value.e ^ -this;
+            Value c = (eThis - eLa) / (eThis + eLa);
             Value ret = new Value(c.Data, "tanh", c);
             return c;
         }
@@ -141,30 +138,29 @@ namespace SharpGrad.DifEngine
         #endregion
 
         #region BACKPROPAGATION
-        void DFS(Value value)
+        void DFS(Value value, List<Value> TopOSort, HashSet<Value> Visited)
         {
             Visited.Add(value);
             if (value.LeftChildren != null && !Visited.Contains(value.LeftChildren))
-                DFS(value.LeftChildren);
+                DFS(value.LeftChildren, TopOSort, Visited);
             if (value.RightChildren != null && !Visited.Contains(value.RightChildren))
-                DFS(value.RightChildren);
+                DFS(value.RightChildren, TopOSort, Visited);
             TopOSort.Add(value);
         }
 
         public void Backpropagate()
         {
-            Visited.Clear();
-            DFS(this);
-            TopOSort.Reverse();
-            foreach (Value value in TopOSort)
+            List<Value> TopOSort = new List<Value>();
+            HashSet<Value> Visited = new HashSet<Value>();
+            DFS(this, TopOSort, Visited);
+            for(int i = TopOSort.Count - 1; i >= 0; i--)
             {
-                value.Backward();
+                TopOSort[i].Backward();
             }
         }
 
         public void ResetGrad()
         {
-            Visited.Clear();
             LeftChildren?.ResetGrad();
             RightChildren?.ResetGrad();
         }
