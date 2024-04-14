@@ -6,6 +6,8 @@ namespace SharpGrad.DifEngine
 {
     public class Value
     {
+        private static int InstanceCount = 0;
+
         public static readonly Value e = new Value(Math.E, "e");
         public static readonly Value Zero = new Value(0.0, "zero");
 
@@ -153,6 +155,7 @@ namespace SharpGrad.DifEngine
 
         public void Backpropagate()
         {
+            Grad = 1.0;
             List<Value> TopOSort = new List<Value>();
             HashSet<Value> Visited = new HashSet<Value>();
             DFS(this, TopOSort, Visited);
@@ -168,5 +171,10 @@ namespace SharpGrad.DifEngine
             RightChildren?.ResetGrad();
         }
         #endregion
+
+        public static implicit operator Value(double d)
+            => new Value(d, $"value_{++InstanceCount}");
+        public static explicit operator double(Value v)
+            => v.Data;
     }
 }

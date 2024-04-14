@@ -5,7 +5,7 @@ using SharpGrad.NN;
 
 var v = DataSet.GetDataSet(400);
 Console.WriteLine("Dataset:");
-Scatter(v);
+DataSet.Scatter(v);
 
 
 
@@ -13,8 +13,8 @@ MLP cerebrin = new(2, 8, 1);
 
 List<Value> X = new()
 {
-    new Value(v[0].X[0], "a"),
-    new Value(v[0].X[1], "b")
+    v[0].X[0],
+    v[0].X[1]
 };
 List<Value> Y = cerebrin.Forward(X);
 
@@ -31,22 +31,22 @@ double lastLoss = double.MaxValue;
 for (int i = 0; i < epochs; i++)
 {
     Console.WriteLine("Epoch: " + i);
-    Value loss = new(0.0, "loss");
+    Value loss = Value.Zero;
     List<DataSet.Data> preds = new();
 
     for (int j = 0; j < v.Count; j++)
     {
         X = new List<Value>
         {
-            new(v[j].X[0], "a"),
-            new(v[j].X[1], "b")
+            v[j].X[0],
+            v[j].X[1]
         };
         Y = cerebrin.Forward(X);
         List<Value> Ygt = new()
         {
-            new(v[j].Y[0], "c")
+            v[j].Y[0]
         };
-        var nl = loss + MSE(Y, Ygt);
+        var nl = loss + Loss.MSE(Y, Ygt);
         loss = nl;
 
         int val;
@@ -62,31 +62,20 @@ for (int i = 0; i < epochs; i++)
         preds.Add(nd);
     }
 
-    loss.Grad = 1.0;
     loss.Backpropagate();
-    foreach (Layer l in cerebrin.Layers)
-    {
-        foreach (Neuron n in l.Neurons)
-        {
-            foreach (Value w in n.Weights)
-            {
-                // Console.WriteLine(w.data);
-                w.Data -= lr * w.Grad;
-            }
-            n.Biai.Data -= lr * n.Biai.Grad;
-        }
-    }
-
+    cerebrin.Step(lr);
     loss.ResetGrad();
 
     Console.WriteLine("Loss: " + loss.Data);
-    Scatter(preds);
+    DataSet.Scatter(preds);
     if (lastLoss > loss.Data)
     {
         lastLoss = loss.Data;
     }
     else
     {
+        Console.WriteLine("Final loss: " + loss.Data);
+        Console.WriteLine("Last epoch: " + i);
         Console.WriteLine("Loss is increasing. Stopping training...");
         break;
     }
@@ -95,115 +84,7 @@ for (int i = 0; i < epochs; i++)
 
 
 
-Value MSE(List<Value> Y, List<Value> Y_hat)
-{
-    Value loss = new(0.0, "loss");
-    for (int i = 0; i < Y.Count; i++)
-    {
-        var nl = loss + ((Y[i] - Y_hat[i]) ^ (new Value(2.0, "w")));
-        loss = nl;
-    }
-    return loss;
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-void Scatter(List<DataSet.Data> v)
-{
-    Console.Clear();
-    Console.WriteLine("\x1b[3J");
-
-    int[,] mat = new int[300, 300];
-    for (int i = 0; i < v.Count; i++)
-    {
-        mat[v[i].X[0] + 15, v[i].X[1] + 15] = v[i].Y[0];
-    }
-    Console.Write("╔");
-    for (int i = 0; i < 30; i++)
-    {
-        Console.Write("═");
-    }
-    Console.WriteLine("╗");
-    for (int i = 0; i < 30; i++)
-    {
-        Console.Write("║");
-        for (int j = 0; j < 30; j++)
-        {
-            if (mat[i, j] == 0)
-            {
-                Console.Write(" ");
-            }
-            if (mat[i, j] == 1)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("o");
-            }
-            if (mat[i, j] == 2)
-            {
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write("o");
-            }
-            Console.ResetColor();
-        }
-        Console.WriteLine("║");
-    }
-
-    Console.Write("╚");
-    for (int i = 0; i < 30; i++)
-    {
-        Console.Write("═");
-    }
-    Console.WriteLine("╝");
-}
-
-static class DataSet
-{
-
-    public class Data
-    {
-        public List<int> X;
-        public List<int> Y;
-
-        public Data(List<int> X, List<int> Y)
-        {
-            this.X = X;
-            this.Y = Y;
-        }
-    }
-
-    public static List<Data> GetDataSet(int n)
-    {
-        var rand = new Random();
-        List<Data> dataset = new();
-        for (int i = 0; i < n; i++)
-        {
-            List<int> X = new();
-            List<int> Y = new();
-            X.Add(rand.Next(-15, 15));
-            X.Add(rand.Next(-15, 15));
-            int x = X[0];
-            int y = X[1];
-            if (y > 2 * x + 5)
-                Y.Add(1);
-            else
-                Y.Add(2);
-
-            dataset.Add(new(X, Y));
-        }
-        return dataset;
-    }
-}
 
 
 

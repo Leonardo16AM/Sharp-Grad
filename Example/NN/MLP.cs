@@ -1,3 +1,4 @@
+using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 
@@ -35,5 +36,21 @@ public class MLP
             X = Y;
         }
         return X;
+    }
+
+    public void Step(double lr)
+    {
+        foreach (Layer l in Layers)
+        {
+            foreach (Neuron n in l.Neurons)
+            {
+                foreach (Value w in n.Weights)
+                {
+                    // Console.WriteLine(w.data);
+                    w.Data -= lr * w.Grad;
+                }
+                n.Biai.Data -= lr * n.Biai.Grad;
+            }
+        }
     }
 }
