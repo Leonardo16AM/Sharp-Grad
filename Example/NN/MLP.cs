@@ -1,8 +1,7 @@
 using SharpGrad.DifEngine;
+using SharpGrad.NN;
 
-namespace SharpGrad.NN
-{
-    public class MLP
+public class MLP
     {
         public List<Layer> Layers;
         public int Inputs;
@@ -29,4 +28,3 @@ namespace SharpGrad.NN
             return X;
         }
     }
-}

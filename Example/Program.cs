@@ -23,8 +23,8 @@ Console.WriteLine(Y[0].Data);
 
 
 
-int epochs=1000;
-double lr=0.0000000001;
+int epochs = 1000;
+double lr = 0.0000000001;
 
 double lastLoss = double.MaxValue;
 
@@ -119,7 +119,7 @@ Value MSE(List<Value> Y, List<Value> Y_hat)
 
 
 
-void Scatter(List<DataSet.Data>v)
+void Scatter(List<DataSet.Data> v)
 {
     int[,] mat = new int[300, 300];
     for (int i = 0; i < v.Count; i++)

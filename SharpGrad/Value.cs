@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace SharpGrad.DifEngine
 {
     public class Value
@@ -41,36 +45,36 @@ namespace SharpGrad.DifEngine
                 //TanhName => BackwardEmpt,
                 _ => BackwardEmpt,
             };
-            TopOSort = new();
-            Visited = new();
+            TopOSort = new List<Value>();
+            Visited = new HashSet<Value>();
         }
 
 
         #region BASIC ARITHMETIC OPERATIONS
         public static Value Add(Value left, Value right)
-            => new(left.Data + right.Data, AddName, left, right);
+            => new Value(left.Data + right.Data, AddName, left, right);
         public static Value operator +(Value left, Value right)
             => Add(left, right);
 
         public static Value Sub(Value left, Value right)
-            => new(left.Data - right.Data, SubName, left, right);
+            => new Value(left.Data - right.Data, SubName, left, right);
         public static Value operator -(Value left, Value right)
             => Sub(left, right);
 
 
         public static Value Mul(Value left, Value right)
-            => new(left.Data * right.Data, MulName, left, right);
+            => new Value(left.Data * right.Data, MulName, left, right);
         public static Value operator *(Value left, Value right)
             => Mul(left, right);
 
         public static Value Div(Value left, Value right)
-            => new(left.Data / right.Data, DivName, left, right);
+            => new Value(left.Data / right.Data, DivName, left, right);
         public static Value operator /(Value left, Value right)
             => Div(left, right);
 
 
         public static Value Pow(Value left, Value right)
-            => new(Math.Pow(left.Data, right.Data), PowName, left, right);
+            => new Value(Math.Pow(left.Data, right.Data), PowName, left, right);
         public static Value operator ^(Value left, Value right)
             => Pow(left, right);
         #endregion
@@ -78,16 +82,16 @@ namespace SharpGrad.DifEngine
         #region ACTIVATION FUNCTIONS
         public Value ReLU()
         {
-            Value c = new((Data <= 0) ? 0 : Data, ReLUName, this);
+            Value c = new Value((Data <= 0) ? 0 : Data, ReLUName, this);
             return c;
         }
 
         public Value TanH()
         {
-            Value e = new(Math.E, "e");
+            Value e = new Value(Math.E, "e");
             Value la = (new Value(0.0, "zero")) - this;
             Value c = (((e ^ this) - (e ^ la)) / ((e ^ this) + (e ^ la)));
-            Value ret = new(c.Data, "tanh", c);
+            Value ret = new Value(c.Data, "tanh", c);
             return c;
         }
         #endregion
@@ -95,7 +99,7 @@ namespace SharpGrad.DifEngine
         #region BACKWARD PASS FUNCTIONS
         protected void BackwardEmpt()
         {
-            if(LeftChildren is not null)
+            if(LeftChildren != null)
                 LeftChildren.Grad += Grad;
         }
 
@@ -140,9 +144,9 @@ namespace SharpGrad.DifEngine
         void DFS(Value value)
         {
             Visited.Add(value);
-            if (value.LeftChildren is not null && !Visited.Contains(value.LeftChildren))
+            if (value.LeftChildren != null && !Visited.Contains(value.LeftChildren))
                 DFS(value.LeftChildren);
-            if (value.RightChildren is not null && !Visited.Contains(value.RightChildren))
+            if (value.RightChildren != null && !Visited.Contains(value.RightChildren))
                 DFS(value.RightChildren);
             TopOSort.Add(value);
         }
@@ -155,7 +159,6 @@ namespace SharpGrad.DifEngine
             foreach (Value value in TopOSort)
             {
                 value.Backward();
-                // Console.WriteLine(u.name+" -> "+u.grad);
             }
         }
 
