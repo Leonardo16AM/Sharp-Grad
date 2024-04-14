@@ -7,6 +7,7 @@ namespace SharpGrad.DifEngine
     public class Value
     {
         public static readonly Value e = new Value(Math.E, "e");
+        public static readonly Value Zero = new Value(0.0, "zero");
 
         public const string ReLUName = "ReLU";
         public const string AddName = "+";
@@ -58,8 +59,10 @@ namespace SharpGrad.DifEngine
             => new Value(left.Data - right.Data, SubName, left, right);
         public static Value operator -(Value left, Value right)
             => Sub(left, right);
+        public static Value Sub(Value @this)
+            => new Value(-@this.Data, SubName, Zero, @this);
         public static Value operator -(Value @this)
-            => new Value(-@this.Data, SubName, @this);
+            => Sub(@this);
 
 
         public static Value Mul(Value left, Value right)

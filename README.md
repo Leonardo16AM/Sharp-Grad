@@ -9,13 +9,14 @@ Sharp Grad is a lightweight, flexible, and efficient automatic differentiation (
 
 ## Code Structure:
 
-The `value` class forms the core of Sharp Grad. Each `value` instance represents a node in the computational graph and contains the following:
+The `value` class forms the core of Sharp Grad. Each `Value` instance represents a node in the computational graph and contains the following:
 
-- `data`: Stores the numerical value of the node.
-- `grad`: Stores the gradient of the function with respect to the node.
-- `children`: List of `value` objects, representing the nodes that this node depends on.
-- `backward`: Delegate for performing the backward pass during backpropagation.
-- `backward_empt`: A function that updates gradients of child nodes during the backward pass.
+- `Data`: Stores the numerical value of the node.
+- `Grad`: Stores the gradient of the function with respect to the node.
+- `LeftChildren`: A `Value` objects, representing a nodes that this node depends on. It should be a left operand in computation.
+- `RightChildren`: A `Value` objects, representing a nodes that this node depends on. It should be a right operand in computation
+- `Backward`: Delegate for performing the backward pass during backpropagation.
+- `BackwardEmpt`: A function that updates gradients of child nodes during the backward pass.
 
 ### Basic Arithmetic Operations:
 
@@ -23,7 +24,7 @@ Sharp Grad supports addition (+), subtraction (-), multiplication (*), division 
 
 ### Activation Functions:
 
-Sharp Grad currently includes the following activation functions: ReLU and Tanh. These are critical for building deep learning models and can be easily applied to any `value` object.
+Sharp Grad currently includes the following activation functions: ReLU and Tanh. These are critical for building deep learning models and can be easily applied to any `Value` object.
 
 ### Backpropagation:
 
@@ -31,7 +32,7 @@ Sharp Grad implements backpropagation for computing gradients efficiently. It do
 
 ## Getting Started:
 
-Instantiate `value` objects for your variables and constants. You can then combine these objects using arithmetic operations and functions to construct the desired mathematical expression. Finally, call the `backpropagate` method on the output `value` to compute the gradients.
+Instantiate `Value` objects for your variables and constants. You can then combine these objects using arithmetic operations and functions to construct the desired mathematical expression. Finally, call the `Backpropagate` method on the output `Value` to compute the gradients.
 
 ## Future Work:
 
