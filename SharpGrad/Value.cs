@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace SharpGrad.DifEngine
 {
+    //TODO: Use class inheritance instead of switch-case
     public class Value
     {
         private static int InstanceCount = 0;
@@ -123,6 +124,7 @@ namespace SharpGrad.DifEngine
             RightChildren.Grad += Grad * LeftChildren.Data;
         }
 
+        // TODO: Is this a good way to backpropagate division?
         protected void BackwardDiv()
         {
             LeftChildren.Grad += Grad / RightChildren.Data;
