@@ -64,7 +64,6 @@ for (int i = 0; i < epochs; i++)
 
     loss.Backpropagate();
     cerebrin.Step(lr);
-    loss.ResetGrad();
 
     Console.WriteLine("Loss: " + loss.Data);
     DataSet.Scatter(preds);

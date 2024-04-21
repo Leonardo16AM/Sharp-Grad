@@ -105,12 +105,6 @@ namespace SharpGrad.DifEngine
                 TopOSort[i].Backward();
             }
         }
-
-        public void ResetGrad()
-        {
-            LeftChildren?.ResetGrad();
-            RightChildren?.ResetGrad();
-        }
         #endregion
 
         public static implicit operator Value(double d)
