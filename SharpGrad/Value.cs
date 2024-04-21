@@ -83,27 +83,21 @@ namespace SharpGrad.DifEngine
                 LeftChildren.Grad += Grad;
         }
 
-        #region BACKPROPAGATION
-        void DFS(List<Value> TopOSort, HashSet<Value> Visited)
+        protected void Backpropagate_()
         {
-            Visited.Add(this);
-            if (LeftChildren != null && !Visited.Contains(LeftChildren))
-                LeftChildren.DFS(TopOSort, Visited);
-            if (RightChildren != null && !Visited.Contains(RightChildren))
-                RightChildren.DFS(TopOSort, Visited);
-            TopOSort.Add(this);
+            if (Grad > 0)
+            {
+                Backward();
+                LeftChildren?.Backpropagate_();
+                RightChildren?.Backpropagate_();
+            }
         }
 
+        #region BACKPROPAGATION
         public void Backpropagate()
         {
             Grad = 1.0;
-            List<Value> TopOSort = new List<Value>();
-            HashSet<Value> Visited = new HashSet<Value>();
-            DFS(TopOSort, Visited);
-            for(int i = TopOSort.Count - 1; i >= 0; i--)
-            {
-                TopOSort[i].Backward();
-            }
+            Backpropagate_();
         }
         #endregion
 

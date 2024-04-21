@@ -24,7 +24,7 @@ Console.WriteLine(Y[0].Data);
 
 
 int epochs = 1000;
-double lr = 0.0000000001;
+double lr = 1e-9;
 
 double lastLoss = double.MaxValue;
 
