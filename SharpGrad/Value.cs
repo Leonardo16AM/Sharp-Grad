@@ -77,13 +77,13 @@ namespace SharpGrad.DifEngine
         }
         #endregion
 
+        #region BACKPROPAGATION
         protected virtual void Backward()
         {
             if(LeftChildren != null)
                 LeftChildren.Grad += Grad;
         }
 
-        #region BACKPROPAGATION
         void DFS(List<Value> TopOSort, HashSet<Value> Visited)
         {
             Visited.Add(this);
@@ -104,12 +104,6 @@ namespace SharpGrad.DifEngine
             {
                 TopOSort[i].Backward();
             }
-        }
-
-        public void ResetGrad()
-        {
-            LeftChildren?.ResetGrad();
-            RightChildren?.ResetGrad();
         }
         #endregion
 
