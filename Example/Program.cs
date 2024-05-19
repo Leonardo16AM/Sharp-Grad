@@ -11,11 +11,11 @@ DataSet.Scatter(v);
 
 MLP<double> cerebrin = new(2, 8, 1);
 
-List<Value<double>> X = new()
-{
+List<Value<double>> X =
+[
     v[0].X[0],
     v[0].X[1]
-};
+];
 List<Value<double>> Y = cerebrin.Forward(X);
 
 
@@ -32,20 +32,20 @@ for (int i = 0; i < epochs; i++)
 {
     Console.WriteLine("Epoch: " + i);
     Value<double> loss = Value<double>.Zero;
-    List<DataSet.Data> preds = new();
+    List<DataSet.Data> preds = [];
 
     for (int j = 0; j < v.Count; j++)
     {
-        X = new List<Value<double>>
-        {
+        X =
+        [
             v[j].X[0],
             v[j].X[1]
-        };
+        ];
         Y = cerebrin.Forward(X);
-        List<Value<double>> Ygt = new()
-        {
+        List<Value<double>> Ygt =
+        [
             v[j].Y[0]
-        };
+        ];
         var nl = loss + Loss.MSE(Y, Ygt);
         loss = nl;
 
@@ -58,7 +58,7 @@ for (int i = 0; i < epochs; i++)
         {
             val = 2;
         }
-        DataSet.Data nd = new(v[j].X, new List<int> { val });
+        DataSet.Data nd = new(v[j].X, [val]);
         preds.Add(nd);
     }
 

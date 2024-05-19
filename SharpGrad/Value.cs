@@ -6,30 +6,21 @@ using System.Numerics;
 namespace SharpGrad.DifEngine
 {
     //TODO: Use class inheritance instead of switch-case
-    public class Value<TType>
+    public class Value<TType>(double data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
         where TType : IFloatingPointIeee754<TType>
     {
         private static int InstanceCount = 0;
 
-        public static readonly Value<TType> e = new Value<TType>(Math.E, "e");
-        public static readonly Value<TType> Zero = new Value<TType>(0.0, "zero");
+        public static readonly Value<TType> e = new(Math.E, "e");
+        public static readonly Value<TType> Zero = new(0.0, "zero");
 
         public delegate void BackwardPass();
 
-        public double Grad;
-        public double Data;
-        public readonly Value<TType>? LeftChildren;
-        public readonly Value<TType>? RightChildren;
-        public readonly string Name;
-
-        public Value(double data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
-        {
-            Data = data;
-            Grad = 0.0;
-            LeftChildren = leftChild;
-            RightChildren = rightChild;
-            Name = name;
-        }
+        public double Grad = 0.0;
+        public double Data = data;
+        public readonly Value<TType>? LeftChildren = leftChild;
+        public readonly Value<TType>? RightChildren = rightChild;
+        public readonly string Name = name;
 
 
         #region BASIC ARITHMETIC OPERATIONS
@@ -74,7 +65,7 @@ namespace SharpGrad.DifEngine
             Value<TType> eThis = Value<TType>.e ^ this;
             Value<TType> eLa = Value<TType>.e ^ -this;
             Value<TType> c = (eThis - eLa) / (eThis + eLa);
-            Value<TType> ret = new Value<TType>(c.Data, "tanh", c);
+            Value<TType> ret = new(c.Data, "tanh", c);
             return c;
         }
         #endregion
@@ -99,8 +90,8 @@ namespace SharpGrad.DifEngine
         public void Backpropagate()
         {
             Grad = 1.0;
-            List<Value<TType>> TopOSort = new List<Value<TType>>();
-            HashSet<Value<TType>> Visited = new HashSet<Value<TType>>();
+            List<Value<TType>> TopOSort = [];
+            HashSet<Value<TType>> Visited = [];
             DFS(TopOSort, Visited);
             for(int i = TopOSort.Count - 1; i >= 0; i--)
             {
@@ -110,7 +101,7 @@ namespace SharpGrad.DifEngine
         #endregion
 
         public static implicit operator Value<TType>(double d)
-            => new Value<TType>(d, $"value_{++InstanceCount}");
+            => new(d, $"value_{++InstanceCount}");
         public static explicit operator double(Value<TType> v)
             => v.Data;
     }

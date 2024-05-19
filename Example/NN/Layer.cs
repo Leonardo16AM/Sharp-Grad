@@ -13,7 +13,7 @@ namespace SharpGrad.NN
 
         public Layer(int neurons, int inputs, bool act_func)
         {
-            Neurons = new List<Neuron<TType>>();
+            Neurons = [];
             for (int i = 0; i < neurons; i++)
             {
                 Neurons.Add(new Neuron<TType>(inputs, act_func));
@@ -22,7 +22,7 @@ namespace SharpGrad.NN
 
         public List<Value<TType>> Forward(List<Value<TType>> X)
         {
-            List<Value<TType>> Y = new();
+            List<Value<TType>> Y = [];
             foreach (Neuron<TType> n in Neurons)
             {
                 Y.Add(n.Forward(X));

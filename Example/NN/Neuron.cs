@@ -15,7 +15,7 @@ namespace SharpGrad
 
         public Neuron(int inputs, bool act_func)
         {
-            Weights = new();
+            Weights = [];
             Biai = new(Rand.NextDouble(), "B");
             Inputs = inputs;
             ActFunc = act_func;

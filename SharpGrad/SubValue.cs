@@ -2,13 +2,9 @@
 
 namespace SharpGrad.DifEngine
 {
-    public class SubValue<TType> : Value<TType>
+    public class SubValue<TType>(Value<TType> left, Value<TType> right) : Value<TType>(left.Data - right.Data, "-", left, right)
         where TType : IFloatingPointIeee754<TType>
     {
-        public SubValue(Value<TType> left, Value<TType> right)
-            : base(left.Data - right.Data, "-", left, right)
-        {
-        }
         protected override void Backward()
         {
             LeftChildren.Grad += Grad;
