@@ -16,7 +16,7 @@ namespace SharpGrad
         public Neuron(int inputs, bool act_func)
         {
             Weights = [];
-            Biai = new((TType)(object)Rand.NextDouble(), "B");
+            Biai = new(TType.CreateSaturating(Rand.NextDouble()), "B");
             Inputs = inputs;
             ActFunc = act_func;
             for (int i = 0; i < inputs; i++)

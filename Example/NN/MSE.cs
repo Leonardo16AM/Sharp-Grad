@@ -16,7 +16,7 @@ namespace SharpGrad.NN
             Value<TType> loss = Value<TType>.Zero;
             for (int i = 0; i < Y.Count; i++)
             {
-                var nl = loss + ((Y[i] - Y_hat[i]) ^ (TType)(object)2.0);
+                var nl = loss + ((Y[i] - Y_hat[i]) ^ TType.CreateSaturating(2.0));
                 loss = nl;
             }
             return loss;
