@@ -1,8 +1,11 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class ReLUValue : Value
+    public class ReLUValue<TType> : Value<TType>
+        where TType : IFloatingPointIeee754<TType>
     {
-        public ReLUValue(Value value)
+        public ReLUValue(Value<TType> value)
             : base((value.Data <= 0) ? 0 : value.Data, "relu", value)
         {
         }

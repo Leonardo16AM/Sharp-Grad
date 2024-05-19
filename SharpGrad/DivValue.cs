@@ -1,8 +1,11 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class DivValue : Value
+    public class DivValue<TType> : Value<TType>
+        where TType : IFloatingPointIeee754<TType>
     {
-        public DivValue(Value left, Value right)
+        public DivValue(Value<TType> left, Value<TType> right)
             : base(left.Data / right.Data, "/", left, right)
         {
         }

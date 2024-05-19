@@ -1,13 +1,15 @@
 ﻿using SharpGrad.DifEngine;
+using System.Numerics;
 
 namespace SharpGrad
 {
-    public class Neuron
+    public class Neuron<TType>
+        where TType : IFloatingPointIeee754<TType>
     {
         public static readonly Random Rand = new();
 
-        public readonly List<Value> Weights;
-        public readonly Value Biai;
+        public readonly List<Value<TType>> Weights;
+        public readonly Value<TType> Biai;
         public readonly int Inputs;
         public readonly bool ActFunc;
 
@@ -22,9 +24,9 @@ namespace SharpGrad
                 Weights.Add(new(Rand.NextDouble(), $"W{i}"));
             }
         }
-        public Value Forward(List<Value> X)
+        public Value<TType> Forward(List<Value<TType>> X)
         {
-            Value sum = X[0] * Weights[0];
+            Value<TType> sum = X[0] * Weights[0];
             for (int i = 1; i < Inputs; i++)
             {
                 sum += X[i] * Weights[i];

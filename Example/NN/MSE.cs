@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,9 +10,10 @@ namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Value MSE(List<Value> Y, List<Value> Y_hat)
+        public static Value<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
+            where TType : IFloatingPointIeee754<TType>
         {
-            Value loss = Value.Zero;
+            Value<TType> loss = Value<TType>.Zero;
             for (int i = 0; i < Y.Count; i++)
             {
                 var nl = loss + ((Y[i] - Y_hat[i]) ^ 2.0);

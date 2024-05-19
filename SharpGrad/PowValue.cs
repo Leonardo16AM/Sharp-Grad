@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public class PowValue : Value
+    public class PowValue<TType> : Value<TType>
+            where TType : IFloatingPointIeee754<TType>
     {
-        public PowValue(Value left, Value right)
+        public PowValue(Value<TType> left, Value<TType> right)
             : base(Math.Pow(left.Data, right.Data), "^", left, right)
         {
         }

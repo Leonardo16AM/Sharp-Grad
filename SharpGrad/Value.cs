@@ -1,26 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
     //TODO: Use class inheritance instead of switch-case
-    public class Value
+    public class Value<TType>
+        where TType : IFloatingPointIeee754<TType>
     {
         private static int InstanceCount = 0;
 
-        public static readonly Value e = new Value(Math.E, "e");
-        public static readonly Value Zero = new Value(0.0, "zero");
+        public static readonly Value<TType> e = new Value<TType>(Math.E, "e");
+        public static readonly Value<TType> Zero = new Value<TType>(0.0, "zero");
 
         public delegate void BackwardPass();
 
         public double Grad;
         public double Data;
-        public readonly Value? LeftChildren;
-        public readonly Value? RightChildren;
+        public readonly Value<TType>? LeftChildren;
+        public readonly Value<TType>? RightChildren;
         public readonly string Name;
 
-        public Value(double data, string name, Value? leftChild = null, Value? rightChild = null)
+        public Value(double data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
         {
             Data = data;
             Grad = 0.0;
@@ -31,48 +33,48 @@ namespace SharpGrad.DifEngine
 
 
         #region BASIC ARITHMETIC OPERATIONS
-        public static Value Add(Value left, Value right)
-            => new AddValue(left, right);
-        public static Value operator +(Value left, Value right)
+        public static Value<TType> Add(Value<TType> left, Value<TType> right)
+            => new AddValue<TType>(left, right);
+        public static Value<TType> operator +(Value<TType> left, Value<TType> right)
             => Add(left, right);
 
-        public static Value Sub(Value left, Value right)
-            => new SubValue(left, right);
-        public static Value operator -(Value left, Value right)
+        public static Value<TType> Sub(Value<TType> left, Value<TType> right)
+            => new SubValue<TType>(left, right);
+        public static Value<TType> operator -(Value<TType> left, Value<TType> right)
             => Sub(left, right);
-        public static Value Sub(Value @this)
-            => new SubValue(Zero, @this);
-        public static Value operator -(Value @this)
+        public static Value<TType> Sub(Value<TType> @this)
+            => new SubValue<TType>(Zero, @this);
+        public static Value<TType> operator -(Value<TType> @this)
             => Sub(@this);
 
 
-        public static Value Mul(Value left, Value right)
-            => new MulValue(left, right);
-        public static Value operator *(Value left, Value right)
+        public static Value<TType> Mul(Value<TType> left, Value<TType> right)
+            => new MulValue<TType>(left, right);
+        public static Value<TType> operator *(Value<TType> left, Value<TType> right)
             => Mul(left, right);
 
-        public static Value Div(Value left, Value right)
-            => new DivValue(left, right);
-        public static Value operator /(Value left, Value right)
+        public static Value<TType> Div(Value<TType> left, Value<TType> right)
+            => new DivValue<TType>(left, right);
+        public static Value<TType> operator /(Value<TType> left, Value<TType> right)
             => Div(left, right);
 
 
-        public static Value Pow(Value left, Value right)
-            => new PowValue(left, right);
-        public static Value operator ^(Value left, Value right)
+        public static Value<TType> Pow(Value<TType> left, Value<TType> right)
+            => new PowValue<TType>(left, right);
+        public static Value<TType> operator ^(Value<TType> left, Value<TType> right)
             => Pow(left, right);
         #endregion
 
         #region ACTIVATION FUNCTIONS
-        public Value ReLU()
-            => new ReLUValue(this);
+        public Value<TType> ReLU()
+            => new ReLUValue<TType>(this);
 
-        public Value TanH()
+        public Value<TType> TanH()
         {
-            Value eThis = Value.e ^ this;
-            Value eLa = Value.e ^ -this;
-            Value c = (eThis - eLa) / (eThis + eLa);
-            Value ret = new Value(c.Data, "tanh", c);
+            Value<TType> eThis = Value<TType>.e ^ this;
+            Value<TType> eLa = Value<TType>.e ^ -this;
+            Value<TType> c = (eThis - eLa) / (eThis + eLa);
+            Value<TType> ret = new Value<TType>(c.Data, "tanh", c);
             return c;
         }
         #endregion
@@ -84,7 +86,7 @@ namespace SharpGrad.DifEngine
                 LeftChildren.Grad += Grad;
         }
 
-        void DFS(List<Value> TopOSort, HashSet<Value> Visited)
+        void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
             Visited.Add(this);
             if (LeftChildren != null && !Visited.Contains(LeftChildren))
@@ -97,8 +99,8 @@ namespace SharpGrad.DifEngine
         public void Backpropagate()
         {
             Grad = 1.0;
-            List<Value> TopOSort = new List<Value>();
-            HashSet<Value> Visited = new HashSet<Value>();
+            List<Value<TType>> TopOSort = new List<Value<TType>>();
+            HashSet<Value<TType>> Visited = new HashSet<Value<TType>>();
             DFS(TopOSort, Visited);
             for(int i = TopOSort.Count - 1; i >= 0; i--)
             {
@@ -107,9 +109,9 @@ namespace SharpGrad.DifEngine
         }
         #endregion
 
-        public static implicit operator Value(double d)
-            => new Value(d, $"value_{++InstanceCount}");
-        public static explicit operator double(Value v)
+        public static implicit operator Value<TType>(double d)
+            => new Value<TType>(d, $"value_{++InstanceCount}");
+        public static explicit operator double(Value<TType> v)
             => v.Data;
     }
 }

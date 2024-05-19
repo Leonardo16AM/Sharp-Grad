@@ -1,8 +1,11 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class SubValue : Value
+    public class SubValue<TType> : Value<TType>
+        where TType : IFloatingPointIeee754<TType>
     {
-        public SubValue(Value left, Value right)
+        public SubValue(Value<TType> left, Value<TType> right)
             : base(left.Data - right.Data, "-", left, right)
         {
         }
