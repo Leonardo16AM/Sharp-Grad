@@ -3,7 +3,7 @@
 namespace SharpGrad.DifEngine
 {
     public class SubValue<TType>(Value<TType> left, Value<TType> right) : Value<TType>(left.Data - right.Data, "-", left, right)
-        where TType : IFloatingPointIeee754<TType>
+        where TType : IFloatingPoint<TType>
     {
         protected override void Backward()
         {

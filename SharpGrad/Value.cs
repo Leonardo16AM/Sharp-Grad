@@ -6,18 +6,18 @@ using System.Numerics;
 namespace SharpGrad.DifEngine
 {
     //TODO: Use class inheritance instead of switch-case
-    public class Value<TType>(double data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
-        where TType : IFloatingPointIeee754<TType>
+    public class Value<TType>(TType data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
+        where TType : IFloatingPoint<TType>
     {
         private static int InstanceCount = 0;
 
-        public static readonly Value<TType> e = new(Math.E, "e");
-        public static readonly Value<TType> Zero = new(0.0, "zero");
+        public static readonly Value<TType> e = new((TType)(object)Math.E, "e");
+        public static readonly Value<TType> Zero = new((TType)(object)0.0, "zero");
 
         public delegate void BackwardPass();
 
-        public double Grad = 0.0;
-        public double Data = data;
+        public TType Grad = (TType)(object)0.0;
+        public TType Data = data;
         public readonly Value<TType>? LeftChildren = leftChild;
         public readonly Value<TType>? RightChildren = rightChild;
         public readonly string Name = name;
@@ -89,7 +89,7 @@ namespace SharpGrad.DifEngine
 
         public void Backpropagate()
         {
-            Grad = 1.0;
+            Grad = TType.CreateSaturating(1.0);
             List<Value<TType>> TopOSort = [];
             HashSet<Value<TType>> Visited = [];
             DFS(TopOSort, Visited);
@@ -100,9 +100,9 @@ namespace SharpGrad.DifEngine
         }
         #endregion
 
-        public static implicit operator Value<TType>(double d)
+        public static implicit operator Value<TType>(TType d)
             => new(d, $"value_{++InstanceCount}");
-        public static explicit operator double(Value<TType> v)
+        public static explicit operator TType(Value<TType> v)
             => v.Data;
     }
 }

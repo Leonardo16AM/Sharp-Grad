@@ -5,7 +5,7 @@ using System.Numerics;
 namespace SharpGrad.NN
 {
     public class MLP<TType>
-        where TType : IFloatingPointIeee754<TType>
+        where TType : IFloatingPoint<TType>
     {
         public List<Layer<TType>> Layers;
         public int Inputs;
@@ -41,7 +41,7 @@ namespace SharpGrad.NN
             return X;
         }
 
-        public void Step(double lr)
+        public void Step(TType lr)
         {
             foreach (Layer<TType> l in Layers)
             {

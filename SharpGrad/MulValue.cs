@@ -3,7 +3,7 @@
 namespace SharpGrad.DifEngine
 {
     public class MulValue<TType> : Value<TType>
-        where TType : IFloatingPointIeee754<TType>
+        where TType : IFloatingPoint<TType>
     {
         public MulValue(Value<TType> left, Value<TType> right)
             : base(left.Data * right.Data, "*", left, right)

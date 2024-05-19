@@ -3,16 +3,16 @@
 namespace SharpGrad.DifEngine
 {
     public class ReLUValue<TType> : Value<TType>
-        where TType : IFloatingPointIeee754<TType>
+        where TType : IFloatingPoint<TType>
     {
         public ReLUValue(Value<TType> value)
-            : base((value.Data <= 0) ? 0 : value.Data, "relu", value)
+            : base((value.Data <= TType.Zero) ? TType.Zero : value.Data, "relu", value)
         {
         }
 
         protected override void Backward()
         {
-            if (Grad > 0)
+            if (Grad > TType.Zero)
                 LeftChildren.Grad += Grad;
         }
     }
