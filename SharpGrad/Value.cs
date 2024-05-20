@@ -61,14 +61,16 @@ namespace SharpGrad.DifEngine
         public Value<TType> ReLU()
             => new ReLUValue<TType>(this);
 
-        public Value<TType> TanH()
-        {
-            Value<TType> eThis = Value<TType>.e.Pow(this);
-            Value<TType> eLa = Value<TType>.e.Pow(-this);
-            Value<TType> c = (eThis - eLa) / (eThis + eLa);
-            Value<TType> ret = new(c.Data, "tanh", c);
-            return c;
-        }
+        public Value<TType> Tanh()
+            => new TanhValue<TType>(this);
+
+        public Value<TType> Sigmoid()
+            => new SigmoidValue<TType>(this);
+        
+        public Value<TType> LeakyReLU(TType alpha)
+            => new LeakyReLUValue<TType>(this,alpha);
+
+
         #endregion
 
         #region BACKPROPAGATION
