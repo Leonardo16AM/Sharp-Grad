@@ -3,7 +3,7 @@
 namespace SharpGrad.DifEngine
 {
     public class DivValue<TType> : Value<TType>
-        where TType : IFloatingPoint<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
         public DivValue(Value<TType> left, Value<TType> right)
             : base(left.Data / right.Data, "/", left, right)

@@ -11,7 +11,7 @@ namespace SharpGrad.NN
     public static partial class Loss
     {
         public static Value<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
-            where TType : IFloatingPoint<TType>
+            where TType : IBinaryFloatingPointIeee754<TType>
         {
             Value<TType> loss = Value<TType>.Zero;
             for (int i = 0; i < Y.Count; i++)

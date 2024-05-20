@@ -7,7 +7,7 @@ namespace SharpGrad.DifEngine
 {
     //TODO: Use class inheritance instead of switch-case
     public class Value<TType>(TType data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
-        where TType : IFloatingPoint<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
         private static int InstanceCount = 0;
 

@@ -5,7 +5,7 @@ namespace SharpGrad.DifEngine
 {
     public class PowValue<TType>(Value<TType> left, Value<TType> right)
         : Value<TType>(TType.CreateSaturating(Math.Pow(double.CreateSaturating(left.Data), double.CreateSaturating(right.Data))), "^", left, right)
-        where TType : IFloatingPoint<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
         protected override void Backward()
         {
