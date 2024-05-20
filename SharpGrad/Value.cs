@@ -52,18 +52,19 @@ namespace SharpGrad.DifEngine
 
         public static Value<TType> Pow(Value<TType> left, Value<TType> right)
             => new PowValue<TType>(left, right);
-        public static Value<TType> operator ^(Value<TType> left, Value<TType> right)
-            => Pow(left, right);
+        public Value<TType> Pow(Value<TType> other)
+            => new PowValue<TType>(this, other);
         #endregion
 
         #region ACTIVATION FUNCTIONS
+
         public Value<TType> ReLU()
             => new ReLUValue<TType>(this);
 
         public Value<TType> TanH()
         {
-            Value<TType> eThis = Value<TType>.e ^ this;
-            Value<TType> eLa = Value<TType>.e ^ -this;
+            Value<TType> eThis = Value<TType>.e.Pow(this);
+            Value<TType> eLa = Value<TType>.e.Pow(-this);
             Value<TType> c = (eThis - eLa) / (eThis + eLa);
             Value<TType> ret = new(c.Data, "tanh", c);
             return c;
