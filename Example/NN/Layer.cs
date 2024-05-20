@@ -1,27 +1,29 @@
 ﻿using SharpGrad.DifEngine;
+using System.Numerics;
 
 namespace SharpGrad.NN
 {
-    public class Layer
+    public class Layer<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public List<Neuron> Neurons;
+        public List<Neuron<TType>> Neurons;
         public int NeuronsCount;
         public int Inputs;
         public bool ActFunc;
 
         public Layer(int neurons, int inputs, bool act_func)
         {
-            Neurons = new List<Neuron>();
+            Neurons = [];
             for (int i = 0; i < neurons; i++)
             {
-                Neurons.Add(new Neuron(inputs, act_func));
+                Neurons.Add(new Neuron<TType>(inputs, act_func));
             }
         }
 
-        public List<Value> Forward(List<Value> X)
+        public List<Value<TType>> Forward(List<Value<TType>> X)
         {
-            List<Value> Y = new();
-            foreach (Neuron n in Neurons)
+            List<Value<TType>> Y = [];
+            foreach (Neuron<TType> n in Neurons)
             {
                 Y.Add(n.Forward(X));
             }

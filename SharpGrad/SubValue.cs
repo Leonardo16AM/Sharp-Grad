@@ -1,11 +1,10 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class SubValue : Value
+    public class SubValue<TType>(Value<TType> left, Value<TType> right) : Value<TType>(left.Data - right.Data, "-", left, right)
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public SubValue(Value left, Value right)
-            : base(left.Data - right.Data, "-", left, right)
-        {
-        }
         protected override void Backward()
         {
             LeftChildren.Grad += Grad;

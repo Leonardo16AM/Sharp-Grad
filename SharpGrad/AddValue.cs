@@ -1,8 +1,11 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class AddValue : Value
+    public class AddValue<TType> : Value<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public AddValue(Value left, Value right)
+        public AddValue(Value<TType> left, Value<TType> right)
             : base(left.Data + right.Data, "+", left, right)
         {
         }

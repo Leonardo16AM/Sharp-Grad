@@ -1,8 +1,11 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class MulValue : Value
+    public class MulValue<TType> : Value<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public MulValue(Value left, Value right)
+        public MulValue(Value<TType> left, Value<TType> right)
             : base(left.Data * right.Data, "*", left, right)
         {
         }

@@ -1,15 +1,18 @@
-﻿namespace SharpGrad.DifEngine
+﻿using System.Numerics;
+
+namespace SharpGrad.DifEngine
 {
-    public class ReLUValue : Value
+    public class ReLUValue<TType> : Value<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public ReLUValue(Value value)
-            : base((value.Data <= 0) ? 0 : value.Data, "relu", value)
+        public ReLUValue(Value<TType> value)
+            : base((value.Data <= TType.Zero) ? TType.Zero : value.Data, "relu", value)
         {
         }
 
         protected override void Backward()
         {
-            if (Grad > 0)
+            if (Grad > TType.Zero)
                 LeftChildren.Grad += Grad;
         }
     }
