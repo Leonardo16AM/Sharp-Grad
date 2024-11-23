@@ -86,38 +86,65 @@ internal class Program
 
 
 
-//Value a = new Value(1.5,"a");
-//Value b = new Value(2.0,"b");
-//Value c = new Value(6.0,"b");
+// Value<float> a = new Value<float>(1.5f,"a");
+// Value<float> b = new Value<float>(2.0f,"b");
+// Value<float> c = new Value<float>(6.0f,"b");
 
-// value d=(a+b*c);
-// value e=d/(new value(2.0,"2"));
-// value f=e^(new value(2.0,"2"));
-// value g=f.relu();   
+// Value<float> d=(a+b*c);
+// Value<float> e=d/(new Value<float>(2.0f,"2"));
+// Value<float> f=e.Pow(new Value<float>(2.0f,"2"));
+// Value<float> g=f.ReLU();   
 
-// g.grad=1.0;
-// g.backpropagate();
+// g.Grad=1.0f;
+// g.Backpropagate();
 
-// Console.WriteLine(a.grad);
-// Console.WriteLine(b.grad);
-// Console.WriteLine(c.grad);
+// Console.WriteLine(a.Grad);
+// Console.WriteLine(b.Grad);
+// Console.WriteLine(c.Grad);
 
-// value j= new value(0.5,"j");
-// value k= j.tanh();
+// Value<float> j= new Value<float>(0.5f,"j");
+// Value<float> k= j.Tanh();
+// Value<float> l= k.Sigmoid();
+// Value<float> m= l.LeakyReLU(1.0f);
+// m.Grad=1.0f;
+// m.Backpropagate();
+// Console.WriteLine(j.Grad);
+// Console.WriteLine(m.Data);
 
-// k.grad=1.0;
-// k.backpropagate();
-// Console.WriteLine(j.grad);
-// Console.WriteLine(k.data);
+
+/***
+Tested with torch:
+
+import torch
+
+a = torch.tensor(1.5, requires_grad=True)
+b = torch.tensor(2.0, requires_grad=True)
+c = torch.tensor(6.0, requires_grad=True)
+
+d = a + b * c
+e = d / 2.0
+f = e ** 2
+g = torch.relu(f)
+
+g.backward()
+
+print("Gradiente de a:", a.grad)
+print("Gradiente de b:", b.grad)
+print("Gradiente de c:", c.grad)
 
 
-// MLP cerebrin = new MLP(4,new List<int>{4,16,16,1});
 
-// List<value> X = new List<value>();
-// X.Add(new value(1.0,"x1"));
-// X.Add(new value(2.0,"x2"));
-// X.Add(new value(3.0,"x3"));
-// X.Add(new value(4.0,"x4"));
+def custom_leaky_relu(x, negative_slope=1.0):
+    return torch.where(x > 0, x, negative_slope * x)
 
-// List<value> Y = cerebrin.forward(X);
-// Console.WriteLine(Y[0].data);
+
+j = torch.tensor(0.5, requires_grad=True)
+k = torch.tanh(j)
+l= torch.sigmoid(k)
+m = custom_leaky_relu(l, negative_slope=1.0)
+
+m.backward()
+
+print(j.grad)
+print( m.item())
+***/
