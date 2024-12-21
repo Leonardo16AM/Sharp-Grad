@@ -3,80 +3,75 @@ using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 
-var v = DataSet.GetDataSet(400);
-Console.WriteLine("Dataset:");
-DataSet.Scatter(v);
-
-
-
-MLP<float> cerebrin = new(2, 8, 1);
-
-List<Value<float>> X =
-[
-    v[0].X[0],
-    v[0].X[1]
-];
-List<Value<float>> Y = cerebrin.Forward(X);
-
-
-Console.WriteLine(Y[0].Data);
-
-
-
-int epochs = 1000;
-float lr = 1e-9f;
-
-float lastLoss = float.MaxValue;
-
-for (int i = 0; i < epochs; i++)
+internal class Program
 {
-    Console.WriteLine("Epoch: " + i);
-    Value<float> loss = Value<float>.Zero;
-    List<DataSet.Data> preds = [];
+    
 
-    for (int j = 0; j < v.Count; j++)
+    private static void Main(string[] args)
     {
-        X =
-        [
-            v[j].X[0],
-            v[j].X[1]
-        ];
-        Y = cerebrin.Forward(X);
-        List<Value<float>> Ygt =
-        [
-            v[j].Y[0]
-        ];
-        var nl = loss + Loss.MSE(Y, Ygt);
-        loss = nl;
+        Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
+        var v = DataSet.GetDataSet(400);
 
-        int val;
-        if (Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2))
+        MLP<float> cerebrin = new(2, 8, 1);
+
+        int epochs = 1000;
+        float lr = 1e-9f;
+
+        float lastLoss = float.MaxValue;
+
+        for (int i = 0; i < epochs; i++)
         {
-            val = 1;
-        }
-        else
-        {
-            val = 2;
-        }
-        DataSet.Data nd = new(v[j].X, [val]);
-        preds.Add(nd);
-    }
+            Console.SetCursorPosition(0, 0);
+            Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
+            Value<float> loss = Value<float>.Zero;
+            List<DataSet.Data> preds = [];
 
-    loss.Backpropagate();
-    cerebrin.Step(lr);
+            for (int j = 0; j < v.Count; j++)
+            {
+                List<Value<float>> X =
+                [
+                    v[j].X[0],
+                    v[j].X[1]
+                ];
+                List<Value<float>> Y = cerebrin.Forward(X);
+                List<Value<float>> Ygt =
+                [
+                    v[j].Y[0]
+                ];
+                var nl = loss + Loss.MSE(Y, Ygt);
+                loss = nl;
 
-    Console.WriteLine("Loss: " + loss.Data);
-    DataSet.Scatter(preds);
-    if (lastLoss > loss.Data)
-    {
-        lastLoss = loss.Data;
-    }
-    else
-    {
-        Console.WriteLine("Final loss: " + loss.Data);
-        Console.WriteLine("Last epoch: " + i);
-        Console.WriteLine("Loss is increasing. Stopping training...");
-        break;
+                int val;
+                if (Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2))
+                {
+                    val = 1;
+                }
+                else
+                {
+                    val = 2;
+                }
+                DataSet.Data nd = new(v[j].X, [val]);
+                preds.Add(nd);
+            }
+
+            loss.Backpropagate();
+            cerebrin.Step(lr);
+
+            Console.WriteLine("Loss: " + loss.Data);
+            DataSet.Scatter(v, preds);
+            if (lastLoss > loss.Data)
+            {
+                lastLoss = loss.Data;
+            }
+            else
+            {
+                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
+                Console.WriteLine("Final loss: " + loss.Data);
+                Console.WriteLine("Last epoch: " + i);
+                Console.WriteLine("Loss is increasing. Stopping training...");
+                break;
+            }
+        }
     }
 }
 
