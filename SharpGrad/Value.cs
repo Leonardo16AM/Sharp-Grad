@@ -2,6 +2,7 @@ using SharpGrad.Activations;
 using SharpGrad.Operators;
 using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.DifEngine
@@ -64,6 +65,11 @@ namespace SharpGrad.DifEngine
         
         public Value<TType> LeakyReLU(TType alpha)
             => new LeakyReLUValue<TType>(this,alpha);
+
+        public override Expression GenerateExpression()
+        {
+            return Expression.Field(Expression.Constant(this), nameof(Data));
+        }
         #endregion
 
         public static implicit operator Value<TType>(TType d)

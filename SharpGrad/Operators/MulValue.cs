@@ -6,7 +6,7 @@ namespace SharpGrad.Operators
     public class MulValue<TType> : BinaryOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public MulValue(Value<TType> left, Value<TType> right)
+        public MulValue(ValueBase<TType> left, ValueBase<TType> right)
             : base(left.Data * right.Data, "*", left, right)
         {
         }

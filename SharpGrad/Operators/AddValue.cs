@@ -6,7 +6,7 @@ namespace SharpGrad.Operators
     public class AddValue<TType> : BinaryOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public AddValue(Value<TType> left, Value<TType> right)
+        public AddValue(ValueBase<TType> left, ValueBase<TType> right)
             : base(left.Data + right.Data, "+", left, right)
         {
         }
