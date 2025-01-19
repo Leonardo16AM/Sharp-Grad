@@ -4,9 +4,9 @@ using System.Numerics;
 namespace SharpGrad.Activation
 {
     public class SigmoidValue<TType> : UnariOpValue<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>, IExponentialFunctions<TType>
     {
-        public SigmoidValue(Value<TType> value)
+        public SigmoidValue(ValueBase<TType> value)
             : base(TType.One / (TType.One + TType.Exp(-value.Data)), "sigmoid", value)
         {
         }

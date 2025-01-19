@@ -5,9 +5,9 @@ using System.Numerics;
 namespace SharpGrad.Operators
 {
     public class TanhValue<TType> : UnariOpValue<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>
+        where TType : IBinaryFloatingPointIeee754<TType>, IHyperbolicFunctions<TType>
     {
-        public TanhValue(Value<TType> value)
+        public TanhValue(ValueBase<TType> value)
             : base(TType.Tanh(value.Data), "tanh", value)
         {
         }

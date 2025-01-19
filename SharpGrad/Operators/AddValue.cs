@@ -17,6 +17,4 @@ namespace SharpGrad.Operators
             RightOperand.Grad += Grad;
         }
     }
-
-
 }
