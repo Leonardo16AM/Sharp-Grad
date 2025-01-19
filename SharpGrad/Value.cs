@@ -1,12 +1,12 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
     //TODO: Use class inheritance instead of switch-case
-    public class Value<TType>(TType data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
+    public class Value<TType>(TType data, string name, params ValueBase<TType>[] childs)
+        : ValueBase<TType>(data, name, childs)
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         private static int InstanceCount = 0;
@@ -16,11 +16,8 @@ namespace SharpGrad.DifEngine
 
         public delegate void BackwardPass();
 
-        public TType Grad = TType.Zero;
-        public TType Data = data;
-        public readonly Value<TType>? LeftChildren = leftChild;
-        public readonly Value<TType>? RightChildren = rightChild;
-        public readonly string Name = name;
+        public Value<TType>? LeftChildren => Childrens.Length > 0 ? Childrens[0] as Value<TType> : null;
+        public Value<TType>? RightChildren => Childrens.Length > 1 ? Childrens[1] as Value<TType> : null;
 
 
         #region BASIC ARITHMETIC OPERATIONS
@@ -71,38 +68,6 @@ namespace SharpGrad.DifEngine
             => new LeakyReLUValue<TType>(this,alpha);
 
 
-        #endregion
-
-        #region BACKPROPAGATION
-        protected virtual void Backward()
-        {
-            if(LeftChildren != null)
-                LeftChildren.Grad += Grad;
-        }
-
-        void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
-        {
-            if (Visited.Add(this))
-            {
-                if (LeftChildren != null && !Visited.Contains(LeftChildren))
-                    LeftChildren.DFS(TopOSort, Visited);
-                if (RightChildren != null && !Visited.Contains(RightChildren))
-                    RightChildren.DFS(TopOSort, Visited);
-                TopOSort.Add(this);
-            }
-        }
-
-        public void Backpropagate()
-        {
-            Grad = TType.One;
-            List<Value<TType>> TopOSort = [];
-            HashSet<Value<TType>> Visited = [];
-            DFS(TopOSort, Visited);
-            for(int i = TopOSort.Count - 1; i >= 0; i--)
-            {
-                TopOSort[i].Backward();
-            }
-        }
         #endregion
 
         public static implicit operator Value<TType>(TType d)
