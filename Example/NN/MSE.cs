@@ -1,10 +1,5 @@
 ﻿using SharpGrad.DifEngine;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpGrad.NN
 {
@@ -16,7 +11,8 @@ namespace SharpGrad.NN
             Value<TType> loss = Value<TType>.Zero;
             for (int i = 0; i < Y.Count; i++)
             {
-                var nl = loss + ((Y[i] - Y_hat[i]).Pow(TType.CreateSaturating(2.0)));
+                var yDiff = Y[i] - Y_hat[i];
+                var nl = loss + (yDiff * yDiff);
                 loss = nl;
             }
             return loss;
