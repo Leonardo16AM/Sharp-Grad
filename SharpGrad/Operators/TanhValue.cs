@@ -1,6 +1,8 @@
+using SharpGrad.Activations;
+using SharpGrad.DifEngine;
 using System.Numerics;
 
-namespace SharpGrad.DifEngine
+namespace SharpGrad.Operators
 {
     public class TanhValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>

@@ -1,6 +1,7 @@
-﻿using System.Numerics;
+﻿using SharpGrad.DifEngine;
+using System.Numerics;
 
-namespace SharpGrad.DifEngine
+namespace SharpGrad.Operators
 {
     public abstract class BinaryOpValue<TType> : NariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>

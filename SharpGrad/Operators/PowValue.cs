@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SharpGrad.DifEngine;
+using System;
 using System.Numerics;
 
-namespace SharpGrad.DifEngine
+namespace SharpGrad.Operators
 {
     // TODO : Find why the commented code is not working.
     public class PowValue<TType>(Value<TType> left, Value<TType> right)

@@ -1,3 +1,5 @@
+using SharpGrad.Activations;
+using SharpGrad.Operators;
 using System;
 using System.Diagnostics;
 using System.Numerics;

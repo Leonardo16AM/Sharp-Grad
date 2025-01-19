@@ -1,12 +1,13 @@
-﻿using System.Numerics;
+﻿using SharpGrad.DifEngine;
+using System.Numerics;
 
-namespace SharpGrad.DifEngine
+namespace SharpGrad.Activations
 {
     public class ReLUValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public ReLUValue(Value<TType> value)
-            : base((value.Data <= TType.Zero) ? TType.Zero : value.Data, "relu", value)
+            : base(value.Data <= TType.Zero ? TType.Zero : value.Data, "relu", value)
         {
         }
 
