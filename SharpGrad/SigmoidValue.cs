@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public class SigmoidValue<TType> : UnariOperatorForValue<TType>
+    public class SigmoidValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public SigmoidValue(Value<TType> value)

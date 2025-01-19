@@ -5,7 +5,7 @@ namespace SharpGrad.DifEngine
 {
     // TODO : Find why the commented code is not working.
     public class PowValue<TType>(Value<TType> left, Value<TType> right)
-        : BinaryOperatorForValue<TType>(TType.CreateSaturating(Math.Pow(double.CreateSaturating(left.Data), double.CreateSaturating(right.Data))), "^", left, right)
+        : BinaryOpValue<TType>(TType.CreateSaturating(Math.Pow(double.CreateSaturating(left.Data), double.CreateSaturating(right.Data))), "^", left, right)
         //: Value<TType>(TType.Pow(left.Data, right.Data), "^", left, right)
         where TType : IBinaryFloatingPointIeee754<TType>, IPowerFunctions<TType>
     {

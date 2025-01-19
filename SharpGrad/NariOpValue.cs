@@ -2,10 +2,10 @@
 
 namespace SharpGrad.DifEngine
 {
-    public abstract class OperatorForValue<TType> : Value<TType>
+    public abstract class NariOpValue<TType> : Value<TType>
     where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public OperatorForValue(TType data, string name, params ValueBase<TType>[] childs)
+        public NariOpValue(TType data, string name, params ValueBase<TType>[] childs)
             : base(data, name, childs)
         {
             if (childs.Length < 1)

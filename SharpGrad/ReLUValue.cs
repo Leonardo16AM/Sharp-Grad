@@ -2,7 +2,7 @@
 
 namespace SharpGrad.DifEngine
 {
-    public class ReLUValue<TType> : UnariOperatorForValue<TType>
+    public class ReLUValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public ReLUValue(Value<TType> value)

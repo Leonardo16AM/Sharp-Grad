@@ -2,7 +2,7 @@
 
 namespace SharpGrad.DifEngine
 {
-    public class SubValue<TType> : BinaryOperatorForValue<TType>
+    public class SubValue<TType> : BinaryOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public SubValue(Value<TType> left, Value<TType> right)

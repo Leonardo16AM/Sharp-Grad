@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public class LeakyReLUValue<TType> : UnariOperatorForValue<TType>
+    public class LeakyReLUValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         private readonly TType _alpha;
