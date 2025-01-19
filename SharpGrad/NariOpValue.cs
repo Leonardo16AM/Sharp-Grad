@@ -13,6 +13,4 @@ namespace SharpGrad
                 throw new System.ArgumentException($"Operator {name} must have at least one child.");
         }
     }
-
-
 }
