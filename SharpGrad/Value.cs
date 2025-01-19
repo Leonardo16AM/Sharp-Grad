@@ -60,7 +60,7 @@ namespace SharpGrad.DifEngine
 
         private static int InstanceCount = 0;
         public static implicit operator Value<TType>(TType d)
-            => new Variable<TType>(d, $"v{InstanceCount++}");
+            => new Constant<TType>(d, $"v{InstanceCount++}");
 
         public static explicit operator TType(Value<TType> v)
             => v.Data;
