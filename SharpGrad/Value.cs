@@ -92,7 +92,7 @@ namespace SharpGrad.DifEngine
 
         public void Backpropagate()
         {
-            Grad = TType.CreateSaturating(1.0);
+            Grad = TType.One;
             List<Value<TType>> TopOSort = [];
             HashSet<Value<TType>> Visited = [];
             DFS(TopOSort, Visited);
