@@ -40,31 +40,20 @@ namespace SharpGrad.DifEngine
         }
 
         #region BASIC ARITHMETIC OPERATIONS
-        public static ValueBase<TType> Add(ValueBase<TType> left, ValueBase<TType> right)
-            => new AddValue<TType>(left, right);
-        public static ValueBase<TType> operator +(ValueBase<TType> left, ValueBase<TType> right)
-            => Add(left, right);
+        public static AddValue<TType> Add(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
+        public static AddValue<TType> operator +(ValueBase<TType> left, ValueBase<TType> right) => Add(left, right);
 
-        public static ValueBase<TType> Sub(ValueBase<TType> left, ValueBase<TType> right)
-            => new SubValue<TType>(left, right);
-        public static ValueBase<TType> operator -(ValueBase<TType> left, ValueBase<TType> right)
-            => Sub(left, right);
+        public static SubValue<TType> Sub(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
+        public static SubValue<TType> operator -(ValueBase<TType> left, ValueBase<TType> right) => Sub(left, right);
 
-        public static ValueBase<TType> Mul(ValueBase<TType> left, ValueBase<TType> right)
-            => new MulValue<TType>(left, right);
-        public static ValueBase<TType> operator *(ValueBase<TType> left, ValueBase<TType> right)
-            => Mul(left, right);
+        public static MulValue<TType> Mul(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
+        public static MulValue<TType> operator *(ValueBase<TType> left, ValueBase<TType> right) => Mul(left, right);
 
-        public static ValueBase<TType> Div(ValueBase<TType> left, ValueBase<TType> right)
-            => new DivValue<TType>(left, right);
-        public static ValueBase<TType> operator /(ValueBase<TType> left, ValueBase<TType> right)
-            => Div(left, right);
+        public static DivValue<TType> Div(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
+        public static DivValue<TType> operator /(ValueBase<TType> left, ValueBase<TType> right) => Div(left, right);
 
 
-        public static ValueBase<TType> Pow(ValueBase<TType> left, ValueBase<TType> right)
-            => new PowValue<TType>(left, right);
-        public ValueBase<TType> Pow(ValueBase<TType> other)
-            => new PowValue<TType>(this, other);
+        public static PowValue<TType> Pow(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
         #endregion
 
     }
