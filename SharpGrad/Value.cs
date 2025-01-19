@@ -82,12 +82,14 @@ namespace SharpGrad.DifEngine
 
         void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
-            Visited.Add(this);
-            if (LeftChildren != null && !Visited.Contains(LeftChildren))
-                LeftChildren.DFS(TopOSort, Visited);
-            if (RightChildren != null && !Visited.Contains(RightChildren))
-                RightChildren.DFS(TopOSort, Visited);
-            TopOSort.Add(this);
+            if (Visited.Add(this))
+            {
+                if (LeftChildren != null && !Visited.Contains(LeftChildren))
+                    LeftChildren.DFS(TopOSort, Visited);
+                if (RightChildren != null && !Visited.Contains(RightChildren))
+                    RightChildren.DFS(TopOSort, Visited);
+                TopOSort.Add(this);
+            }
         }
 
         public void Backpropagate()
