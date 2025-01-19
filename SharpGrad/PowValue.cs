@@ -9,7 +9,7 @@ namespace SharpGrad.DifEngine
     {
         protected override void Backward()
         {
-            LeftChildren.Grad += Grad * RightChildren.Data * TType.CreateSaturating(Math.Pow(double.CreateSaturating(LeftChildren.Data), double.CreateSaturating(RightChildren.Data) - 1.0));
+            LeftChildren!.Grad += Grad * RightChildren!.Data * TType.CreateSaturating(Math.Pow(double.CreateSaturating(LeftChildren.Data), double.CreateSaturating(RightChildren.Data) - 1.0));
             RightChildren.Grad += Grad * TType.CreateSaturating(Math.Pow(double.CreateSaturating(LeftChildren.Data), double.CreateSaturating(RightChildren.Data)) * Math.Log(double.CreateSaturating(LeftChildren.Data)));
         }
     }

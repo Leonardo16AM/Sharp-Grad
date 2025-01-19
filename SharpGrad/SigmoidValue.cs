@@ -13,7 +13,7 @@ namespace SharpGrad.DifEngine
         protected override void Backward()
         {
             var sigmoid = Data;
-            LeftChildren.Grad += Grad * sigmoid * (TType.One - sigmoid);
+            LeftChildren!.Grad += Grad * sigmoid * (TType.One - sigmoid);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace SharpGrad.DifEngine
 
         protected override void Backward()
         {
-            LeftChildren.Grad += Grad * RightChildren.Data;
+            LeftChildren!.Grad += Grad * RightChildren!.Data;
             RightChildren.Grad += Grad * LeftChildren.Data;
         }
     }
