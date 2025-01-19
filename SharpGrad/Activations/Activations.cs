@@ -1,0 +1,25 @@
+﻿using SharpGrad.DifEngine;
+using SharpGrad.Operators;
+using System.Numerics;
+
+namespace SharpGrad.Activation
+{
+    public static class Activations
+    {
+        public static ReLUValue<TType> ReLU<TType>(this Value<TType> value)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => new(value);
+
+        public static LeakyReLUValue<TType> LeakyReLU<TType>(this Value<TType> value, TType alpha)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => new(value, alpha);
+
+        public static TanhValue<TType> Tanh<TType>(this Value<TType> value)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => new(value);
+
+        public static SigmoidValue<TType> Sigmoid<TType>(this Value<TType> value)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => new(value);
+    }
+}

@@ -1,7 +1,7 @@
 ﻿using SharpGrad.DifEngine;
 using System.Numerics;
 
-namespace SharpGrad.Activations
+namespace SharpGrad.Activation
 {
     public abstract class UnariOpValue<TType> : NariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
