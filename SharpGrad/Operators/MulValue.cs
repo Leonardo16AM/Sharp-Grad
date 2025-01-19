@@ -13,8 +13,8 @@ namespace SharpGrad.Operators
 
         protected override void Backward()
         {
-            LeftChildren!.Grad += Grad * RightChildren!.Data;
-            RightChildren.Grad += Grad * LeftChildren.Data;
+            LeftOperand!.Grad += Grad * RightOperand!.Data;
+            RightOperand.Grad += Grad * LeftOperand.Data;
         }
     }
 }

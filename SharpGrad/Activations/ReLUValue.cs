@@ -14,7 +14,7 @@ namespace SharpGrad.Activations
         protected override void Backward()
         {
             if (Grad > TType.Zero)
-                LeftChildren!.Grad += Grad;
+                Operand!.Grad += Grad;
         }
     }
 }

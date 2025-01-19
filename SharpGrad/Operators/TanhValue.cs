@@ -15,7 +15,7 @@ namespace SharpGrad.Operators
         protected override void Backward()
         {
             var tanh = Data;
-            LeftChildren!.Grad += Grad * (TType.One - tanh * tanh);
+            Operand!.Grad += Grad * (TType.One - tanh * tanh);
         }
     }
 }

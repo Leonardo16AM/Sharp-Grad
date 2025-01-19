@@ -14,8 +14,8 @@ namespace SharpGrad.Operators
         // TODO: Is this a good way to backpropagate division?
         protected override void Backward()
         {
-            LeftChildren.Grad += Grad / RightChildren.Data;
-            RightChildren.Grad += Grad * LeftChildren.Data / (RightChildren.Data * RightChildren.Data);
+            LeftOperand.Grad += Grad / RightOperand.Data;
+            RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data);
         }
     }
 }

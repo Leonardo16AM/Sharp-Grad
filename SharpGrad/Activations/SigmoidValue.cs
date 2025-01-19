@@ -14,7 +14,7 @@ namespace SharpGrad.Activations
         protected override void Backward()
         {
             var sigmoid = Data;
-            LeftChildren.Grad += Grad * sigmoid * (TType.One - sigmoid);
+            Operand.Grad += Grad * sigmoid * (TType.One - sigmoid);
         }
     }
 }
