@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operators
@@ -9,6 +10,13 @@ namespace SharpGrad.Operators
         public AddValue(Value<TType> left, Value<TType> right)
             : base(left.Data + right.Data, "+", left, right)
         {
+        }
+
+        public override Expression GenerateForwardExpression()
+        {
+            Expression compute = Expression.Add(LeftOperand.GenerateForwardExpression(), RightOperand.GenerateForwardExpression());
+            Expression assign = Expression.Assign(DataExpression, compute);
+            return assign;
         }
 
         protected override void Backward()

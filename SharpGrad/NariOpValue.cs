@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace SharpGrad
 {
-    public abstract class NariOpValue<TType> : Variable<TType>
+    public abstract class NariOpValue<TType> : Value<TType>
     where TType : INumber<TType>
     {
         public NariOpValue(TType data, string name, params Value<TType>[] childs)

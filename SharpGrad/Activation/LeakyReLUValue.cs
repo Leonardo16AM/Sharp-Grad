@@ -1,5 +1,6 @@
 using SharpGrad.DifEngine;
 using System;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Activation
@@ -13,6 +14,16 @@ namespace SharpGrad.Activation
             : base(value.Data <= TType.Zero ? alpha * value.Data : value.Data, "leaky_relu", value)
         {
             _alpha = alpha;
+        }
+
+        public override Expression GenerateForwardExpression()
+        {
+            Expression expression = Expression.Condition(
+                Expression.LessThanOrEqual(Operand.GenerateForwardExpression(), Expressions.Zero),
+                Expression.Multiply(Expression.Constant(_alpha), Operand.GenerateForwardExpression()),
+                Operand.GenerateForwardExpression());
+            Expression assignExpression = Expression.Assign(DataExpression, expression);
+            return assignExpression;
         }
 
         protected override void Backward()

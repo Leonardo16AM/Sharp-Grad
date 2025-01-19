@@ -6,15 +6,21 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public abstract class Value<TType>(TType data, string name, params Value<TType>[] childs)
-        where TType : INumber<TType>
+    public abstract class Value<TType> where TType : INumber<TType>
     {
         public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Variable<TType> Zero = new(TType.Zero, "0");
 
-        public readonly Value<TType>[] Childrens = childs;
-        public readonly string Name = name;
-        public TType Data = data;
+        public static class Expressions
+        {
+            public static readonly Expression Zero = Expression.Constant(TType.Zero);
+            public static readonly Expression One = Expression.Constant(TType.One);
+        }
+
+        public readonly Value<TType>[] Childrens;
+        public readonly string Name;
+        protected readonly Expression DataExpression;
+        public TType Data;
         public TType Grad = TType.Zero;
 
         public abstract Expression GenerateForwardExpression();
@@ -59,6 +65,15 @@ namespace SharpGrad.DifEngine
         #endregion
 
         private static int InstanceCount = 0;
+
+        public Value(TType data, string name, params Value<TType>[] childs)
+        {
+            Childrens = childs;
+            Name = name;
+            Data = data;
+            DataExpression = Expression.Field(Expression.Constant(this), nameof(Data));
+        }
+
         public static implicit operator Value<TType>(TType d)
             => new Constant<TType>(d, $"v{InstanceCount++}");
 

@@ -19,6 +19,6 @@ namespace SharpGrad.DifEngine
         }
 
         public static implicit operator Variable<TType>(TType d)
-            => new Variable<TType>(d, $"v{InstanceCount++}");
+            => new Variable<TType>(d, $"var{InstanceCount++}");
     }
 }

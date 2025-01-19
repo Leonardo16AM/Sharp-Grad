@@ -1,4 +1,5 @@
 using SharpGrad.DifEngine;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Activation
@@ -9,6 +10,13 @@ namespace SharpGrad.Activation
         public SigmoidValue(Value<TType> value)
             : base(TType.One / (TType.One + TType.Exp(-value.Data)), "sigmoid", value)
         {
+        }
+
+        public override Expression GenerateForwardExpression()
+        {
+            Expression expression = Expression.Divide(Expressions.One, Expression.Add(Expressions.One, Expression.Negate(Operand.GenerateForwardExpression())));
+            Expression assignExpression = Expression.Assign(DataExpression, expression);
+            return assignExpression;
         }
 
         protected override void Backward()
