@@ -6,7 +6,7 @@ namespace SharpGrad.Operators
 {
     public class PowValue<TType>(ValueBase<TType> left, ValueBase<TType> right)
         : BinaryOpValue<TType>(TType.Pow(left.Data, right.Data), "^", left, right)
-        where TType : IBinaryFloatingPointIeee754<TType>, IPowerFunctions<TType>
+        where TType : INumber<TType>, IPowerFunctions<TType>, ILogarithmicFunctions<TType>
     {
         protected override void Backward()
         {

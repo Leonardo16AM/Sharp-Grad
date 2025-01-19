@@ -4,7 +4,7 @@ using System.Numerics;
 namespace SharpGrad
 {
     public abstract class NariOpValue<TType> : Value<TType>
-    where TType : IBinaryFloatingPointIeee754<TType>
+    where TType : INumber<TType>
     {
         public NariOpValue(TType data, string name, params ValueBase<TType>[] childs)
             : base(data, name, childs)

@@ -4,7 +4,7 @@ using System.Numerics;
 namespace SharpGrad.Operators
 {
     public class AddValue<TType> : BinaryOpValue<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>
+        where TType : INumber<TType>
     {
         public AddValue(ValueBase<TType> left, ValueBase<TType> right)
             : base(left.Data + right.Data, "+", left, right)

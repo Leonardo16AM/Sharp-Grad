@@ -6,7 +6,7 @@ using System.Numerics;
 namespace SharpGrad.DifEngine
 {
     public abstract class ValueBase<TType>(TType data, string name, params ValueBase<TType>[] childs)
-        where TType : IBinaryFloatingPointIeee754<TType>
+        where TType : INumber<TType>
     {
         public TType Grad = TType.Zero;
         public TType Data = data;
@@ -51,9 +51,6 @@ namespace SharpGrad.DifEngine
 
         public static DivValue<TType> Div(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
         public static DivValue<TType> operator /(ValueBase<TType> left, ValueBase<TType> right) => Div(left, right);
-
-
-        public static PowValue<TType> Pow(ValueBase<TType> left, ValueBase<TType> right) => new(left, right);
         #endregion
 
     }

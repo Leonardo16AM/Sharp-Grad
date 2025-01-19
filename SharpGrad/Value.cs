@@ -9,7 +9,7 @@ namespace SharpGrad.DifEngine
 {
     public class Value<TType>(TType data, string name, params ValueBase<TType>[] childs)
         : ValueBase<TType>(data, name, childs)
-        where TType : IBinaryFloatingPointIeee754<TType>
+        where TType : INumber<TType>
     {
         private static int InstanceCount = 0;
 
@@ -17,8 +17,6 @@ namespace SharpGrad.DifEngine
         public static readonly Value<TType> Zero = new(TType.Zero, "0");
 
         public delegate void BackwardPass();
-
-        public PowValue<TType> Pow(Value<TType> other) => new(this, other);
 
         public override Expression GenerateExpression()
         {
