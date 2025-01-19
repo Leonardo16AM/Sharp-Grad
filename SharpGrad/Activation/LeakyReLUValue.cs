@@ -9,7 +9,7 @@ namespace SharpGrad.Activation
     {
         private readonly TType _alpha;
 
-        public LeakyReLUValue(ValueBase<TType> value, TType alpha)
+        public LeakyReLUValue(Value<TType> value, TType alpha)
             : base(value.Data <= TType.Zero ? alpha * value.Data : value.Data, "leaky_relu", value)
         {
             _alpha = alpha;

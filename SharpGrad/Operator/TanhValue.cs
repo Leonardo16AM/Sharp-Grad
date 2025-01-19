@@ -7,7 +7,7 @@ namespace SharpGrad.Operators
     public class TanhValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IHyperbolicFunctions<TType>
     {
-        public TanhValue(ValueBase<TType> value)
+        public TanhValue(Value<TType> value)
             : base(TType.Tanh(value.Data), "tanh", value)
         {
         }

@@ -47,7 +47,7 @@ namespace SharpGrad.NN
             {
                 foreach (Neuron<TType> n in l.Neurons)
                 {
-                    foreach (Value<TType> w in n.Weights)
+                    foreach (Variable<TType> w in n.Weights)
                     {
                         // Console.WriteLine(w.data);
                         w.Data -= lr * w.Grad;

@@ -7,7 +7,7 @@ namespace SharpGrad.Activation
     public class ReLUValue<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
     {
-        public ReLUValue(ValueBase<TType> value)
+        public ReLUValue(Value<TType> value)
             : base(value.Data <= TType.Zero ? TType.Zero : value.Data, "relu", value)
         {
         }

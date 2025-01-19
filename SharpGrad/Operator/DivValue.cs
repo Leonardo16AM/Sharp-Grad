@@ -6,7 +6,7 @@ namespace SharpGrad.Operators
     public class DivValue<TType> : BinaryOpValue<TType>
         where TType : INumber<TType>
     {
-        public DivValue(ValueBase<TType> left, ValueBase<TType> right)
+        public DivValue(Value<TType> left, Value<TType> right)
             : base(left.Data / right.Data, "/", left, right)
         {
         }

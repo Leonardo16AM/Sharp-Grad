@@ -23,7 +23,7 @@ internal class Program
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-            Value<float> loss = Value<float>.Zero;
+            Variable<float> loss = Variable<float>.Zero;
             List<DataSet.Data> preds = [];
 
             for (int j = 0; j < v.Count; j++)

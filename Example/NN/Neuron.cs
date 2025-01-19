@@ -9,8 +9,8 @@ namespace SharpGrad
     {
         public static readonly Random Rand = new();
 
-        public readonly List<Value<TType>> Weights;
-        public readonly Value<TType> Biai;
+        public readonly List<Variable<TType>> Weights;
+        public readonly Variable<TType> Biai;
         public readonly int Inputs;
         public readonly bool ActFunc;
 

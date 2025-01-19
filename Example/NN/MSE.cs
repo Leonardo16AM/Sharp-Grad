@@ -5,10 +5,10 @@ namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Value<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
+        public static Variable<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
             where TType : IBinaryFloatingPointIeee754<TType>
         {
-            Value<TType> loss = Value<TType>.Zero;
+            Variable<TType> loss = Variable<TType>.Zero;
             for (int i = 0; i < Y.Count; i++)
             {
                 var yDiff = Y[i] - Y_hat[i];

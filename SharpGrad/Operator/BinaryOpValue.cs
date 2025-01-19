@@ -6,10 +6,10 @@ namespace SharpGrad.Operators
     public abstract class BinaryOpValue<TType> : NariOpValue<TType>
         where TType : INumber<TType>
     {
-        public ValueBase<TType> LeftOperand => Childrens[0];
-        public ValueBase<TType> RightOperand => Childrens[1];
+        public Value<TType> LeftOperand => Childrens[0];
+        public Value<TType> RightOperand => Childrens[1];
 
-        public BinaryOpValue(TType data, string name, ValueBase<TType> left, ValueBase<TType> right)
+        public BinaryOpValue(TType data, string name, Value<TType> left, Value<TType> right)
             : base(data, name, left, right)
         {
         }
