@@ -12,11 +12,11 @@ namespace SharpGrad.DifEngine
         private static int InstanceCount = 0;
 
         public static readonly Value<TType> e = new(TType.CreateSaturating(Math.E), "e");
-        public static readonly Value<TType> Zero = new(TType.CreateSaturating(0.0), "zero");
+        public static readonly Value<TType> Zero = new(TType.Zero, "0");
 
         public delegate void BackwardPass();
 
-        public TType Grad = TType.CreateSaturating(0.0);
+        public TType Grad = TType.Zero;
         public TType Data = data;
         public readonly Value<TType>? LeftChildren = leftChild;
         public readonly Value<TType>? RightChildren = rightChild;
