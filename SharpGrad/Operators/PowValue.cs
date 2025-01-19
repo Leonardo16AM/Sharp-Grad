@@ -4,7 +4,6 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    // TODO : Find why the commented code is not working.
     public class PowValue<TType>(Value<TType> left, Value<TType> right)
         : BinaryOpValue<TType>(TType.Pow(left.Data, right.Data), "^", left, right)
         where TType : IBinaryFloatingPointIeee754<TType>, IPowerFunctions<TType>
