@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public class SigmoidValue<TType> : Value<TType>
+    public class SigmoidValue<TType> : UnariOperatorForValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public SigmoidValue(Value<TType> value)
@@ -13,7 +13,7 @@ namespace SharpGrad.DifEngine
         protected override void Backward()
         {
             var sigmoid = Data;
-            LeftChildren!.Grad += Grad * sigmoid * (TType.One - sigmoid);
+            LeftChildren.Grad += Grad * sigmoid * (TType.One - sigmoid);
         }
     }
 }

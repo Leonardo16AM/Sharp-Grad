@@ -2,7 +2,7 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public class TanhValue<TType> : Value<TType>
+    public class TanhValue<TType> : UnariOperatorForValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public TanhValue(Value<TType> value)

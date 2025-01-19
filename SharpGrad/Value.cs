@@ -16,10 +16,6 @@ namespace SharpGrad.DifEngine
 
         public delegate void BackwardPass();
 
-        public Value<TType>? LeftChildren => Childrens.Length > 0 ? Childrens[0] as Value<TType> : null;
-        public Value<TType>? RightChildren => Childrens.Length > 1 ? Childrens[1] as Value<TType> : null;
-
-
         #region BASIC ARITHMETIC OPERATIONS
         public static Value<TType> Add(Value<TType> left, Value<TType> right)
             => new AddValue<TType>(left, right);
@@ -66,8 +62,6 @@ namespace SharpGrad.DifEngine
         
         public Value<TType> LeakyReLU(TType alpha)
             => new LeakyReLUValue<TType>(this,alpha);
-
-
         #endregion
 
         public static implicit operator Value<TType>(TType d)

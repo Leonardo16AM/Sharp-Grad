@@ -2,7 +2,7 @@
 
 namespace SharpGrad.DifEngine
 {
-    public class AddValue<TType> : Value<TType>
+    public class AddValue<TType> : BinaryOperatorForValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
         public AddValue(Value<TType> left, Value<TType> right)
@@ -12,8 +12,10 @@ namespace SharpGrad.DifEngine
 
         protected override void Backward()
         {
-            LeftChildren!.Grad += Grad;
-            RightChildren!.Grad += Grad;
+            LeftChildren.Grad += Grad;
+            RightChildren.Grad += Grad;
         }
     }
+
+
 }
