@@ -8,7 +8,7 @@ namespace SharpGrad.Operators
         where TType : INumber<TType>
     {
         public SubValue(Value<TType> left, Value<TType> right)
-            : base(left.Data - right.Data, "-", left, right)
+            : base("-", left, right)
         {
         }
 

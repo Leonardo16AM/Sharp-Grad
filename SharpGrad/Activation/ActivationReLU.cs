@@ -5,11 +5,11 @@ using System.Numerics;
 
 namespace SharpGrad.Activation
 {
-    public class ReLUValue<TType> : UnariOpValue<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
+    public class ActivationReLU<TType> : Activation<TType>
+        where TType : INumber<TType>, IComparable<TType>
     {
-        public ReLUValue(Value<TType> value)
-            : base(value.Data <= TType.Zero ? TType.Zero : value.Data, "relu", value)
+        public ActivationReLU(Value<TType> value)
+            : base("relu", value)
         {
         }
 

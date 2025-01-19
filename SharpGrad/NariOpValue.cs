@@ -1,4 +1,6 @@
 ﻿using SharpGrad.DifEngine;
+using System;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad
@@ -6,11 +8,24 @@ namespace SharpGrad
     public abstract class NariOpValue<TType> : Value<TType>
     where TType : INumber<TType>
     {
-        public NariOpValue(TType data, string name, params Value<TType>[] childs)
-            : base(data, name, childs)
+        protected bool isComputed = false;
+        public override TType Data {
+            get
+            {
+                if(!isComputed)
+                {
+                    ForwardLambda();
+                    isComputed = true;
+                }
+                return data;
+            }
+        }
+
+        public NariOpValue(string name, params Value<TType>[] childs)
+            : base(name, childs)
         {
             if (childs.Length < 1)
-                throw new System.ArgumentException($"Operator {name} must have at least one child.");
+                throw new ArgumentException($"Operator {name} must have at least one child.");
         }
     }
 }

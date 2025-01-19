@@ -5,7 +5,7 @@ namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Value<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
+        public static Value<TType> MSE<TType>(IReadOnlyList<Value<TType>> Y, IReadOnlyList<Value<TType>> Y_hat)
             where TType : INumber<TType>
         {
             Value<TType> loss = Value<TType>.Zero;

@@ -1,17 +1,23 @@
 using SharpGrad.DifEngine;
+using SharpGrad.Operator;
 using System;
 using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Activation
 {
-    public class LeakyReLUValue<TType> : UnariOpValue<TType>
+    public abstract class Activation<TType>(string name, Value<TType> child) : UnariOpValue<TType>(name, child)
+        where TType : INumber<TType>
+    {
+    }
+
+    public class ActivationLeakyReLU<TType> : Activation<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
     {
         private readonly TType _alpha;
 
-        public LeakyReLUValue(Value<TType> value, TType alpha)
-            : base(value.Data <= TType.Zero ? alpha * value.Data : value.Data, "leaky_relu", value)
+        public ActivationLeakyReLU(Value<TType> value, TType alpha)
+            : base("leaky_relu", value)
         {
             _alpha = alpha;
         }

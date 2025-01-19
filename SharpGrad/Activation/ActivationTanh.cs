@@ -1,15 +1,15 @@
-using SharpGrad.Activation;
 using SharpGrad.DifEngine;
+using SharpGrad.Operator;
 using System.Linq.Expressions;
 using System.Numerics;
 
-namespace SharpGrad.Operators
+namespace SharpGrad.Activation
 {
-    public class TanhValue<TType> : UnariOpValue<TType>
+    public class ActivationTanh<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IHyperbolicFunctions<TType>
     {
-        public TanhValue(Value<TType> value)
-            : base(TType.Tanh(value.Data), "tanh", value)
+        public ActivationTanh(Value<TType> value)
+            : base("tanh", value)
         {
         }
 
@@ -22,7 +22,7 @@ namespace SharpGrad.Operators
 
         protected override void Backward()
         {
-            var tanh = Data;
+            var tanh = data;
             Operand!.Grad += Grad * (TType.One - tanh * tanh);
         }
     }

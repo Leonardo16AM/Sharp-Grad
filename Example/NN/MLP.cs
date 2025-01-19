@@ -30,15 +30,15 @@ namespace SharpGrad.NN
             }
         }
 
-        public List<Value<TType>> Forward(List<Value<TType>> X)
+        public IReadOnlyList<Value<TType>> Forward(IReadOnlyList<Value<TType>> X)
         {
-            List<Value<TType>> Y;
+            IReadOnlyList<Value<TType>> Y = [];
             foreach (Layer<TType> l in Layers)
             {
                 Y = l.Forward(X);
                 X = Y;
             }
-            return X;
+            return Y;
         }
 
         public void Step(TType lr)

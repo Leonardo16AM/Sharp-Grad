@@ -20,7 +20,7 @@ namespace SharpGrad.NN
             }
         }
 
-        public List<Value<TType>> Forward(List<Value<TType>> X)
+        public IReadOnlyList<Value<TType>> Forward(IReadOnlyList<Value<TType>> X)
         {
             List<Value<TType>> Y = [];
             foreach (Neuron<TType> n in Neurons)

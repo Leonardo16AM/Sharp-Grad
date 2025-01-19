@@ -20,10 +20,28 @@ namespace SharpGrad.DifEngine
         public readonly Value<TType>[] Childrens;
         public readonly string Name;
         protected readonly Expression DataExpression;
-        public TType Data;
+        protected TType data;
+        public virtual TType Data => data;
+
         public TType Grad = TType.Zero;
 
         public abstract Expression GenerateForwardExpression();
+
+        private Func<TType>? forwardLambda;
+        public Func<TType> ForwardLambda
+        {
+            get
+            {
+                if (forwardLambda is null)
+                {
+                    // Get forward expression
+                    Expression forwardExpression = GenerateForwardExpression();
+                    // Compile Expression ussing Lambda function
+                    forwardLambda = Expression.Lambda<Func<TType>>(forwardExpression).Compile();
+                }
+                return forwardLambda;
+            }
+        }
 
         protected virtual void Backward() { }
 
@@ -50,6 +68,11 @@ namespace SharpGrad.DifEngine
             TopOSort.Add(this);
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         #region BASIC ARITHMETIC OPERATIONS
         public static AddValue<TType> Add(Value<TType> left, Value<TType> right) => new(left, right);
         public static AddValue<TType> operator +(Value<TType> left, Value<TType> right) => Add(left, right);
@@ -66,19 +89,19 @@ namespace SharpGrad.DifEngine
 
         private static int InstanceCount = 0;
 
-        public Value(TType data, string name, params Value<TType>[] childs)
+        public Value(string name, params Value<TType>[] childs)
         {
             Childrens = childs;
             Name = name;
-            Data = data;
-            DataExpression = Expression.Field(Expression.Constant(this), nameof(Data));
+            data = TType.Zero;
+            DataExpression = Expression.Field(Expression.Constant(this), nameof(data));
         }
 
         public static implicit operator Value<TType>(TType d)
             => new Constant<TType>(d, $"v{InstanceCount++}");
 
         public static explicit operator TType(Value<TType> v)
-            => v.Data;
+            => v.data;
 
     }
 }

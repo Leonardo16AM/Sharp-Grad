@@ -5,13 +5,16 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class PowValue<TType>(Value<TType> left, Value<TType> right)
-        : BinaryOpValue<TType>(TType.Pow(left.Data, right.Data), "^", left, right)
+    public class PowValue<TType>(Value<TType> left, Value<TType> right) :
+        BinaryOpValue<TType>("^", left, right)
         where TType : INumber<TType>, IPowerFunctions<TType>, ILogarithmicFunctions<TType>
     {
         public override Expression GenerateForwardExpression()
         {
-            Expression expression = Expression.Power(LeftOperand.GenerateForwardExpression(), RightOperand.GenerateForwardExpression());
+            Expression expression = Expression.Call(
+                typeof(TType).GetMethod("Pow")!,
+                LeftOperand.GenerateForwardExpression(),
+                RightOperand.GenerateForwardExpression());
             Expression assignExpression = Expression.Assign(DataExpression, expression);
             return assignExpression;
         }

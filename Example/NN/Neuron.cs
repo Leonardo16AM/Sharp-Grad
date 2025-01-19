@@ -25,7 +25,7 @@ namespace SharpGrad
                 Weights.Add(new(TType.CreateSaturating(Rand.NextDouble()), $"W{i}"));
             }
         }
-        public Value<TType> Forward(List<Value<TType>> X)
+        public Value<TType> Forward(IReadOnlyList<Value<TType>> X)
         {
             Value<TType> sum = X[0] * Weights[0];
             for (int i = 1; i < Inputs; i++)
