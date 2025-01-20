@@ -33,7 +33,6 @@ namespace SharpGrad.NN
 
         public Value<TType>[] Forward(Value<TType>[] X)
         {
-            Value<TType>[] Y = [];
             foreach (Layer<TType> l in Layers)
             {
                 X = l.Forward(X);
