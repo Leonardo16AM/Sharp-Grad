@@ -27,10 +27,10 @@ namespace SharpGrad.Activation
             return Expression.Assign(DataExpression, expression);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
             var sigmoid = data;
-            Operand.Grad += Grad * sigmoid * (TType.One - sigmoid);
+            Operand.Grad += Grad * sigmoid * (TType.One - sigmoid) / accCount;
         }
     }
 }

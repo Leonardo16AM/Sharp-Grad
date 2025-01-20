@@ -52,17 +52,18 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        protected virtual void Backward() { }
+        protected virtual void Backward(TType accCount) { }
 
-        public void Backpropagate()
+        public void Backpropagate(int accCount)
         {
             Grad = TType.One;
             List<Value<TType>> TopOSort = [];
             HashSet<Value<TType>> Visited = [];
             DFS(TopOSort, Visited);
+            TType accC = TType.CreateSaturating(accCount);
             for (int i = TopOSort.Count - 1; i >= 0; i--)
             {
-                TopOSort[i].Backward();
+                TopOSort[i].Backward(accC);
             }
         }
 
@@ -93,6 +94,19 @@ namespace SharpGrad.DifEngine
         public static MulValue<TType> operator *(Value<TType> left, Value<TType> right) => Mul(left, right);
 
         public static DivValue<TType> Div(Value<TType> left, Value<TType> right) => new(left, right);
+
+        public void ResetGradient()
+        {
+            Grad = TType.Zero;
+            if (Childrens.Length > 0)
+            {
+                foreach (var child in Childrens)
+                {
+                    child.ResetGradient();
+                }
+            }
+        }
+
         public static DivValue<TType> operator /(Value<TType> left, Value<TType> right) => Div(left, right);
         #endregion
 

@@ -36,12 +36,12 @@ namespace SharpGrad.Activation
             return Expression.Assign(DataExpression, expression);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
             if (Grad > TType.Zero)
-                Operand.Grad += Grad;
+                Operand.Grad += Grad / accCount;
             else
-                Operand.Grad += Grad * _alpha;
+                Operand.Grad += Grad * _alpha / accCount;
         }
     }
 }

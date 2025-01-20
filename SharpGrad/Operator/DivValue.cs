@@ -24,10 +24,10 @@ namespace SharpGrad.Operators
         }
 
         // TODO: Is this a good way to backpropagate division?
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
-            LeftOperand.Grad += Grad / RightOperand.Data;
-            RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data);
+            LeftOperand.Grad += Grad / RightOperand.Data / accCount;
+            RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data) / accCount;
         }
     }
 }

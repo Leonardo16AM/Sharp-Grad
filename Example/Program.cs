@@ -250,7 +250,7 @@ internal class Program
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
         var v = DataSet.GetDataSet(400);
 
-        MLP<float> cerebrin = new(2, 8, 1);
+        MLP<float> cerebrin = new(2, 4, 1);
 
         int epochs = 1000;
         float lr = 1e-9f;
@@ -261,44 +261,38 @@ internal class Program
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-            List<DataSet.Data> preds = [];
+            DataSet.Data[] preds = new DataSet.Data[v.Count];
 
 
 
             Variable<float>[] X = [
-                v[0].X[0],
-                v[0].X[1]
+                new("X[0]"),
+                new("X[1]")
             ];
             Variable<float>[] Ygt = [
-                v[0].Y[0]
+                new("Ygt")
             ];
 
             IReadOnlyList<Value<float>> Y = cerebrin.Forward(X);
             var loss = Loss.MSE(cerebrin.Forward(X), Ygt);
 
             Func<float> mse = loss.ForwardLambda;
-            float l = loss.ForwardLambda();
-            loss.Backpropagate();
-
-            int val = Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2) ? 1 : 2;
-            preds.Add(new(v[0].X, [val]));
-
-
-
+            float l = 0;
             for (int j = 0; j < v.Count; j++)
             {
                 X[0].Data = v[j].X[0];
                 X[1].Data = v[j].X[1];
                 Ygt[0] = v[j].Y[0];
 
-                l += loss.ForwardLambda();
-                loss.Backpropagate();
+                loss.ForwardLambda();
+                l += loss.Data / v.Count;
+                loss.Backpropagate(v.Count);
 
-                val = Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2) ? 1 : 2;
-                preds.Add(new(v[j].X, [val]));
+                int val = Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2) ? 1 : 2;
+                preds[j] = new(v[j].X, [val]);
             }
-
             cerebrin.Step(lr);
+            //loss.ResetGradient();
 
             Console.WriteLine("Loss: " + l);
             DataSet.Scatter(v, preds);
@@ -308,11 +302,11 @@ internal class Program
             }
             else
             {
-                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                Console.WriteLine("Final loss: " + l);
-                Console.WriteLine("Last epoch: " + i);
-                Console.WriteLine("Loss is increasing. Stopping training...");
-                break;
+                //Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
+                //Console.WriteLine("Final loss: " + l);
+                //Console.WriteLine("Last epoch: " + i);
+                //Console.WriteLine("Loss is increasing. Stopping training...");
+                //break;
             }
         }
     }

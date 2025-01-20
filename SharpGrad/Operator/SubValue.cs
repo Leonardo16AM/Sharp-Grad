@@ -23,10 +23,10 @@ namespace SharpGrad.Operators
             return Expression.Assign(DataExpression, expression);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
-            LeftOperand.Grad += Grad;
-            RightOperand.Grad -= Grad;
+            LeftOperand.Grad += Grad / accCount;
+            RightOperand.Grad -= Grad / accCount;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -17,16 +18,15 @@ namespace SharpGrad.Operators
         {
             if (variableExpressions.TryGetValue(this, out Expression? expression))
                 return expression;
-
             Expression compute = Expression.Add(LeftOperand.GenerateForwardExpression(variableExpressions), RightOperand.GenerateForwardExpression(variableExpressions));
             variableExpressions[this] = DataExpression;
             return Expression.Assign(DataExpression, compute);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
-            LeftOperand.Grad += Grad;
-            RightOperand.Grad += Grad;
+            LeftOperand.Grad += Grad / accCount;
+            RightOperand.Grad += Grad / accCount;
         }
     }
 }

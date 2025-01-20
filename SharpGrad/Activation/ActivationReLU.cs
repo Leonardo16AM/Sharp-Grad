@@ -13,24 +13,24 @@ namespace SharpGrad.Activation
             : base("relu", value)
         {
         }
-
         public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
         {
             if (variableExpressions.TryGetValue(this, out Expression? expression))
                 return expression;
 
+            Expression operandExpression = Operand.GenerateForwardExpression(variableExpressions);
             expression = Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GenerateForwardExpression(variableExpressions), Expressions.Zero),
+                Expression.LessThanOrEqual(operandExpression, Expressions.Zero),
                 Expressions.Zero,
-                Operand.GenerateForwardExpression(variableExpressions));
+                operandExpression);
             variableExpressions[this] = DataExpression;
             return Expression.Assign(DataExpression, expression);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
             if (Grad > TType.Zero)
-                Operand.Grad += Grad;
+                Operand.Grad += Grad / accCount;
         }
     }
 }

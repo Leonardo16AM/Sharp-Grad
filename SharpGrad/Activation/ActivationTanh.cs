@@ -24,10 +24,10 @@ namespace SharpGrad.Activation
             return Expression.Assign(DataExpression, expression);
         }
 
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
             var tanh = data;
-            Operand!.Grad += Grad * (TType.One - tanh * tanh);
+            Operand!.Grad += Grad * (TType.One - tanh * tanh) / accCount;
         }
     }
 }
