@@ -6,6 +6,7 @@ using System.Diagnostics;
 internal class Program
 {
     public static Random Rnd = new();
+    #region TEST
     // TEST START
     public static void Add()
     {
@@ -230,6 +231,7 @@ internal class Program
     }
 
     // END TEST
+    #endregion
 
     private static void Main(string[] args)
     {
@@ -263,11 +265,11 @@ internal class Program
 
 
 
-            List<Variable<float>> X = [
+            Variable<float>[] X = [
                 v[0].X[0],
                 v[0].X[1]
             ];
-            List<Variable<float>> Ygt = [
+            Variable<float>[] Ygt = [
                 v[0].Y[0]
             ];
 
