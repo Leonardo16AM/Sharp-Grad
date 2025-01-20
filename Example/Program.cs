@@ -28,13 +28,12 @@ internal class Program
 
             for (int j = 0; j < v.Count; j++)
             {
-                List<Value<float>> X =
-                [
-                    v[j].X[0],
-                    v[j].X[1]
+                Variable<float>[] X = [
+                    new Variable<float>(v[j].X[0], "X0"), 
+                    new Variable<float>(v[j].X[1], "X1")
                 ];
-                List<Value<float>> Y = cerebrin.Forward(X);
-                List<Value<float>> Ygt =
+                Value<float>[] Y = cerebrin.Forward(X);
+                Variable<float>[] Ygt =
                 [
                     v[j].Y[0]
                 ];

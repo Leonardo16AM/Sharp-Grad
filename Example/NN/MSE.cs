@@ -1,19 +1,22 @@
 ﻿using SharpGrad.DifEngine;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 
 namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Variable<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
+        public static Value<TType> MSE<TType>(Value<TType>[] Y, Value<TType>[] Y_hat)
             where TType : IBinaryFloatingPointIeee754<TType>
         {
-            Variable<TType> loss = Variable<TType>.Zero;
-            for (int i = 0; i < Y.Count; i++)
+            Value<TType> loss = Value<TType>.Zero;
+            for (int i = 0; i < Y.Length; i++)
             {
-                var yDiff = Y[i] - Y_hat[i];
-                var nl = loss + (yDiff * yDiff);
-                loss = nl;
+                var nl = Y[i] - Y_hat[i];
+                loss += nl * nl;
             }
             return loss;
         }
