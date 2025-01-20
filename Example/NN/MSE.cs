@@ -1,6 +1,7 @@
 ﻿using SharpGrad.DifEngine;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -10,14 +11,14 @@ namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Value<TType> MSE<TType>(List<Value<TType>> Y, List<Value<TType>> Y_hat)
+        public static Value<TType> MSE<TType>(Value<TType>[] Y, Value<TType>[] Y_hat)
             where TType : IBinaryFloatingPointIeee754<TType>
         {
             Value<TType> loss = Value<TType>.Zero;
-            for (int i = 0; i < Y.Count; i++)
+            for (int i = 0; i < Y.Length; i++)
             {
-                var nl = loss + ((Y[i] - Y_hat[i]).Pow(TType.CreateSaturating(2.0)));
-                loss = nl;
+                var nl = Y[i] - Y_hat[i];
+                loss += nl * nl;
             }
             return loss;
         }
