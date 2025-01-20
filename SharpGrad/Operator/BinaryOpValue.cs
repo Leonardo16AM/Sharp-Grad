@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.Operator;
 using System.Numerics;
 
 namespace SharpGrad.Operators
@@ -9,5 +10,8 @@ namespace SharpGrad.Operators
     {
         public Value<TType> LeftOperand => Childrens[0];
         public Value<TType> RightOperand => Childrens[1];
+
+        public override string ToString()
+            => $"({LeftOperand} {Name} {RightOperand})";
     }
 }

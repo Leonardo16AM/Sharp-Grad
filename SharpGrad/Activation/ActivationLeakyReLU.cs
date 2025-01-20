@@ -1,6 +1,7 @@
 using SharpGrad.DifEngine;
 using SharpGrad.Operator;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
@@ -22,14 +23,17 @@ namespace SharpGrad.Activation
             _alpha = alpha;
         }
 
-        public override Expression GenerateForwardExpression()
+        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
         {
-            Expression expression = Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GenerateForwardExpression(), Expressions.Zero),
-                Expression.Multiply(Expression.Constant(_alpha), Operand.GenerateForwardExpression()),
-                Operand.GenerateForwardExpression());
-            Expression assignExpression = Expression.Assign(DataExpression, expression);
-            return assignExpression;
+            if(variableExpressions.TryGetValue(this, out Expression? expression))
+                return expression;
+
+            expression = Expression.Condition(
+                Expression.LessThanOrEqual(Operand.GenerateForwardExpression(variableExpressions), Expressions.Zero),
+                Expression.Multiply(Expression.Constant(_alpha), Operand.GenerateForwardExpression(variableExpressions)),
+                Operand.GenerateForwardExpression(variableExpressions));
+            variableExpressions[this] = DataExpression;
+            return Expression.Assign(DataExpression, expression);
         }
 
         protected override void Backward()

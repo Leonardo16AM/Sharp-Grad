@@ -8,8 +8,17 @@ namespace SharpGrad.DifEngine
 {
     public abstract class Value<TType> where TType : INumber<TType>
     {
+        private static int InstanceCount = 0;
         public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Variable<TType> Zero = new(TType.Zero, "0");
+
+        public Value(string name, params Value<TType>[] childs)
+        {
+            Childrens = childs;
+            Name = name;
+            data = TType.Zero;
+            DataExpression = Expression.Field(Expression.Constant(this), nameof(data));
+        }
 
         public static class Expressions
         {
@@ -25,7 +34,7 @@ namespace SharpGrad.DifEngine
 
         public TType Grad = TType.Zero;
 
-        public abstract Expression GenerateForwardExpression();
+        public abstract Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions);
 
         private Func<TType>? forwardLambda;
         public Func<TType> ForwardLambda
@@ -35,7 +44,7 @@ namespace SharpGrad.DifEngine
                 if (forwardLambda is null)
                 {
                     // Get forward expression
-                    Expression forwardExpression = GenerateForwardExpression();
+                    Expression forwardExpression = GenerateForwardExpression([]);
                     // Compile Expression ussing Lambda function
                     forwardLambda = Expression.Lambda<Func<TType>>(forwardExpression).Compile();
                 }
@@ -86,16 +95,6 @@ namespace SharpGrad.DifEngine
         public static DivValue<TType> Div(Value<TType> left, Value<TType> right) => new(left, right);
         public static DivValue<TType> operator /(Value<TType> left, Value<TType> right) => Div(left, right);
         #endregion
-
-        private static int InstanceCount = 0;
-
-        public Value(string name, params Value<TType>[] childs)
-        {
-            Childrens = childs;
-            Name = name;
-            data = TType.Zero;
-            DataExpression = Expression.Field(Expression.Constant(this), nameof(data));
-        }
 
         public static implicit operator Value<TType>(TType d)
             => new Constant<TType>(d, $"v{InstanceCount++}");

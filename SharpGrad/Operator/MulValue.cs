@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
@@ -12,11 +13,14 @@ namespace SharpGrad.Operators
         {
         }
 
-        public override Expression GenerateForwardExpression()
+        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
         {
-            Expression expression = Expression.Multiply(LeftOperand.GenerateForwardExpression(), RightOperand.GenerateForwardExpression());
-            Expression assignExpression = Expression.Assign(DataExpression, expression);
-            return assignExpression;
+            if (variableExpressions.TryGetValue(this, out Expression? expression))
+                return expression;
+
+            expression = Expression.Multiply(LeftOperand.GenerateForwardExpression(variableExpressions), RightOperand.GenerateForwardExpression(variableExpressions));
+            variableExpressions[this] = DataExpression;
+            return Expression.Assign(DataExpression, expression);
         }
 
         protected override void Backward()

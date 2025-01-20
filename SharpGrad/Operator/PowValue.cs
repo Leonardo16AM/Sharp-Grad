@@ -1,5 +1,6 @@
 ﻿using SharpGrad.DifEngine;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
@@ -9,14 +10,17 @@ namespace SharpGrad.Operators
         BinaryOpValue<TType>("^", left, right)
         where TType : INumber<TType>, IPowerFunctions<TType>, ILogarithmicFunctions<TType>
     {
-        public override Expression GenerateForwardExpression()
+        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
         {
-            Expression expression = Expression.Call(
+            if (variableExpressions.TryGetValue(this, out Expression? expression))
+                return expression;
+
+            expression = Expression.Call(
                 typeof(TType).GetMethod("Pow")!,
-                LeftOperand.GenerateForwardExpression(),
-                RightOperand.GenerateForwardExpression());
-            Expression assignExpression = Expression.Assign(DataExpression, expression);
-            return assignExpression;
+                LeftOperand.GenerateForwardExpression(variableExpressions),
+                RightOperand.GenerateForwardExpression(variableExpressions));
+            variableExpressions[this] = DataExpression;
+            return Expression.Assign(DataExpression, expression);
         }
 
         protected override void Backward()

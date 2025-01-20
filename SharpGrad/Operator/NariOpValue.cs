@@ -3,20 +3,21 @@ using System;
 using System.Linq.Expressions;
 using System.Numerics;
 
-namespace SharpGrad
+namespace SharpGrad.Operator
 {
     public abstract class NariOpValue<TType> : Value<TType>
     where TType : INumber<TType>
     {
         protected bool isComputed = false;
-        public override TType Data {
+        public override TType Data
+        {
             get
             {
-                if(!isComputed)
-                {
-                    ForwardLambda();
-                    isComputed = true;
-                }
+                //if (!isComputed)
+                //{
+                //    ForwardLambda();
+                //    isComputed = true;
+                //}
                 return data;
             }
         }

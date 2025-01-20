@@ -8,7 +8,8 @@ namespace SharpGrad.Operator
         where TType : INumber<TType>
     {
         public Value<TType> Operand => Childrens[0];
+
+        public override string ToString()
+            => $"{Name}({Operand})";
     }
-
-
 }
