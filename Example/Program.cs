@@ -253,7 +253,7 @@ internal class Program
         MLP<float> cerebrin = new(2, 4, 1);
 
         int epochs = 1000;
-        float lr = 1e-9f;
+        float lr = 1e-3f;
 
         float lastLoss = float.MaxValue;
 
@@ -276,7 +276,6 @@ internal class Program
             IReadOnlyList<Value<float>> Y = cerebrin.Forward(X);
             var loss = Loss.MSE(cerebrin.Forward(X), Ygt);
 
-            Func<float> mse = loss.ForwardLambda;
             float l = 0;
             for (int j = 0; j < v.Count; j++)
             {
