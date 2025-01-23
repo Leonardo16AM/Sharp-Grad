@@ -54,7 +54,7 @@ namespace SharpGrad.DifEngine
 
         protected virtual void Backward(TType accCount) { }
 
-        public void Backpropagate(int accCount)
+        public void Backpropagate(int accCount = 1)
         {
             Grad = TType.One;
             List<Value<TType>> TopOSort = [];

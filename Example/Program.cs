@@ -248,56 +248,53 @@ internal class Program
         ///////////////////
 
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
-        var v = DataSet.GetDataSet(400);
+        var v = DataSet.GetDataSet(300);
 
-        MLP<float> cerebrin = new(2, 4, 1);
+        MLP<float> cerebrin = new(2, 8, 1);
 
         int epochs = 1000;
         float lr = 1e-3f;
 
-        float lastLoss = float.MaxValue;
+        DataSet.Data[] preds = new DataSet.Data[v.Count];
 
+        Variable<float>[][] X = new Variable<float>[v.Count][];
+        Variable<float>[][] Ygt = new Variable<float>[v.Count][];
+        Value<float>[][] Y = new Value<float>[v.Count][];
+        Value<float>? loss = null;
+        for (int i = 0; i < v.Count; i++)
+        {
+            X[i] = [v[i].X[0], v[i].X[1]];
+            Ygt[i] = [v[i].Y[0]];
+            Y[i] = cerebrin.Forward(X[i]);
+            if (loss is null)
+                loss = Loss.MSE(Y[i], Ygt[i]) / v.Count;
+            else
+                loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
+        }
+
+        float lastLoss = float.MaxValue;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-            DataSet.Data[] preds = new DataSet.Data[v.Count];
 
+            loss!.ForwardLambda();
+            loss.Backpropagate(1);
 
-
-            Variable<float>[] X = [
-                new("X[0]"),
-                new("X[1]")
-            ];
-            Variable<float>[] Ygt = [
-                new("Ygt")
-            ];
-
-            IReadOnlyList<Value<float>> Y = cerebrin.Forward(X);
-            var loss = Loss.MSE(cerebrin.Forward(X), Ygt);
-
-            float l = 0;
-            for (int j = 0; j < v.Count; j++)
+            for (int j = 0; j < Y.Length; j++)
             {
-                X[0].Data = v[j].X[0];
-                X[1].Data = v[j].X[1];
-                Ygt[0] = v[j].Y[0];
-
-                loss.ForwardLambda();
-                l += loss.Data / v.Count;
-                loss.Backpropagate(v.Count);
-
-                int val = Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2) ? 1 : 2;
+                int val = Math.Abs(Y[j][0].Data - 1) < Math.Abs(Y[j][0].Data - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
             }
-            cerebrin.Step(lr);
-            //loss.ResetGradient();
 
-            Console.WriteLine("Loss: " + l);
+            cerebrin.Step(lr);
+            loss.ResetGradient();
+
+            Console.WriteLine("Loss: " + loss.Data);
             DataSet.Scatter(v, preds);
-            if (lastLoss > l)
+            if (lastLoss > loss.Data)
             {
-                lastLoss = l;
+                lastLoss = loss.Data;
             }
             else
             {
