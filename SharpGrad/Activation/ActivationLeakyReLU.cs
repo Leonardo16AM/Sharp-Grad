@@ -23,19 +23,11 @@ namespace SharpGrad.Activation
             _alpha = alpha;
         }
 
-        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
-        {
-            if(variableExpressions.TryGetValue(this, out Expression? expression))
-                return expression;
-
-            expression = Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GenerateForwardExpression(variableExpressions), Expressions.Zero),
-                Expression.Multiply(Expression.Constant(_alpha), Operand.GenerateForwardExpression(variableExpressions)),
-                Operand.GenerateForwardExpression(variableExpressions));
-            variableExpressions[this] = DataExpression;
-            return Expression.Assign(DataExpression, expression);
-        }
-
+        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+            => Expression.Condition(
+                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), Expressions.Zero),
+                Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions)),
+                Operand.GetAsOperand(variableExpressions));
         protected override void Backward(TType accCount)
         {
             if (Grad > TType.Zero)
@@ -43,5 +35,7 @@ namespace SharpGrad.Activation
             else
                 Operand.Grad += Grad * _alpha / accCount;
         }
+
+
     }
 }

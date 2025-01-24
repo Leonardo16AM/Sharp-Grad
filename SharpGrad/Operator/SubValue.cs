@@ -13,15 +13,8 @@ namespace SharpGrad.Operators
         {
         }
 
-        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
-        {
-            if (variableExpressions.TryGetValue(this, out Expression? expression))
-                return expression;
-
-            expression = Expression.Subtract(LeftOperand.GenerateForwardExpression(variableExpressions), RightOperand.GenerateForwardExpression(variableExpressions));
-            variableExpressions[this] = DataExpression;
-            return Expression.Assign(DataExpression, expression);
-        }
+        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+            => Expression.Subtract(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
         protected override void Backward(TType accCount)
         {

@@ -1,6 +1,8 @@
 ﻿using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 
@@ -34,19 +36,50 @@ namespace SharpGrad.DifEngine
 
         public TType Grad = TType.Zero;
 
-        public abstract Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions);
+        //public abstract Expression GenerateForwardExpression_old(Dictionary<Value<TType>, Expression> variableExpressions);
+        public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand);
+        public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList)
+            => _ = GetAsOperand(variableExpressions, forwardExpressionList, out var _);
+        public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions)
+        {
+            List<Expression> forwardExpressionList = [];
+            if (GetAsOperand(variableExpressions, forwardExpressionList, out var operand)
+                && forwardExpressionList.Count == 0)
+            {
+                return operand!;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Expression list should be empty. Found {forwardExpressionList.Count} expressions.");
+            }
+        }
 
-        private Func<TType>? forwardLambda;
-        public Func<TType> ForwardLambda
+        private Action? forwardLambda;
+        public Action ForwardLambda
         {
             get
             {
                 if (forwardLambda is null)
                 {
                     // Get forward expression
-                    Expression forwardExpression = GenerateForwardExpression([]);
+                    List<Expression> forwardExpressionList = [];
+                    Dictionary<Value<TType>, Expression> variableExpressions = [];
+                    _ = GetAsOperand(variableExpressions, forwardExpressionList, out var _);
+                    // Save back all parameters to data
+                    List<ParameterExpression> parameters = [];
+                    foreach (var e in variableExpressions)
+                    {
+                        if(e.Value is ParameterExpression parameter)
+                        {
+                            forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
+                            parameters.Add(parameter);
+                        }
+                    }
+
                     // Compile Expression ussing Lambda function
-                    forwardLambda = Expression.Lambda<Func<TType>>(forwardExpression).Compile();
+
+                    Expression forwardExpression = Expression.Block(parameters, forwardExpressionList);
+                    forwardLambda = Expression.Lambda<Action>(forwardExpression).Compile();
                 }
                 return forwardLambda;
             }

@@ -9,25 +9,33 @@ namespace SharpGrad.DifEngine
     {
         private static int InstanceCount = 0;
 
-        private readonly Expression expression;
-
         public new TType Data { get => data; set => data = value; }
 
         public Variable(TType data, string name, params Value<TType>[] childs)
             : base(name, childs)
         {
             base.data = data;
-            expression = Expression.Field(Expression.Constant(this), nameof(data));
         }
 
         public Variable(string name, params Value<TType>[] childs) :
             this(TType.Zero, name, childs)
         { }
 
-        public override Expression GenerateForwardExpression(Dictionary<Value<TType>, Expression> variableExpressions)
-            => expression;
+        //public override Expression GenerateForwardExpression_old(Dictionary<Value<TType>, Expression> variableExpressions)
+        //    => expression;
+        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand)
+        {
+            if (!variableExpressions.TryGetValue(this, out operand))
+            {
+                operand = Expression.Variable(typeof(TType), Name);
+                variableExpressions[this] = operand;
+                forwardExpressionList.Add(Expression.Assign(operand, Expression.Field(Expression.Constant(this), nameof(data))));
+            }
+            return true;
+        }
 
         public static implicit operator Variable<TType>(TType d)
             => new(d, $"var{InstanceCount++}");
+
     }
 }
