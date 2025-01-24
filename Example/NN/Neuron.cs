@@ -33,6 +33,7 @@ namespace SharpGrad
                 sum += X[i] * Weights[i];
             }
             sum += Biai;
+
             return ActFunc ? sum.ReLU() : sum;
         }
     }

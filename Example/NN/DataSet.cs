@@ -35,7 +35,7 @@ namespace SharpGrad.NN
         private static readonly string UpperRow = "╔" + new string('═', N) + "╗";
         private static readonly string LowerRow = "╚" + new string('═', N) + "╝";
 
-        public static int[,] GetMat(List<Data> v)
+        public static int[,] GetMat(IReadOnlyList<Data> v)
         {
             int[,] mat = new int[N, N];
             for (int i = 0; i < v.Count; i++)
@@ -43,7 +43,7 @@ namespace SharpGrad.NN
             return mat;
         }
 
-        public static void Scatter(List<Data> x, List<Data> y)
+        public static void Scatter(IReadOnlyList<Data> x, IReadOnlyList<Data> y)
         {
             int[,] matX = GetMat(x);
             int[,] matY = GetMat(y);

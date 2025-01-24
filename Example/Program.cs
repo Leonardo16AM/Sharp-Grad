@@ -1,60 +1,294 @@
-﻿
-using SharpGrad;
+﻿using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
+using System.Diagnostics;
 
 internal class Program
 {
-    
+    public static Random Rnd = new();
+    #region TEST
+    // TEST START
+    public static void Add()
+    {
+        Variable<float> a = new(1.5f, "a");
+        Variable<float> b = new(2.0f, "b");
+        var c = a + b;
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        Debug.Assert(c.Data == 3.5f);
+
+        a.Data = 2.0f;
+        b.Data = 3.0f;
+        cFunc();
+        Debug.Assert(c.Data == 5.0f);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            var bData = (float)Rnd.NextDouble();
+            b.Data = bData;
+            cFunc();
+            Debug.Assert(c.Data == aData + bData);
+        }
+    }
+
+    public static void Sub()
+    {
+        Variable<float> a = new(1.5f, "a");
+        Variable<float> b = new(2.0f, "b");
+        var c = a - b;
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        Debug.Assert(c.Data == -0.5f);
+
+        a.Data = 2.0f;
+        b.Data = 3.0f;
+        cFunc();
+        Debug.Assert(c.Data == -1.0f);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            var bData = (float)Rnd.NextDouble();
+            b.Data = bData;
+            cFunc();
+            Debug.Assert(c.Data == aData - bData);
+        }
+    }
+
+    public static void Mul()
+    {
+        Variable<float> a = new(1.5f, "a");
+        Variable<float> b = new(2.0f, "b");
+        var c = a * b;
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        Debug.Assert(c.Data == 3.0f);
+
+        a.Data = 2.0f;
+        b.Data = 3.0f;
+        cFunc();
+        Debug.Assert(c.Data == 6.0f);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            var bData = (float)Rnd.NextDouble();
+            b.Data = bData;
+            cFunc();
+            Debug.Assert(c.Data == aData * bData);
+        }
+    }
+
+    public static void Div()
+    {
+        Variable<float> a = new(1.5f, "a");
+        Variable<float> b = new(2.0f, "b");
+        var c = a / b;
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        Debug.Assert(c.Data == 0.75f);
+
+        a.Data = 2.0f;
+        b.Data = 3.0f;
+        cFunc();
+        Debug.Assert(c.Data == 2.0f / 3.0f);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            var bData = (float)Rnd.NextDouble();
+            b.Data = bData;
+            cFunc();
+            Debug.Assert(c.Data == aData / bData);
+        }
+    }
+
+    public static void Pow()
+    {
+        Variable<float> a = new(1.5f, "a");
+        Variable<float> b = new(2.0f, "b");
+        var c = a.Pow(b);
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        Debug.Assert(c.Data == Math.Pow(1.5, 2.0));
+
+        a.Data = 2.0f;
+        b.Data = 3.0f;
+        cFunc();
+        Debug.Assert(c.Data == Math.Pow(2.0, 3.0));
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            var bData = (float)Rnd.NextDouble();
+            b.Data = bData;
+            cFunc();
+            var r = (float)Math.Pow(aData, bData);
+            Debug.Assert(c.Data == r);
+        }
+    }
+
+    public static void Sigmoid()
+    {
+        Variable<float> a = new(1.5f, "a");
+        var c = a.Sigmoid();
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        var r = 1.0f / (1.0f + (float)Math.Exp(-1.5f));
+        Debug.Assert(c.Data == r);
+
+        a.Data = 2.0f;
+        cFunc();
+        r = 1.0f / (1.0f + (float)Math.Exp(-2.0f));
+        Debug.Assert(c.Data == r);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            cFunc();
+            r = 1.0f / (1.0f + (float)Math.Exp(-aData));
+            Debug.Assert(c.Data == r);
+        }
+    }
+
+    public static void Tanh()
+    {
+        Variable<float> a = new(1.5f, "a");
+        var c = a.Tanh();
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        var r = (float)Math.Tanh(1.5f);
+        Debug.Assert(c.Data == r);
+
+        a.Data = 2.0f;
+        cFunc();
+        r = (float)Math.Tanh(2.0f);
+        Debug.Assert(c.Data == r);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            cFunc();
+            r = (float)Math.Tanh(aData);
+            Debug.Assert(c.Data == r);
+        }
+    }
+
+    public static void ReLU()
+    {
+        Variable<float> a = new(1.5f, "a");
+        var c = a.ReLU();
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        var r = (float)Math.Max(0, 1.5f);
+        Debug.Assert(c.Data == r);
+
+        a.Data = -2.0f;
+        cFunc();
+        r = (float)Math.Max(0, -2.0f);
+        Debug.Assert(c.Data == r);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            cFunc();
+            r = (float)Math.Max(0, aData);
+            Debug.Assert(c.Data == r);
+        }
+    }
+
+    public static void LeakyReLU()
+    {
+        Variable<float> a = new(1.5f, "a");
+        var c = a.LeakyReLU(0.1f);
+        var cFunc = c.ForwardLambda;
+        cFunc();
+        var r = Math.Max(0.1f * 1.5f, 1.5f);
+        Debug.Assert(c.Data == r);
+
+        a.Data = -2.0f;
+        cFunc();
+        r = Math.Max(0.1f * -2.0f, -2.0f);
+        Debug.Assert(c.Data == r);
+
+        for (int i = 0; i < 10; i++)
+        {
+            var aData = (float)Rnd.NextDouble();
+            a.Data = aData;
+            cFunc();
+            r = Math.Max(0.1f * aData, aData);
+            Debug.Assert(c.Data == r);
+        }
+    }
+
+    // END TEST
+    #endregion
 
     private static void Main(string[] args)
     {
+        //// TEST /////
+        //Add();
+        //Sub();
+        //Mul();
+        //Div();
+        //Pow();
+        //Sigmoid();
+        //Tanh();
+        //ReLU();
+        //LeakyReLU();
+        ///////////////////
+
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
-        var v = DataSet.GetDataSet(400);
+        var v = DataSet.GetDataSet(300);
 
         MLP<float> cerebrin = new(2, 8, 1);
 
         int epochs = 1000;
-        float lr = 1e-9f;
+        float lr = 1e-3f;
+
+        DataSet.Data[] preds = new DataSet.Data[v.Count];
+
+        Variable<float>[][] X = new Variable<float>[v.Count][];
+        Variable<float>[][] Ygt = new Variable<float>[v.Count][];
+        Value<float>[][] Y = new Value<float>[v.Count][];
+        Value<float>? loss = null;
+        for (int i = 0; i < v.Count; i++)
+        {
+            X[i] = [v[i].X[0], v[i].X[1]];
+            Ygt[i] = [v[i].Y[0]];
+            Y[i] = cerebrin.Forward(X[i]);
+            if (loss is null)
+                loss = Loss.MSE(Y[i], Ygt[i]) / v.Count;
+            else
+                loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
+        }
 
         float lastLoss = float.MaxValue;
-
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-            Variable<float> loss = Variable<float>.Zero;
-            List<DataSet.Data> preds = [];
 
-            for (int j = 0; j < v.Count; j++)
+            loss!.ForwardLambda();
+            loss.Backpropagate(1);
+
+            for (int j = 0; j < Y.Length; j++)
             {
-                Variable<float>[] X = [
-                    new Variable<float>(v[j].X[0], "X0"), 
-                    new Variable<float>(v[j].X[1], "X1")
-                ];
-                Value<float>[] Y = cerebrin.Forward(X);
-                Variable<float>[] Ygt =
-                [
-                    v[j].Y[0]
-                ];
-                var nl = loss + Loss.MSE(Y, Ygt);
-                loss = nl;
-
-                int val;
-                if (Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2))
-                {
-                    val = 1;
-                }
-                else
-                {
-                    val = 2;
-                }
-                DataSet.Data nd = new(v[j].X, [val]);
-                preds.Add(nd);
+                int val = Math.Abs(Y[j][0].Data - 1) < Math.Abs(Y[j][0].Data - 2) ? 1 : 2;
+                preds[j] = new(v[j].X, [val]);
             }
 
-            loss.Backpropagate();
             cerebrin.Step(lr);
+            loss.ResetGradient();
 
             Console.WriteLine("Loss: " + loss.Data);
             DataSet.Scatter(v, preds);
@@ -64,11 +298,11 @@ internal class Program
             }
             else
             {
-                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                Console.WriteLine("Final loss: " + loss.Data);
-                Console.WriteLine("Last epoch: " + i);
-                Console.WriteLine("Loss is increasing. Stopping training...");
-                break;
+                //Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
+                //Console.WriteLine("Final loss: " + l);
+                //Console.WriteLine("Last epoch: " + i);
+                //Console.WriteLine("Loss is increasing. Stopping training...");
+                //break;
             }
         }
     }

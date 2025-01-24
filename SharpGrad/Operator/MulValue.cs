@@ -1,4 +1,6 @@
 ﻿using SharpGrad.DifEngine;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operators
@@ -7,14 +9,18 @@ namespace SharpGrad.Operators
         where TType : INumber<TType>
     {
         public MulValue(Value<TType> left, Value<TType> right)
-            : base(left.Data * right.Data, "*", left, right)
+            : base("*", left, right)
         {
         }
 
-        protected override void Backward()
+        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+            => Expression.Multiply(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
+
+        protected override void Backward(TType accCount)
         {
-            LeftOperand!.Grad += Grad * RightOperand!.Data;
-            RightOperand.Grad += Grad * LeftOperand.Data;
+            LeftOperand!.Grad += Grad * RightOperand!.Data / accCount;
+            RightOperand.Grad += Grad * LeftOperand.Data / accCount;
         }
+
     }
 }

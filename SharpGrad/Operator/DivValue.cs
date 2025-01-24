@@ -1,4 +1,6 @@
 ﻿using SharpGrad.DifEngine;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operators
@@ -7,15 +9,19 @@ namespace SharpGrad.Operators
         where TType : INumber<TType>
     {
         public DivValue(Value<TType> left, Value<TType> right)
-            : base(left.Data / right.Data, "/", left, right)
-        {
-        }
+            : base("/", left, right)
+        { }
+
+
+        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+            => Expression.Divide(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
         // TODO: Is this a good way to backpropagate division?
-        protected override void Backward()
+        protected override void Backward(TType accCount)
         {
-            LeftOperand.Grad += Grad / RightOperand.Data;
-            RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data);
+            LeftOperand.Grad += Grad / RightOperand.Data / accCount;
+            RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data) / accCount;
         }
+
     }
 }
