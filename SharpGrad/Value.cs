@@ -85,22 +85,8 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        protected virtual void Backward(TType accCount) { }
-
-        public void Backpropagate(int accCount = 1)
-        {
-            Grad = TType.One;
-            List<Value<TType>> TopOSort = [];
-            HashSet<Value<TType>> Visited = [];
-            DFS(TopOSort, Visited);
-            TType accC = TType.CreateSaturating(accCount);
-            for (int i = TopOSort.Count - 1; i >= 0; i--)
-            {
-                TopOSort[i].Backward(accC);
-            }
-        }
-
-        void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
+        internal virtual void Backward(TType accCount) { }
+        protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
             Visited.Add(this);
             foreach (var child in Childrens)

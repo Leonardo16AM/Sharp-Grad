@@ -45,5 +45,20 @@ namespace SharpGrad.Operator
             }
             return true;
         }
+
+        public void Backpropagate(int accCount = 1)
+        {
+            Grad = TType.One;
+            List<Value<TType>> TopOSort = [];
+            HashSet<Value<TType>> Visited = [];
+            DFS(TopOSort, Visited);
+            TType accC = TType.CreateSaturating(accCount);
+            for (int i = TopOSort.Count - 1; i >= 0; i--)
+            {
+                TopOSort[i].Backward(accC);
+            }
+        }
+
+
     }
 }

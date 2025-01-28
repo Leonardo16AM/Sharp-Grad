@@ -28,7 +28,7 @@ namespace SharpGrad.Activation
                 Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), Expressions.Zero),
                 Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions)),
                 Operand.GetAsOperand(variableExpressions));
-        protected override void Backward(TType accCount)
+        internal override void Backward(TType accCount)
         {
             if (Grad > TType.Zero)
                 Operand.Grad += Grad / accCount;

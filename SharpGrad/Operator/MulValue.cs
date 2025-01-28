@@ -16,7 +16,7 @@ namespace SharpGrad.Operators
         protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Multiply(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
-        protected override void Backward(TType accCount)
+        internal override void Backward(TType accCount)
         {
             LeftOperand!.Grad += Grad * RightOperand!.Data / accCount;
             RightOperand.Grad += Grad * LeftOperand.Data / accCount;

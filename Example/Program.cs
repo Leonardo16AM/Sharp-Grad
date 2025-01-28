@@ -1,6 +1,7 @@
 ﻿using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
+using SharpGrad.Operator;
 using System.Diagnostics;
 
 internal class Program
@@ -260,7 +261,7 @@ internal class Program
         Variable<float>[][] X = new Variable<float>[v.Count][];
         Variable<float>[][] Ygt = new Variable<float>[v.Count][];
         Value<float>[][] Y = new Value<float>[v.Count][];
-        Value<float>? loss = null;
+        NariOpValue<float>? loss = null;
         for (int i = 0; i < v.Count; i++)
         {
             X[i] = [v[i].X[0], v[i].X[1]];

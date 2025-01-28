@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.Operator;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,10 +10,10 @@ namespace SharpGrad.NN
 {
     public static partial class Loss
     {
-        public static Value<TType> MSE<TType>(Value<TType>[] Y, Value<TType>[] Y_hat)
+        public static NariOpValue<TType> MSE<TType>(Value<TType>[] Y, Value<TType>[] Y_hat)
             where TType : INumber<TType>
         {
-            Value<TType> loss = Y[0] - Y_hat[0];
+            NariOpValue<TType> loss = Y[0] - Y_hat[0];
             loss *= loss;
             for (int i = 1; i < Y.Length; i++)
             {
