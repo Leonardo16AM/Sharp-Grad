@@ -280,7 +280,7 @@ internal class Program
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
 
             loss!.ForwardLambda();
-            loss.Backpropagate(1);
+            loss.Backpropagate();
 
             for (int j = 0; j < Y.Length; j++)
             {

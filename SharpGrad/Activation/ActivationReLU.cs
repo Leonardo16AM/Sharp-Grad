@@ -19,10 +19,10 @@ namespace SharpGrad.Activation
                 Expressions.Zero,
                 Operand.GetAsOperand(variableExpressions));
 
-        protected override void Backward(TType accCount)
+        protected override void Backward()
         {
             if (Grad > TType.Zero)
-                Operand.Grad += Grad / accCount;
+                Operand.Grad += Grad;
         }
 
     }

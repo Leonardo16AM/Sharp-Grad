@@ -17,10 +17,10 @@ namespace SharpGrad.Activation
         protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Call(typeof(TType), nameof(TType.Tanh), null, Operand.GetAsOperand(variableExpressions));
 
-        protected override void Backward(TType accCount)
+        protected override void Backward()
         {
             var tanh = data;
-            Operand!.Grad += Grad * (TType.One - tanh * tanh) / accCount;
+            Operand!.Grad += Grad * (TType.One - tanh * tanh);
         }
 
     }
