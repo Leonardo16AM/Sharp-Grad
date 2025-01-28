@@ -19,7 +19,7 @@ namespace SharpGrad.Operators
             => Expression.Add(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
 
-        internal override void Backward(TType accCount)
+        protected override void Backward(TType accCount)
         {
             LeftOperand.Grad += Grad / accCount;
             RightOperand.Grad += Grad / accCount;

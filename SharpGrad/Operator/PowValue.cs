@@ -16,7 +16,7 @@ namespace SharpGrad.Operators
                 RightOperand.GetAsOperand(variableExpressions));
 
 
-        internal override void Backward(TType accCount)
+        protected override void Backward(TType accCount)
         {
             LeftOperand.Grad += Grad * RightOperand.Data * TType.Pow(LeftOperand.Data, RightOperand.Data - TType.One) / accCount;
             RightOperand.Grad += Grad * TType.Pow(LeftOperand.Data, RightOperand.Data) * TType.Log(LeftOperand.Data) / accCount;

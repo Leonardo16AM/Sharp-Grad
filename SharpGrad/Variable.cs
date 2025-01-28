@@ -21,8 +21,6 @@ namespace SharpGrad.DifEngine
             this(TType.Zero, name, childs)
         { }
 
-        //public override Expression GenerateForwardExpression_old(Dictionary<Value<TType>, Expression> variableExpressions)
-        //    => expression;
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand)
         {
             if (!variableExpressions.TryGetValue(this, out operand))

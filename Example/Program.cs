@@ -254,7 +254,7 @@ internal class Program
         MLP<float> cerebrin = new(2, 8, 1);
 
         int epochs = 1000;
-        float lr = 1e-3f;
+        float lr = 1e-4f;
 
         DataSet.Data[] preds = new DataSet.Data[v.Count];
 

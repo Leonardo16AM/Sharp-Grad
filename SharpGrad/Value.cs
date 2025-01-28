@@ -85,18 +85,6 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        internal virtual void Backward(TType accCount) { }
-        protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
-        {
-            Visited.Add(this);
-            foreach (var child in Childrens)
-            {
-                if (!Visited.Contains(child))
-                    child.DFS(TopOSort, Visited);
-            }
-            TopOSort.Add(this);
-        }
-
         public override string ToString()
         {
             return Name;

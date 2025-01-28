@@ -16,7 +16,7 @@ namespace SharpGrad.Activation
         protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Divide(Expressions.One, Expression.Add(Expressions.One, Expression.Call(typeof(TType).GetMethod("Exp")!, Expression.Negate(Operand.GetAsOperand(variableExpressions)))));
 
-        internal override void Backward(TType accCount)
+        protected override void Backward(TType accCount)
         {
             var sigmoid = data;
             Operand.Grad += Grad * sigmoid * (TType.One - sigmoid) / accCount;

@@ -17,7 +17,7 @@ namespace SharpGrad.Operators
             => Expression.Divide(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
         // TODO: Is this a good way to backpropagate division?
-        internal override void Backward(TType accCount)
+        protected override void Backward(TType accCount)
         {
             LeftOperand.Grad += Grad / RightOperand.Data / accCount;
             RightOperand.Grad += Grad * LeftOperand.Data / (RightOperand.Data * RightOperand.Data) / accCount;
