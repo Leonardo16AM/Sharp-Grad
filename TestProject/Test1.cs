@@ -10,7 +10,7 @@ namespace TestProject
 
         public static Random Rnd = new();
         [TestMethod]
-        public static void Add()
+        public void Add()
         {
             Variable<float> a = new(1.5f, "a");
             Variable<float> b = new(2.0f, "b");
@@ -36,7 +36,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Sub()
+        public void Sub()
         {
             Variable<float> a = new(1.5f, "a");
             Variable<float> b = new(2.0f, "b");
@@ -62,7 +62,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Mul()
+        public void Mul()
         {
             Variable<float> a = new(1.5f, "a");
             Variable<float> b = new(2.0f, "b");
@@ -88,7 +88,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Div()
+        public void Div()
         {
             Variable<float> a = new(1.5f, "a");
             Variable<float> b = new(2.0f, "b");
@@ -114,7 +114,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Pow()
+        public void Pow()
         {
             Variable<float> a = new(1.5f, "a");
             Variable<float> b = new(2.0f, "b");
@@ -141,7 +141,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Sigmoid()
+        public void Sigmoid()
         {
             Variable<float> a = new(1.5f, "a");
             var c = a.Sigmoid();
@@ -166,7 +166,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void Tanh()
+        public void Tanh()
         {
             Variable<float> a = new(1.5f, "a");
             var c = a.Tanh();
@@ -191,7 +191,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void ReLU()
+        public void ReLU()
         {
             Variable<float> a = new(1.5f, "a");
             var c = a.ReLU();
@@ -216,7 +216,7 @@ namespace TestProject
         }
 
         [TestMethod]
-        public static void LeakyReLU()
+        public void LeakyReLU()
         {
             Variable<float> a = new(1.5f, "a");
             var c = a.LeakyReLU(0.1f);
