@@ -134,6 +134,39 @@ namespace SharpGrad.Operator
             }
         }
 
+
+        public static List<Expression> BuildBackwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Value<TType>> topOSort)
+        {
+            List<Expression> backwardExpressionList = [];
+            for (int i = topOSort.Count - 1; i >= 0; i--)
+            {
+                Value<TType> e = topOSort[i];
+                if (e is Constant<TType> c)
+                {
+                    continue;
+                }
+                else if (e is Variable<TType> v)
+                {
+                    // This is the last use of the variable.
+                    // Save the gradient to Grad field.
+                    Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
+                    backwardExpressionList.Add(Expression.Assign(gradField, gradientExpressions[v]));
+                }
+                else if (topOSort[i] is NariOpValue<TType> n)
+                {
+                    for (int j = 0; j < n.ChildrensCompute.Length; j++)
+                    {
+                        n.ChildrensCompute[j](variableExpressions, gradientExpressions, backwardExpressionList);
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown type");
+                }
+            }
+            return backwardExpressionList;
+        }
+
         private Action? backwardLambda;
         public Action BackwardLambda
         {
@@ -141,51 +174,29 @@ namespace SharpGrad.Operator
             {
                 if (backwardLambda is null)
                 {
-                    _ = ForwardLambda;
-                    gradientExpressions.Clear();
                     Grad = TType.One;
+                    gradientExpressions.Clear();
+                    List<Expression> backwardExpressionList = [];
                     gradientExpressions.Add(this, Expression.Constant(TType.One));
                     if (topOSort is null)
                     {
                         topOSort = [];
                         DFS(topOSort, []);
+                        _ = ForwardLambda;
                     }
-                    List<Expression> backwardExpressionList = [];
-                    // Load data
-                    foreach (var e in variableExpressions)
+                    else
                     {
-                        if (e.Value is ParameterExpression parameter)
+                        // Load data
+                        foreach (var e in variableExpressions)
                         {
-                            backwardExpressionList.Add(Expression.Assign(parameter, Expression.Field(Expression.Constant(e.Key), nameof(data))));
+                            if (e.Value is ParameterExpression parameter)
+                            {
+                                backwardExpressionList.Add(Expression.Assign(parameter, Expression.Field(Expression.Constant(e.Key), nameof(data))));
+                            }
                         }
                     }
 
-                    for (int i = topOSort.Count - 1; i >= 0; i--)
-                    {
-                        Value<TType> e = topOSort[i];
-                        if (e is Constant<TType> c)
-                        {
-                            continue;
-                        }
-                        else if (e is Variable<TType> v)
-                        {
-                            // This is the last use of the variable.
-                            // Save the gradient to Grad field.
-                            Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
-                            backwardExpressionList.Add(Expression.Assign(gradField, gradientExpressions[v]));
-                        }
-                        else if (topOSort[i] is NariOpValue<TType> n)
-                        {
-                            for (int j = 0; j < n.ChildrensCompute.Length; j++)
-                            {
-                                n.ChildrensCompute[j](variableExpressions, gradientExpressions, backwardExpressionList);
-                            }
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Unknown type");
-                        }
-                    }
+                    backwardExpressionList.AddRange(BuildBackwardExpressionList(variableExpressions, gradientExpressions, topOSort));
 
                     // Build block and compile Expression
                     Expression backwardExpression = Expression.Block(variableExpressions.Values.Union(gradientExpressions.Values).OfType<ParameterExpression>(), backwardExpressionList);
