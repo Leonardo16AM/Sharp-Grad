@@ -1,4 +1,3 @@
-using SharpGrad;
 using SharpGrad.DifEngine;
 using System.Numerics;
 
