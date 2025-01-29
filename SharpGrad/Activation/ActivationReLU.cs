@@ -11,19 +11,29 @@ namespace SharpGrad.Activation
     {
         public ActivationReLU(Value<TType> value)
             : base("relu", value)
-        {
-        }
-        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+        { }
+
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), Expressions.Zero),
-                Expressions.Zero,
+                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), ExpressionZero),
+                ExpressionZero,
                 Operand.GetAsOperand(variableExpressions));
 
         protected override void Backward()
         {
-            if (Grad > TType.Zero)
+            if (Data > TType.Zero)
                 Operand.Grad += Grad;
         }
 
+        protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        {
+            Expression grad = gradientExpressions[this];
+            Expression relu = variableExpressions[this];
+            Expression gr = Expression.Condition(
+                Expression.LessThanOrEqual(relu, Expression.Constant(TType.Zero)),
+                Expression.Constant(TType.Zero),
+                grad);
+            AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
+        }
     }
 }

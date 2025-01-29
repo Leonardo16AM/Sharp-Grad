@@ -11,19 +11,20 @@ namespace SharpGrad.Operators
     {
         public AddValue(Value<TType> left, Value<TType> right)
             : base("+", left, right)
-        {
-        }
+        { }
 
 
-        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Add(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
 
-
-        protected override void Backward()
+        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            LeftOperand.Grad += Grad;
-            RightOperand.Grad += Grad;
+            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gradientExpressions[this]);
         }
 
+        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        {
+            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, gradientExpressions[this]);
+        }
     }
 }

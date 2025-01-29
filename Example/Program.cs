@@ -249,7 +249,7 @@ internal class Program
         ///////////////////
 
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
-        var v = DataSet.GetDataSet(300);
+        var v = DataSet.GetDataSet(400);
 
         MLP<float> cerebrin = new(2, 8, 1);
 
@@ -273,14 +273,17 @@ internal class Program
                 loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
         }
 
+        if(loss is null)
+            throw new Exception("No loss function defined.");
+
         float lastLoss = float.MaxValue;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
 
-            loss!.ForwardLambda();
-            loss.Backpropagate();
+            loss.ForwardLambda();
+            loss.BackwardLambda();
 
             for (int j = 0; j < Y.Length; j++)
             {
@@ -299,11 +302,11 @@ internal class Program
             }
             else
             {
-                //Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                //Console.WriteLine("Final loss: " + l);
-                //Console.WriteLine("Last epoch: " + i);
-                //Console.WriteLine("Loss is increasing. Stopping training...");
-                //break;
+                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
+                Console.WriteLine("Final loss: " + loss.Data);
+                Console.WriteLine("Last epoch: " + i);
+                Console.WriteLine("Loss is increasing. Stopping training...");
+                break;
             }
         }
     }

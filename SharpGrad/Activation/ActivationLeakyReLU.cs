@@ -19,13 +19,11 @@ namespace SharpGrad.Activation
 
         public ActivationLeakyReLU(Value<TType> value, TType alpha)
             : base("leaky_relu", value)
-        {
-            _alpha = alpha;
-        }
+        { }
 
-        protected override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), Expressions.Zero),
+                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), ExpressionZero),
                 Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions)),
                 Operand.GetAsOperand(variableExpressions));
 
@@ -35,6 +33,17 @@ namespace SharpGrad.Activation
                 Operand.Grad += Grad;
             else
                 Operand.Grad += Grad * _alpha;
+        }
+
+        protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        {
+            Expression grad = gradientExpressions[this];
+            Expression relu = variableExpressions[this];
+            Expression gr = Expression.Condition(
+                Expression.LessThanOrEqual(relu, Expression.Constant(TType.Zero)),
+                Expression.Multiply(Expression.Constant(_alpha), grad),
+                grad);
+            AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
         }
     }
 }

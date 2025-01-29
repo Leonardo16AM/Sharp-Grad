@@ -11,6 +11,8 @@ namespace SharpGrad
         private static int InstanceCount = 0;
 
         private readonly Expression expression;
+        internal Expression Expression => expression;
+
         public Constant(TType data, string name, params Value<TType>[] childs)
             : base(name, childs)
         {
