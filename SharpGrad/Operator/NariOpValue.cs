@@ -60,6 +60,54 @@ namespace SharpGrad.Operator
         private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
+        public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, List<Value<TType>> topOSort)
+        {
+            List<Expression> forwardExpressionList = [];
+
+            for (int i = 0; i < topOSort.Count; i++)
+            {
+                Value<TType> e = topOSort[i];
+                Debug.Assert(!variableExpressions.ContainsKey(e));
+                if (e is Constant<TType> c)
+                {
+                    variableExpressions[c] = c.Expression;
+                }
+                else if (e is Variable<TType> v)
+                {
+                    Expression expression = Expression.Variable(typeof(TType), v.Name);
+                    variableExpressions[v] = expression;
+                    forwardExpressionList.Add(Expression.Assign(expression, Expression.Field(Expression.Constant(v), nameof(data))));
+                }
+                else if (topOSort[i] is NariOpValue<TType> n)
+                {
+                    Expression expression = Expression.Variable(typeof(TType), n.Name);
+                    variableExpressions[n] = expression;
+                    forwardExpressionList.Add(Expression.Assign(expression, n.GetForwardComputation(variableExpressions)));
+                }
+                else
+                {
+                    throw new InvalidOperationException("Unknown type");
+                }
+            }
+
+            return forwardExpressionList;
+        }
+
+        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList)
+        {
+            List<ParameterExpression> parameters = [];
+
+            foreach (var e in variableExpressions)
+            {
+                if (e.Value is ParameterExpression parameter)
+                {
+                    forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
+                    parameters.Add(parameter);
+                }
+            }
+
+            return parameters;
+        }
 
         private Action? forwardLambda;
         public Action ForwardLambda
@@ -73,44 +121,10 @@ namespace SharpGrad.Operator
                         topOSort = [];
                         DFS(topOSort, []);
                     }
-                    List<Expression> forwardExpressionList = [];
-
-                    for (int i = 0; i < topOSort.Count; i++)
-                    {
-                        Value<TType> e = topOSort[i];
-                        Debug.Assert(!variableExpressions.ContainsKey(e));
-                        if (e is Constant<TType> c)
-                        {
-                            variableExpressions[c] = c.Expression;
-                        }
-                        else if (e is Variable<TType> v)
-                        {
-                            Expression expression = Expression.Variable(typeof(TType), v.Name);
-                            variableExpressions[v] = expression;
-                            forwardExpressionList.Add(Expression.Assign(expression, Expression.Field(Expression.Constant(v), nameof(data))));
-                        }
-                        else if (topOSort[i] is NariOpValue<TType> n)
-                        {
-                            Expression expression = Expression.Variable(typeof(TType), n.Name);
-                            variableExpressions[n] = expression;
-                            forwardExpressionList.Add(Expression.Assign(expression, n.GetForwardComputation(variableExpressions)));
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Unknown type");
-                        }
-                    }
+                    List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, topOSort);
 
                     // Backup all parameters to data
-                    List<ParameterExpression> parameters = [];
-                    foreach (var e in variableExpressions)
-                    {
-                        if (e.Value is ParameterExpression parameter)
-                        {
-                            forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
-                            parameters.Add(parameter);
-                        }
-                    }
+                    List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList);
 
                     // Build block and compile Expression
                     Expression forwardExpression = Expression.Block(parameters, forwardExpressionList);
