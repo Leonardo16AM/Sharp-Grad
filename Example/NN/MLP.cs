@@ -44,15 +44,7 @@ namespace SharpGrad.NN
         {
             foreach (Layer<TType> l in Layers)
             {
-                foreach (Neuron<TType> n in l.Neurons)
-                {
-                    foreach (Variable<TType> w in n.Weights)
-                    {
-                        // Console.WriteLine(w.data);
-                        w.Data -= lr * w.Grad;
-                    }
-                    n.Biai.Data -= lr * n.Biai.Grad;
-                }
+                l.Step(lr);
             }
         }
     }

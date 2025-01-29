@@ -36,5 +36,14 @@ namespace SharpGrad
 
             return ActFunc ? sum.ReLU() : sum;
         }
+
+        public void Step(TType lr)
+        {
+            foreach (Variable<TType> w in Weights)
+            {
+                // Console.WriteLine(w.data);
+                w.Data -= lr * w.Grad;
+            }
+        }
     }
 }
