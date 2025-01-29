@@ -258,9 +258,15 @@ internal class Program
 
         DataSet.Data[] preds = new DataSet.Data[v.Count];
 
+        // List of input data
         Variable<float>[][] X = new Variable<float>[v.Count][];
+        // List of ground truth data
         Variable<float>[][] Ygt = new Variable<float>[v.Count][];
+        // List of predicted data
         Value<float>[][] Y = new Value<float>[v.Count][];
+
+
+        // Build execution expression graph (no computation done here)
         NariOpValue<float>? loss = null;
         for (int i = 0; i < v.Count; i++)
         {
@@ -272,16 +278,17 @@ internal class Program
             else
                 loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
         }
-
         if(loss is null)
             throw new Exception("No loss function defined.");
 
+        // Training loop
         float lastLoss = float.MaxValue;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
 
+            // Forward and backward pass
             loss.ForwardLambda();
             loss.BackwardLambda();
 
