@@ -1,4 +1,5 @@
-﻿using SharpGrad.Operators;
+﻿using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -6,8 +7,14 @@ using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    public abstract class Value<TType> where TType : INumber<TType>
+    public abstract class Value<TType>
+        where TType : INumber<TType>
     {
+        /// <summary>
+        /// If true, this value is an output of the computation graph and should be saved back to its data field.
+        /// </summary>
+        public virtual bool IsOutput { get; set; } = false;
+
         public static readonly Expression ExpressionZero = Expression.Constant(TType.Zero);
         public static readonly Expression ExpressionOne = Expression.Constant(TType.One);
 
@@ -17,15 +24,13 @@ namespace SharpGrad.DifEngine
 
         public Value(string name, params Value<TType>[] childs)
         {
-            Childrens = childs;
+            Operands = childs;
             Name = name;
             data = TType.Zero;
-            DataExpression = Expression.Field(Expression.Constant(this), nameof(data));
         }
 
-        public readonly Value<TType>[] Childrens;
+        public readonly Value<TType>[] Operands;
         public readonly string Name;
-        protected readonly Expression DataExpression;
         protected TType data;
         public virtual TType Data => data;
 
@@ -35,7 +40,7 @@ namespace SharpGrad.DifEngine
         {
             if (Visited.Add(this))
             {
-                foreach (var child in Childrens)
+                foreach (var child in Operands)
                 {
                     child.DFS(TopOSort, Visited);
                 }
@@ -73,14 +78,14 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
 
         #region BASIC ARITHMETIC OPERATIONS
         public static AddValue<TType> Add(Value<TType> left, Value<TType> right) => new(left, right);
         public static AddValue<TType> operator +(Value<TType> left, Value<TType> right) => Add(left, right);
+
+        public static NegValue<TType> Neg(Value<TType> operand) => new(operand);
+        public static NegValue<TType> operator -(Value<TType> operand) => Neg(operand);
 
         public static SubValue<TType> Sub(Value<TType> left, Value<TType> right) => new(left, right);
         public static SubValue<TType> operator -(Value<TType> left, Value<TType> right) => Sub(left, right);
@@ -93,9 +98,9 @@ namespace SharpGrad.DifEngine
         public void ResetGradient()
         {
             Grad = TType.Zero;
-            if (Childrens.Length > 0)
+            if (Operands.Length > 0)
             {
-                foreach (var child in Childrens)
+                foreach (var child in Operands)
                 {
                     child.ResetGradient();
                 }

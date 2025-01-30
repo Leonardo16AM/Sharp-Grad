@@ -10,13 +10,13 @@ namespace SharpGrad.Operators
         NariOpValue<TType>
         where TType : INumber<TType>
     {
-        public Value<TType> LeftOperand => Childrens[0];
+        public Value<TType> LeftOperand => Operands[0];
         protected abstract void ComputeLeftGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList);
 
-        public Value<TType> RightOperand => Childrens[1];
+        public Value<TType> RightOperand => Operands[1];
         protected abstract void ComputeRightGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,

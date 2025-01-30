@@ -9,7 +9,7 @@ namespace SharpGrad.Operator
         NariOpValue<TType>
         where TType : INumber<TType>
     {
-        public Value<TType> Operand => Childrens[0];
+        public Value<TType> Operand => Operands[0];
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
 

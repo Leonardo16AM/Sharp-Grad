@@ -36,6 +36,7 @@ namespace SharpGrad.NN
             {
                 X = l.Forward(X);
             }
+            X.IsOutput(true);
             return X;
         }
 

@@ -1,4 +1,5 @@
-﻿using SharpGrad.Activation;
+﻿using SharpGrad;
+using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 using SharpGrad.Operator;
@@ -41,6 +42,8 @@ internal class Program
         }
         if(loss is null)
             throw new Exception("No loss function defined.");
+        else
+            loss.IsOutput = true;
 
         // Training loop
         float lastLoss = float.MaxValue;
@@ -50,7 +53,7 @@ internal class Program
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
 
             // Forward and backward pass
-            loss.ForwardLambda();
+            //loss.ForwardLambda();
             loss.BackwardLambda();
 
             for (int j = 0; j < Y.Length; j++)

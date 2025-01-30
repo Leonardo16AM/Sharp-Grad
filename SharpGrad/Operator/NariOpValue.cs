@@ -11,8 +11,6 @@ namespace SharpGrad.Operator
     public abstract class NariOpValue<TType> : Value<TType>
     where TType : INumber<TType>
     {
-        protected bool isComputed = false;
-
         public delegate void ComputeGradientDelegate(
             Dictionary<Value<TType>, Expression> VariableExpressions,
             Dictionary<Value<TType>, Expression> GradientExpressions,
@@ -45,9 +43,9 @@ namespace SharpGrad.Operator
         {
             if (!variableExpressions.TryGetValue(this, out operand))
             {
-                for (int i = 0; i < Childrens.Length; i++)
+                for (int i = 0; i < Operands.Length; i++)
                 {
-                    Childrens[i].BuildForward(variableExpressions, forwardExpressionList);
+                    Operands[i].BuildForward(variableExpressions, forwardExpressionList);
                 }
                 operand = Expression.Variable(typeof(TType), Name);
                 variableExpressions[this] = operand;
@@ -93,7 +91,7 @@ namespace SharpGrad.Operator
             return forwardExpressionList;
         }
 
-        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList)
+        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, bool all = true)
         {
             List<ParameterExpression> parameters = [];
 
@@ -101,8 +99,11 @@ namespace SharpGrad.Operator
             {
                 if (e.Value is ParameterExpression parameter)
                 {
-                    forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
-                    parameters.Add(parameter);
+                    if (all || e.Key.IsOutput)
+                    {
+                        forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
+                        parameters.Add(parameter);
+                    }
                 }
             }
 
@@ -182,7 +183,8 @@ namespace SharpGrad.Operator
                     {
                         topOSort = [];
                         DFS(topOSort, []);
-                        _ = ForwardLambda;
+                        backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, topOSort));
+                        SaveParameters(variableExpressions, backwardExpressionList, false);
                     }
                     else
                     {
