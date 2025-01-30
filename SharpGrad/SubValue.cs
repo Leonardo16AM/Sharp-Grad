@@ -7,8 +7,8 @@ namespace SharpGrad.DifEngine
     {
         protected override void Backward()
         {
-            LeftChildren.Grad += Grad;
-            RightChildren.Grad -= Grad;
+            LeftChildren!.Grad += Grad;
+            RightChildren!.Grad -= Grad;
         }
     }
 }

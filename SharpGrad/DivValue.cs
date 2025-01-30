@@ -13,7 +13,7 @@ namespace SharpGrad.DifEngine
         // TODO: Is this a good way to backpropagate division?
         protected override void Backward()
         {
-            LeftChildren.Grad += Grad / RightChildren.Data;
+            LeftChildren!.Grad += Grad / RightChildren!.Data;
             RightChildren.Grad += Grad * LeftChildren.Data / (RightChildren.Data * RightChildren.Data);
         }
     }

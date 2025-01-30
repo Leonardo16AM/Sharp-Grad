@@ -7,7 +7,8 @@ namespace SharpGrad.NN
     public class MLP<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public List<Layer<TType>> Layers;
+        //public List<Layer<TType>> Layers;
+        public Layer<TType>[] Layers;
         public int Inputs;
 
         /// <summary>
@@ -21,22 +22,20 @@ namespace SharpGrad.NN
             if (count.Length < 2)
                 throw new ArgumentException($"{nameof(count)} must have at least 2 elements. Got {count.Length}.");
 
-            Layers = new List<Layer<TType>>(count.Length - 1);
+            Layers = new Layer<TType>[count.Length - 1];
             Inputs = count[0];
-            Layers.Add(new Layer<TType>(count[1], Inputs, false));
+            Layers[0] = new Layer<TType>(count[1], Inputs, false);
             for (int i = 2; i < count.Length; i++)
             {
-                Layers.Add(new Layer<TType>(count[i], count[i - 1], true));
+                Layers[i - 1] = new Layer<TType>(count[i], count[i - 1], true);
             }
         }
 
-        public List<Value<TType>> Forward(List<Value<TType>> X)
+        public Value<TType>[] Forward(Value<TType>[] X)
         {
-            List<Value<TType>> Y;
             foreach (Layer<TType> l in Layers)
             {
-                Y = l.Forward(X);
-                X = Y;
+                X = l.Forward(X);
             }
             return X;
         }
