@@ -1,4 +1,3 @@
-using SharpGrad;
 using SharpGrad.DifEngine;
 using System.Numerics;
 
@@ -37,6 +36,7 @@ namespace SharpGrad.NN
             {
                 X = l.Forward(X);
             }
+            X.IsOutput(true);
             return X;
         }
 
@@ -44,15 +44,7 @@ namespace SharpGrad.NN
         {
             foreach (Layer<TType> l in Layers)
             {
-                foreach (Neuron<TType> n in l.Neurons)
-                {
-                    foreach (Value<TType> w in n.Weights)
-                    {
-                        // Console.WriteLine(w.data);
-                        w.Data -= lr * w.Grad;
-                    }
-                    n.Biai.Data -= lr * n.Biai.Grad;
-                }
+                l.Step(lr);
             }
         }
     }

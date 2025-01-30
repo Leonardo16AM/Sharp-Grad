@@ -1,111 +1,120 @@
+﻿using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
-    //TODO: Use class inheritance instead of switch-case
-    public class Value<TType>(TType data, string name, Value<TType>? leftChild = null, Value<TType>? rightChild = null)
-        where TType : IBinaryFloatingPointIeee754<TType>
+    public abstract class Value<TType>
+        where TType : INumber<TType>
     {
+        /// <summary>
+        /// If true, this value is an output of the computation graph and should be saved back to its data field.
+        /// </summary>
+        public virtual bool IsOutput { get; set; } = false;
+
+        public static readonly Expression ExpressionZero = Expression.Constant(TType.Zero);
+        public static readonly Expression ExpressionOne = Expression.Constant(TType.One);
+
         private static int InstanceCount = 0;
+        public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
+        public static readonly Variable<TType> Zero = new(TType.Zero, "0");
 
-        public static readonly Value<TType> e = new(TType.CreateSaturating(Math.E), "e");
-        public static readonly Value<TType> Zero = new(TType.Zero, "0");
+        public Value(string name, params Value<TType>[] childs)
+        {
+            Operands = childs;
+            Name = name;
+            data = TType.Zero;
+        }
 
-        public delegate void BackwardPass();
+        public readonly Value<TType>[] Operands;
+        public readonly string Name;
+        protected TType data;
+        public virtual TType Data => data;
 
         public TType Grad = TType.Zero;
-        public TType Data = data;
-        public readonly Value<TType>? LeftChildren = leftChild;
-        public readonly Value<TType>? RightChildren = rightChild;
-        public readonly string Name = name;
 
-
-        #region BASIC ARITHMETIC OPERATIONS
-        public static Value<TType> Add(Value<TType> left, Value<TType> right)
-            => new AddValue<TType>(left, right);
-        public static Value<TType> operator +(Value<TType> left, Value<TType> right)
-            => Add(left, right);
-
-        public static Value<TType> Sub(Value<TType> left, Value<TType> right)
-            => new SubValue<TType>(left, right);
-        public static Value<TType> operator -(Value<TType> left, Value<TType> right)
-            => Sub(left, right);
-        public static Value<TType> Sub(Value<TType> @this)
-            => new SubValue<TType>(Zero, @this);
-        public static Value<TType> operator -(Value<TType> @this)
-            => Sub(@this);
-
-
-        public static Value<TType> Mul(Value<TType> left, Value<TType> right)
-            => new MulValue<TType>(left, right);
-        public static Value<TType> operator *(Value<TType> left, Value<TType> right)
-            => Mul(left, right);
-
-        public static Value<TType> Div(Value<TType> left, Value<TType> right)
-            => new DivValue<TType>(left, right);
-        public static Value<TType> operator /(Value<TType> left, Value<TType> right)
-            => Div(left, right);
-
-
-        public static Value<TType> Pow(Value<TType> left, Value<TType> right)
-            => new PowValue<TType>(left, right);
-        public Value<TType> Pow(Value<TType> other)
-            => new PowValue<TType>(this, other);
-        #endregion
-
-        #region ACTIVATION FUNCTIONS
-
-        public Value<TType> ReLU()
-            => new ReLUValue<TType>(this);
-
-        public Value<TType> Tanh()
-            => new TanhValue<TType>(this);
-
-        public Value<TType> Sigmoid()
-            => new SigmoidValue<TType>(this);
-        
-        public Value<TType> LeakyReLU(TType alpha)
-            => new LeakyReLUValue<TType>(this,alpha);
-
-
-        #endregion
-
-        #region BACKPROPAGATION
-        protected virtual void Backward()
+        protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
-            if(LeftChildren != null)
-                LeftChildren.Grad += Grad;
-        }
-
-        void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
-        {
-            Visited.Add(this);
-            if (LeftChildren != null && !Visited.Contains(LeftChildren))
-                LeftChildren.DFS(TopOSort, Visited);
-            if (RightChildren != null && !Visited.Contains(RightChildren))
-                RightChildren.DFS(TopOSort, Visited);
-            TopOSort.Add(this);
-        }
-
-        public void Backpropagate()
-        {
-            Grad = TType.One;
-            List<Value<TType>> TopOSort = [];
-            HashSet<Value<TType>> Visited = [];
-            DFS(TopOSort, Visited);
-            for(int i = TopOSort.Count - 1; i >= 0; i--)
+            if (Visited.Add(this))
             {
-                TopOSort[i].Backward();
+                foreach (var child in Operands)
+                {
+                    child.DFS(TopOSort, Visited);
+                }
+                TopOSort.Add(this);
             }
         }
+
+        public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand);
+        public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList)
+            => _ = GetAsOperand(variableExpressions, forwardExpressionList, out var _);
+        public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions)
+        {
+            List<Expression> forwardExpressionList = [];
+            if (GetAsOperand(variableExpressions, forwardExpressionList, out var operand)
+                && forwardExpressionList.Count == 0)
+            {
+                return operand!;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Expression list should be empty. Found {forwardExpressionList.Count} expressions.");
+            }
+        }
+        protected void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> forwardExpressionList, Value<TType> LeftOperand, Expression gradientExpression)
+        {
+            if (!gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
+            {
+                leftGrad = Expression.Variable(typeof(TType), $"{LeftOperand.Name}_grad");
+                gradientExpressions[LeftOperand] = leftGrad;
+                forwardExpressionList.Add(Expression.Assign(leftGrad, gradientExpression));
+            }
+            else
+            {
+                forwardExpressionList.Add(Expression.AddAssign(leftGrad, gradientExpression));
+            }
+        }
+
+        public override string ToString() => Name;
+
+        #region BASIC ARITHMETIC OPERATIONS
+        public static AddValue<TType> Add(Value<TType> left, Value<TType> right) => new(left, right);
+        public static AddValue<TType> operator +(Value<TType> left, Value<TType> right) => Add(left, right);
+
+        public static NegValue<TType> Neg(Value<TType> operand) => new(operand);
+        public static NegValue<TType> operator -(Value<TType> operand) => Neg(operand);
+
+        public static SubValue<TType> Sub(Value<TType> left, Value<TType> right) => new(left, right);
+        public static SubValue<TType> operator -(Value<TType> left, Value<TType> right) => Sub(left, right);
+
+        public static MulValue<TType> Mul(Value<TType> left, Value<TType> right) => new(left, right);
+        public static MulValue<TType> operator *(Value<TType> left, Value<TType> right) => Mul(left, right);
+
+        public static DivValue<TType> Div(Value<TType> left, Value<TType> right) => new(left, right);
+
+        public void ResetGradient()
+        {
+            Grad = TType.Zero;
+            if (Operands.Length > 0)
+            {
+                foreach (var child in Operands)
+                {
+                    child.ResetGradient();
+                }
+            }
+        }
+
+        public static DivValue<TType> operator /(Value<TType> left, Value<TType> right) => Div(left, right);
         #endregion
 
         public static implicit operator Value<TType>(TType d)
-            => new(d, $"value_{++InstanceCount}");
+            => new Constant<TType>(d, $"v{InstanceCount++}");
+
         public static explicit operator TType(Value<TType> v)
-            => v.Data;
+            => v.data;
+
     }
 }

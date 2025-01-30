@@ -1,4 +1,5 @@
-﻿using SharpGrad.DifEngine;
+﻿using SharpGrad.Activation;
+using SharpGrad.DifEngine;
 using System.Numerics;
 
 namespace SharpGrad
@@ -8,14 +9,14 @@ namespace SharpGrad
     {
         public static readonly Random Rand = new();
 
-        public readonly Value<TType>[] Weights;
-        public readonly Value<TType> Biai;
+        public readonly Variable<TType>[] Weights;
+        public readonly Variable<TType> Biai;
         public readonly int Inputs;
         public readonly bool ActFunc;
 
         public Neuron(int inputs, bool act_func)
         {
-            Weights = new Value<TType>[inputs];
+            Weights = new Variable<TType>[inputs];
             Biai = new(TType.CreateSaturating(Rand.NextDouble()), "B");
             Inputs = inputs;
             ActFunc = act_func;
@@ -32,7 +33,17 @@ namespace SharpGrad
                 sum += X[i] * Weights[i];
             }
             sum += Biai;
+
             return ActFunc ? sum.ReLU() : sum;
+        }
+
+        public void Step(TType lr)
+        {
+            foreach (Variable<TType> w in Weights)
+            {
+                // Console.WriteLine(w.data);
+                w.Data -= lr * w.Grad;
+            }
         }
     }
 }

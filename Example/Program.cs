@@ -1,11 +1,12 @@
-﻿
-using SharpGrad;
+﻿using SharpGrad;
+using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
+using SharpGrad.Operator;
+using System.Diagnostics;
 
 internal class Program
 {
-    
 
     private static void Main(string[] args)
     {
@@ -15,46 +16,54 @@ internal class Program
         MLP<float> cerebrin = new(2, 8, 1);
 
         int epochs = 1000;
-        float lr = 1e-9f;
+        float lr = 1e-4f;
 
+        DataSet.Data[] preds = new DataSet.Data[v.Count];
+
+        // List of input data
+        Variable<float>[][] X = new Variable<float>[v.Count][];
+        // List of ground truth data
+        Variable<float>[][] Ygt = new Variable<float>[v.Count][];
+        // List of predicted data
+        Value<float>[][] Y = new Value<float>[v.Count][];
+
+
+        // Build execution expression graph (no computation done here)
+        NariOpValue<float>? loss = null;
+        for (int i = 0; i < v.Count; i++)
+        {
+            X[i] = [v[i].X[0], v[i].X[1]];
+            Ygt[i] = [v[i].Y[0]];
+            Y[i] = cerebrin.Forward(X[i]);
+            if (loss is null)
+                loss = Loss.MSE(Y[i], Ygt[i]) / v.Count;
+            else
+                loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
+        }
+        if(loss is null)
+            throw new Exception("No loss function defined.");
+        else
+            loss.IsOutput = true;
+
+        // Training loop
         float lastLoss = float.MaxValue;
-
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-            Value<float> loss = Value<float>.Zero;
-            List<DataSet.Data> preds = [];
 
-            for (int j = 0; j < v.Count; j++)
+            // Forward and backward pass
+            //loss.ForwardLambda();
+            loss.BackwardLambda();
+
+            for (int j = 0; j < Y.Length; j++)
             {
-                Value<float>[] X = [
-                    new Value<float>(v[j].X[0], "X0"), 
-                    new Value<float>(v[j].X[1], "X1")
-                ];
-                Value<float>[] Y = cerebrin.Forward(X);
-                Value<float>[] Ygt =
-                [
-                    v[j].Y[0]
-                ];
-                var nl = loss + Loss.MSE(Y, Ygt);
-                loss = nl;
-
-                int val;
-                if (Math.Abs(Y[0].Data - 1) < Math.Abs(Y[0].Data - 2))
-                {
-                    val = 1;
-                }
-                else
-                {
-                    val = 2;
-                }
-                DataSet.Data nd = new(v[j].X, [val]);
-                preds.Add(nd);
+                int val = Math.Abs(Y[j][0].Data - 1) < Math.Abs(Y[j][0].Data - 2) ? 1 : 2;
+                preds[j] = new(v[j].X, [val]);
             }
 
-            loss.Backpropagate();
             cerebrin.Step(lr);
+            loss.ResetGradient();
 
             Console.WriteLine("Loss: " + loss.Data);
             DataSet.Scatter(v, preds);
