@@ -27,14 +27,6 @@ namespace SharpGrad.Activation
                 Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions)),
                 Operand.GetAsOperand(variableExpressions));
 
-        protected override void Backward()
-        {
-            if (Grad > TType.Zero)
-                Operand.Grad += Grad;
-            else
-                Operand.Grad += Grad * _alpha;
-        }
-
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expression grad = gradientExpressions[this];
