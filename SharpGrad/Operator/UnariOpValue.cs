@@ -13,7 +13,7 @@ namespace SharpGrad.Operator
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public UnariOpValue(string name, Value<TType> child) : base(name, child)
+        public UnariOpValue(int shape, string name, Value<TType> child) : base(shape, name, child)
         {
             ChildrensCompute = [ComputeGradient];
         }

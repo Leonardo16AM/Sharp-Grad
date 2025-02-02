@@ -41,8 +41,11 @@ namespace SharpGrad
         {
             foreach (Variable<TType> w in Weights)
             {
-                // Console.WriteLine(w.data);
-                w.Data -= lr * w.Grad;
+                for(int i = 0; i < w.Data.Length; i++)
+                {
+                    // Console.WriteLine(w.data);
+                    w.Data[i] -= lr * w.Grad[i];
+                }
             }
         }
     }

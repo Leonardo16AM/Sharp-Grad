@@ -35,7 +35,10 @@ namespace SharpGrad.NN
             foreach (Neuron<TType> n in Neurons)
             {
                 n.Step(lr);
-                n.Biai.Data -= lr * n.Biai.Grad;
+                for(int i = 0; i< n.Biai.Data.Length; i++)
+                {
+                    n.Biai.Data[i] -= lr * n.Biai.Grad[i];
+                }
             }
         }
     }

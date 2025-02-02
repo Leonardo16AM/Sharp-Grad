@@ -9,8 +9,11 @@ namespace SharpGrad.Activation
     public class ActivationReLU<TType> : Activation<TType>
         where TType : INumber<TType>, IComparable<TType>
     {
+        public static int GetShape(Value<TType> value)
+            => value.Shape;
+
         public ActivationReLU(Value<TType> value)
-            : base("relu", value)
+            : base(GetShape(value), "relu", value)
         { }
 
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)

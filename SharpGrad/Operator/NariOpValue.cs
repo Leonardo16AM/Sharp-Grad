@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,7 +19,7 @@ namespace SharpGrad.Operator
 
         public abstract ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public override TType Data
+        public override TType[] Data
         {
             get
             {
@@ -31,8 +32,8 @@ namespace SharpGrad.Operator
             }
         }
 
-        public NariOpValue(string name, params Value<TType>[] childs)
-            : base(name, childs)
+        public NariOpValue(int shape, string name, params Value<TType>[] childs)
+            : base(shape, name, childs)
         {
             if (childs.Length < 1)
                 throw new ArgumentException($"Operator {name} must have at least one child.");
@@ -74,7 +75,10 @@ namespace SharpGrad.Operator
                 {
                     Expression expression = Expression.Variable(typeof(TType), v.Name);
                     variableExpressions[v] = expression;
-                    forwardExpressionList.Add(Expression.Assign(expression, Expression.Field(Expression.Constant(v), nameof(data))));
+                    Expression field = Expression.Field(Expression.Constant(v), nameof(data));
+                    // TODO: !!! DON'T USE Expression.Constant(0) !!!
+                    Expression element = Expression.ArrayAccess(field, Expression.Constant(0));
+                    forwardExpressionList.Add(Expression.Assign(expression, element));
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
                 {
@@ -101,7 +105,10 @@ namespace SharpGrad.Operator
                 {
                     if (all || e.Key.IsOutput)
                     {
-                        forwardExpressionList.Add(Expression.Assign(Expression.Field(Expression.Constant(e.Key), nameof(data)), parameter));
+                        Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
+                        // TODO: !!! DON'T USE Expression.Constant(0) !!!
+                        Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
+                        forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
                         parameters.Add(parameter);
                     }
                 }
@@ -151,7 +158,9 @@ namespace SharpGrad.Operator
                     // This is the last use of the variable.
                     // Save the gradient to Grad field.
                     Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
-                    backwardExpressionList.Add(Expression.Assign(gradField, gradientExpressions[v]));
+                    // TODO: !!! DON'T USE Expression.Constant(0) !!!
+                    Expression arrayAccess = Expression.ArrayAccess(gradField, Expression.Constant(0));
+                    backwardExpressionList.Add(Expression.Assign(arrayAccess, gradientExpressions[v]));
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
                 {
@@ -175,7 +184,7 @@ namespace SharpGrad.Operator
             {
                 if (backwardLambda is null)
                 {
-                    Grad = TType.One;
+                    Array.Fill(Grad, TType.Zero);
                     gradientExpressions.Clear();
                     List<Expression> backwardExpressionList = [];
                     gradientExpressions.Add(this, Expression.Constant(TType.One));

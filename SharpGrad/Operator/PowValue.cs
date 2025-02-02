@@ -9,7 +9,17 @@ namespace SharpGrad.Operators
         BinaryOpValue<TType>
         where TType : INumber<TType>, IPowerFunctions<TType>, ILogarithmicFunctions<TType>
     {
-        public PowValue(Value<TType> left, Value<TType> right) : base("^", left, right)
+        public static int GetShape(Value<TType> left, Value<TType> right)
+        {
+            if (left.Shape != right.Shape)
+            {
+                throw new System.ArgumentException("Shapes of left and right operands must be equal.");
+            }
+            return left.Shape;
+        }
+
+        public PowValue(Value<TType> left, Value<TType> right)
+            : base(GetShape(left, right), "^", left, right)
         { }
 
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)

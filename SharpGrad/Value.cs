@@ -22,19 +22,21 @@ namespace SharpGrad.DifEngine
         public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Variable<TType> Zero = new(TType.Zero, "0");
 
-        public Value(string name, params Value<TType>[] childs)
+        public Value(int shape, string name, params Value<TType>[] childs)
         {
             Operands = childs;
             Name = name;
-            data = TType.Zero;
+            data = new TType[shape];
+            Grad = new TType[shape];
         }
 
         public readonly Value<TType>[] Operands;
         public readonly string Name;
-        protected TType data;
-        public virtual TType Data => data;
+        protected TType[] data;
+        public virtual TType[] Data => data;
+        public int Shape => data.Length;
 
-        public TType Grad = TType.Zero;
+        public TType[] Grad;
 
         protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
@@ -97,7 +99,7 @@ namespace SharpGrad.DifEngine
 
         public void ResetGradient()
         {
-            Grad = TType.Zero;
+            Array.Clear(Grad);
             if (Operands.Length > 0)
             {
                 foreach (var child in Operands)
@@ -111,10 +113,6 @@ namespace SharpGrad.DifEngine
         #endregion
 
         public static implicit operator Value<TType>(TType d)
-            => new Constant<TType>(d, $"v{InstanceCount++}");
-
-        public static explicit operator TType(Value<TType> v)
-            => v.data;
-
+            => new Constant<TType>([d], $"v{InstanceCount++}");
     }
 }

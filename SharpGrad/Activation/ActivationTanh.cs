@@ -10,8 +10,11 @@ namespace SharpGrad.Activation
     public class ActivationTanh<TType> : UnariOpValue<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IHyperbolicFunctions<TType>
     {
+        public static int GetShape(Value<TType> value)
+            => value.Shape;
+
         public ActivationTanh(Value<TType> value)
-            : base("tanh", value)
+            : base(GetShape(value), "tanh", value)
         { }
 
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)

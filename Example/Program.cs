@@ -58,23 +58,24 @@ internal class Program
 
             for (int j = 0; j < Y.Length; j++)
             {
-                int val = Math.Abs(Y[j][0].Data - 1) < Math.Abs(Y[j][0].Data - 2) ? 1 : 2;
+                float d = Y[j][0].Data[0];
+                int val = Math.Abs(d - 1) < Math.Abs(d - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
             }
 
             cerebrin.Step(lr);
             loss.ResetGradient();
 
-            Console.WriteLine("Loss: " + loss.Data);
+            Console.WriteLine("Loss: " + loss.Data[0]);
             DataSet.Scatter(v, preds);
-            if (lastLoss > loss.Data)
+            if (lastLoss > loss.Data[0])
             {
-                lastLoss = loss.Data;
+                lastLoss = loss.Data[0];
             }
             else
             {
                 Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                Console.WriteLine("Final loss: " + loss.Data);
+                Console.WriteLine("Final loss: " + loss.Data[0]);
                 Console.WriteLine("Last epoch: " + i);
                 Console.WriteLine("Loss is increasing. Stopping training...");
                 break;

@@ -9,13 +9,26 @@ namespace SharpGrad.Operators
     public class DivValue<TType> : BinaryOpValue<TType>
         where TType : INumber<TType>
     {
+        public static int GetShape(Value<TType> left, Value<TType> right)
+        {
+            if (left.Shape != right.Shape)
+            {
+                throw new ArgumentException("Shapes of left and right operands must be equal.");
+            }
+            return left.Shape;
+        }
+
         public DivValue(Value<TType> left, Value<TType> right)
-            : base("/", left, right)
+            : base(GetShape(left, right), "/", left, right)
         { }
 
 
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Divide(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
+        {
+            Expression left = LeftOperand.GetAsOperand(variableExpressions);
+            Expression right = RightOperand.GetAsOperand(variableExpressions);
+            return Expression.Divide(left, right);
+        }
 
         protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {

@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace SharpGrad.Activation
 {
-    public abstract class Activation<TType>(string name, Value<TType> child) : UnariOpValue<TType>(name, child)
+    public abstract class Activation<TType>(int shape, string name, Value<TType> child) : UnariOpValue<TType>(shape, name, child)
         where TType : INumber<TType>
     {
     }
@@ -17,8 +17,11 @@ namespace SharpGrad.Activation
     {
         private readonly TType _alpha;
 
+        public static int GetShape(Value<TType> value)
+            => value.Shape;
+
         public ActivationLeakyReLU(Value<TType> value, TType alpha)
-            : base("leaky_relu", value)
+            : base(GetShape(value), "leaky_relu", value)
         { }
 
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)

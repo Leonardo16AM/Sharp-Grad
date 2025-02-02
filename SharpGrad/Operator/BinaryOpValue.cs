@@ -24,7 +24,7 @@ namespace SharpGrad.Operators
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public BinaryOpValue(string name, Value<TType> left, Value<TType> right) : base(name, left, right)
+        public BinaryOpValue(int shape, string name, Value<TType> left, Value<TType> right) : base(shape, name, left, right)
         {
             ChildrensCompute = [ComputeLeftGradient, ComputeRightGradient];
         }
