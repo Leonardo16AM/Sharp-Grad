@@ -17,8 +17,8 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "tanh", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Call(typeof(TType), nameof(TType.Tanh), null, Operand.GetAsOperand(variableExpressions));
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+            => Expression.Call(typeof(TType), nameof(TType.Tanh), null, Operand.GetAsOperand(variableExpressions, index));
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expression grad = gradientExpressions[this];

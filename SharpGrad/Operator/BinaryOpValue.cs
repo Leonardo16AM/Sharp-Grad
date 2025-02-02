@@ -29,6 +29,14 @@ namespace SharpGrad.Operators
             ChildrensCompute = [ComputeLeftGradient, ComputeRightGradient];
         }
 
+        protected abstract Expression GetForwardComputation(Expression left, Expression right);
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+        {
+            Expression left = LeftOperand.GetAsOperand(variableExpressions, index);
+            Expression right = RightOperand.GetAsOperand(variableExpressions, index);
+            return GetForwardComputation(left, right);
+        }
+
         public override string ToString()
             => $"({LeftOperand} {Name} {RightOperand})";
     }

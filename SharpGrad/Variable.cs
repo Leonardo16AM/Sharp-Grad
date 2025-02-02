@@ -25,13 +25,15 @@ namespace SharpGrad.DifEngine
             this(new TType[shape], name, childs)
         { }
 
-        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand)
+        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
             if (!variableExpressions.TryGetValue(this, out operand))
             {
                 operand = Expression.Variable(typeof(TType), Name);
                 variableExpressions[this] = operand;
-                forwardExpressionList.Add(Expression.Assign(operand, Expression.Field(Expression.Constant(this), nameof(data))));
+                Expression field = Expression.Field(Expression.Constant(this), nameof(data));
+                Expression arrayAccess = Expression.ArrayAccess(field, index);
+                forwardExpressionList.Add(Expression.Assign(operand, arrayAccess));
             }
             return true;
         }

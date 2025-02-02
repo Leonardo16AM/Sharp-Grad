@@ -22,13 +22,8 @@ namespace SharpGrad.Operators
             : base(GetShape(left, right), "+", left, right)
         { }
 
-
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-        {
-            Expression left = LeftOperand.GetAsOperand(variableExpressions);
-            Expression right = RightOperand.GetAsOperand(variableExpressions);
-            return Expression.Add(left, right);
-        }
+        protected override Expression GetForwardComputation(Expression left, Expression right)
+            => Expression.Add(left, right);
 
         protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {

@@ -15,8 +15,8 @@ namespace SharpGrad.Operator
             : base(GetShape(value), "-", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Negate(Operand.GetAsOperand(variableExpressions));
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+            => Expression.Negate(Operand.GetAsOperand(variableExpressions, index));
 
         protected override void ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,

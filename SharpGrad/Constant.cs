@@ -23,7 +23,7 @@ namespace SharpGrad
             expression = arrayAccess;
         }
 
-        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand)
+        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
             operand = expression;
             return true;

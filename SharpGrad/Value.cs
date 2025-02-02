@@ -50,13 +50,13 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand);
-        public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList)
-            => _ = GetAsOperand(variableExpressions, forwardExpressionList, out var _);
-        public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions)
+        public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand);
+        public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
+            => _ = GetAsOperand(variableExpressions, forwardExpressionList, index, out var _);
+        public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
         {
             List<Expression> forwardExpressionList = [];
-            if (GetAsOperand(variableExpressions, forwardExpressionList, out var operand)
+            if (GetAsOperand(variableExpressions, forwardExpressionList, index, out var operand)
                 && forwardExpressionList.Count == 0)
             {
                 return operand!;

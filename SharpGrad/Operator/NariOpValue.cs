@@ -39,18 +39,19 @@ namespace SharpGrad.Operator
                 throw new ArgumentException($"Operator {name} must have at least one child.");
         }
 
-        internal abstract Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions);
-        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, out Expression? operand)
+        internal abstract Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index);
+
+        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
             if (!variableExpressions.TryGetValue(this, out operand))
             {
                 for (int i = 0; i < Operands.Length; i++)
                 {
-                    Operands[i].BuildForward(variableExpressions, forwardExpressionList);
+                    Operands[i].BuildForward(variableExpressions, forwardExpressionList, index);
                 }
                 operand = Expression.Variable(typeof(TType), Name);
                 variableExpressions[this] = operand;
-                forwardExpressionList.Add(Expression.Assign(operand, GetForwardComputation(variableExpressions)));
+                forwardExpressionList.Add(Expression.Assign(operand, GetForwardComputation(variableExpressions, index)));
             }
             return true;
         }
@@ -59,7 +60,7 @@ namespace SharpGrad.Operator
         private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
-        public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, List<Value<TType>> topOSort)
+        public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, Expression index, List<Value<TType>> topOSort)
         {
             List<Expression> forwardExpressionList = [];
 
@@ -76,15 +77,14 @@ namespace SharpGrad.Operator
                     Expression expression = Expression.Variable(typeof(TType), v.Name);
                     variableExpressions[v] = expression;
                     Expression field = Expression.Field(Expression.Constant(v), nameof(data));
-                    // TODO: !!! DON'T USE Expression.Constant(0) !!!
-                    Expression element = Expression.ArrayAccess(field, Expression.Constant(0));
+                    Expression element = Expression.ArrayAccess(field, index);
                     forwardExpressionList.Add(Expression.Assign(expression, element));
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
                 {
                     Expression expression = Expression.Variable(typeof(TType), n.Name);
                     variableExpressions[n] = expression;
-                    forwardExpressionList.Add(Expression.Assign(expression, n.GetForwardComputation(variableExpressions)));
+                    forwardExpressionList.Add(Expression.Assign(expression, n.GetForwardComputation(variableExpressions, index)));
                 }
                 else
                 {
@@ -129,7 +129,7 @@ namespace SharpGrad.Operator
                         topOSort = [];
                         DFS(topOSort, []);
                     }
-                    List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, topOSort);
+                    List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, Expression.Constant(0), topOSort);
 
                     // Backup all parameters to data
                     List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList);
@@ -192,7 +192,8 @@ namespace SharpGrad.Operator
                     {
                         topOSort = [];
                         DFS(topOSort, []);
-                        backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, topOSort));
+                        // TODO: !!! DON'T USE Expression.Constant(0) !!!
+                        backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, Expression.Constant(0), topOSort));
                         SaveParameters(variableExpressions, backwardExpressionList, false);
                     }
                     else
@@ -202,7 +203,10 @@ namespace SharpGrad.Operator
                         {
                             if (e.Value is ParameterExpression parameter)
                             {
-                                backwardExpressionList.Add(Expression.Assign(parameter, Expression.Field(Expression.Constant(e.Key), nameof(data))));
+                                Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
+                                // TODO: !!! DON'T USE Expression.Constant(0) !!!
+                                Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
+                                backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
                             }
                         }
                     }

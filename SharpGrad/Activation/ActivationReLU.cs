@@ -16,11 +16,11 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "relu", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
             => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), ExpressionZero),
+                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions, index), ExpressionZero),
                 ExpressionZero,
-                Operand.GetAsOperand(variableExpressions));
+                Operand.GetAsOperand(variableExpressions, index));
 
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
