@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,20 @@ namespace SharpGrad.NN
             return mat;
         }
 
+        private static ConsoleColor lastColor;
+        private static void SetForegroundColor(ConsoleColor Color, StringBuilder? writeBefore = null)
+        {
+            if (lastColor != Color)
+            {
+                if (writeBefore is not null)
+                {
+                    Console.Write(writeBefore);
+                    writeBefore.Clear();
+                }
+                Console.ForegroundColor = lastColor = Color;
+            }
+        }
+
         public static void Scatter(IReadOnlyList<Data> x, IReadOnlyList<Data> y)
         {
             int[,] matX = GetMat(x);
@@ -50,48 +65,51 @@ namespace SharpGrad.NN
 
             Console.Write(UpperRow);
             Console.WriteLine(UpperRow);
-
+            ConsoleColor defaultColor = lastColor = Console.ForegroundColor;
+            StringBuilder sb = new();
             for (int r = 0; r < N; r++)
             {
-                Console.Write("║");
+                SetForegroundColor(defaultColor);
+                Console.Write('║');
+                sb.Clear();
                 for (int c = 0; c < N; c++)
                 {
                     switch (matX[r, c])
                     {
                         case 0:
-                            Console.Write(" ");
+                            sb.Append(' ');
                             break;
                         case 1:
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write("o");
+                            SetForegroundColor(ConsoleColor.Red, sb);
+                            sb.Append('o');
                             break;
                         case 2:
-                            Console.ForegroundColor = ConsoleColor.Blue;
-                            Console.Write("o");
+                            SetForegroundColor(ConsoleColor.Blue, sb);
+                            sb.Append('o');
                             break;
                     }
-                    Console.ResetColor();
                 }
+                SetForegroundColor(defaultColor, sb);
                 Console.Write("║║");
                 for (int j = 0; j < N; j++)
                 {
                     switch (matY[r, j])
                     {
                         case 0:
-                            Console.Write(" ");
+                            sb.Append(' ');
                             break;
                         case 1:
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write("o");
+                            SetForegroundColor(ConsoleColor.Red, sb);
+                            sb.Append('o');
                             break;
                         case 2:
-                            Console.ForegroundColor = ConsoleColor.Blue;
-                            Console.Write("o");
+                            SetForegroundColor(ConsoleColor.Blue, sb);
+                            sb.Append('o');
                             break;
                     }
-                    Console.ResetColor();
                 }
-                Console.WriteLine("║");
+                SetForegroundColor(defaultColor, sb);
+                Console.WriteLine('║');
             }
 
             Console.Write(LowerRow);
