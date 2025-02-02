@@ -99,16 +99,23 @@ namespace SharpGrad.NN
                             sb.Append(' ');
                             break;
                         case 1:
-                            SetForegroundColor(ConsoleColor.Red, sb);
+                            if (matX[r, j] == 1)
+                                SetForegroundColor(ConsoleColor.Red, sb);
+                            else
+                                SetForegroundColor(defaultColor, sb);
                             sb.Append('o');
                             break;
                         case 2:
-                            SetForegroundColor(ConsoleColor.Blue, sb);
+                            if (matX[r, j] == 2)
+                                SetForegroundColor(ConsoleColor.Blue, sb);
+                            else
+                                SetForegroundColor(defaultColor, sb);
                             sb.Append('o');
                             break;
                     }
                 }
                 SetForegroundColor(defaultColor, sb);
+                Console.Write(sb);
                 Console.WriteLine('║');
             }
 
