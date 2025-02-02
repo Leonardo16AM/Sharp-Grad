@@ -1,4 +1,5 @@
 using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -15,8 +16,13 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "sigmoid", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
-            => Expression.Divide(ExpressionOne, Expression.Add(ExpressionOne, Expression.Call(typeof(TType).GetMethod("Exp")!, Expression.Negate(Operand.GetAsOperand(variableExpressions, index)))));
+        internal override Expr GetForwardComputation(Expr operand)
+        {
+            Expr negated = -operand;
+            Expr call = Expr.Call(typeof(TType).GetMethod("Exp")!, negated);
+            Expr add = ExpressionOne + call;
+            return Expression.Divide(ExpressionOne, add);
+        }
 
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {

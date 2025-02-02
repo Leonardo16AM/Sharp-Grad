@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -15,8 +16,8 @@ namespace SharpGrad.Operator
             : base(GetShape(value), "-", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
-            => Expression.Negate(Operand.GetAsOperand(variableExpressions, index));
+        internal override Expr GetForwardComputation(Expr operand)
+            => -operand;
 
         protected override void ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,

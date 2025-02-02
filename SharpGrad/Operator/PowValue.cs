@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -22,7 +23,7 @@ namespace SharpGrad.Operators
             : base(GetShape(left, right), "^", left, right)
         { }
 
-        protected override Expression GetForwardComputation(Expression left, Expression right)
+        protected override Expr GetForwardComputation(Expr left, Expr right)
             => Expression.Call(typeof(TType).GetMethod("Pow")!, left, right);
 
         protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)

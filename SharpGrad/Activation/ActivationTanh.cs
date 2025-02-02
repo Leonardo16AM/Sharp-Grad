@@ -1,4 +1,5 @@
 using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using SharpGrad.Operator;
 using System;
 using System.Collections.Generic;
@@ -17,8 +18,9 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "tanh", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
-            => Expression.Call(typeof(TType), nameof(TType.Tanh), null, Operand.GetAsOperand(variableExpressions, index));
+        internal override Expr GetForwardComputation(Expr operand)
+            => Expression.Call(typeof(TType).GetMethod("Tanh")!, operand);
+
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expression grad = gradientExpressions[this];

@@ -1,9 +1,11 @@
 using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using SharpGrad.Operator;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 
 namespace SharpGrad.Activation
 {
@@ -16,6 +18,7 @@ namespace SharpGrad.Activation
         where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
     {
         private readonly TType _alpha;
+        private readonly Expression alphaExpression;
 
         public static int GetShape(Value<TType> value)
             => value.Shape;
@@ -24,13 +27,14 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "leaky_relu", value)
         {
             _alpha = alpha;
+            alphaExpression = Expression.Constant(alpha);
         }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
-            => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions, index), ExpressionZero),
-                Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions, index)),
-                Operand.GetAsOperand(variableExpressions, index));
+        internal override Expr GetForwardComputation(Expr operand)
+            => Expr.Condition(
+                Expr.LessThanOrEqual(operand, ExpressionZero),
+                alphaExpression * operand,
+                operand);
 
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {

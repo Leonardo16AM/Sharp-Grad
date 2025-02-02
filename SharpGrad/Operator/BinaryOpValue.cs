@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using SharpGrad.Operator;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -29,8 +30,8 @@ namespace SharpGrad.Operators
             ChildrensCompute = [ComputeLeftGradient, ComputeRightGradient];
         }
 
-        protected abstract Expression GetForwardComputation(Expression left, Expression right);
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+        protected abstract Expr GetForwardComputation(Expr left, Expr right);
+        internal sealed override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
         {
             Expression left = LeftOperand.GetAsOperand(variableExpressions, index);
             Expression right = RightOperand.GetAsOperand(variableExpressions, index);

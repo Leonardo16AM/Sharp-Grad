@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -16,11 +17,11 @@ namespace SharpGrad.Activation
             : base(GetShape(value), "relu", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
-            => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions, index), ExpressionZero),
+        internal override Expr GetForwardComputation(Expr operand)
+            => Expr.Condition(
+                Expr.LessThanOrEqual(operand, ExpressionZero),
                 ExpressionZero,
-                Operand.GetAsOperand(variableExpressions, index));
+                operand);
 
         protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
