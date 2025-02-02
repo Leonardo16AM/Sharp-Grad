@@ -20,8 +20,6 @@ namespace SharpGrad.Operator
 
         public override string ToString()
             => $"{Name}({Operand})";
-
-        protected abstract void Backward();
         protected abstract void ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,

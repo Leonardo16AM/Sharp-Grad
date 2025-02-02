@@ -26,12 +26,5 @@ namespace SharpGrad.Activation
             Expression gr = Expression.Multiply(grad, sub);
             AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
         }
-
-        protected override void Backward()
-        {
-            var tanh = data;
-            Operand!.Grad += Grad * (TType.One - tanh * tanh);
-        }
-
     }
 }

@@ -15,9 +15,6 @@ namespace SharpGrad.Operator
         internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
             => Expression.Negate(Operand.GetAsOperand(variableExpressions));
 
-        protected override void Backward()
-            => Operand.Grad -= Grad;
-
         protected override void ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
