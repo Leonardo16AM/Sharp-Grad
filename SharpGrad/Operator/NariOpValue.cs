@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 
 namespace SharpGrad.Operator
 {
@@ -95,7 +96,7 @@ namespace SharpGrad.Operator
             return forwardExpressionList;
         }
 
-        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, bool all = true)
+        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, bool all = true)
         {
             List<ParameterExpression> parameters = [];
 
@@ -106,8 +107,7 @@ namespace SharpGrad.Operator
                     if (all || e.Key.IsOutput)
                     {
                         Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
-                        // TODO: !!! DON'T USE Expression.Constant(0) !!!
-                        Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
+                        Expression arrayAccess = Expression.ArrayAccess(field, index);
                         forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
                         parameters.Add(parameter);
                     }
@@ -129,10 +129,16 @@ namespace SharpGrad.Operator
                         topOSort = [];
                         DFS(topOSort, []);
                     }
-                    List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, Expression.Constant(0), topOSort);
+                    variableExpressions.Clear();
+
+                    ParameterExpression index = Expression.Parameter(typeof(int), "index");
+                    Expression init = Expression.Assign(index, Expression.Constant(0));
+                    List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, index, topOSort);
+                    forwardExpressionList.Insert(0, init);
 
                     // Backup all parameters to data
-                    List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList);
+                    List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, index);
+                    parameters.Add(index);
 
                     // Build block and compile Expression
                     Expression forwardExpression = Expression.Block(parameters, forwardExpressionList);
@@ -188,13 +194,15 @@ namespace SharpGrad.Operator
                     gradientExpressions.Clear();
                     List<Expression> backwardExpressionList = [];
                     gradientExpressions.Add(this, Expression.Constant(TType.One));
+
+                    ParameterExpression index = Expression.Parameter(typeof(int), "index");
                     if (topOSort is null)
                     {
                         topOSort = [];
                         DFS(topOSort, []);
                         // TODO: !!! DON'T USE Expression.Constant(0) !!!
-                        backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, Expression.Constant(0), topOSort));
-                        SaveParameters(variableExpressions, backwardExpressionList, false);
+                        backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, index, topOSort));
+                        SaveParameters(variableExpressions, backwardExpressionList, index, false);
                     }
                     else
                     {
@@ -205,7 +213,7 @@ namespace SharpGrad.Operator
                             {
                                 Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
                                 // TODO: !!! DON'T USE Expression.Constant(0) !!!
-                                Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
+                                Expression arrayAccess = Expression.ArrayAccess(field, index);
                                 backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
                             }
                         }
@@ -214,7 +222,11 @@ namespace SharpGrad.Operator
                     backwardExpressionList.AddRange(BuildBackwardExpressionList(variableExpressions, gradientExpressions, topOSort));
 
                     // Build block and compile Expression
-                    Expression backwardExpression = Expression.Block(variableExpressions.Values.Union(gradientExpressions.Values).OfType<ParameterExpression>(), backwardExpressionList);
+                    Expression backwardExpression = Expression.Block(
+                        variableExpressions.Values
+                        .Union(gradientExpressions.Values)
+                        .OfType<ParameterExpression>()
+                        .Append(index), backwardExpressionList);
                     backwardLambda = Expression.Lambda<Action>(backwardExpression).Compile();
                 }
                 return backwardLambda;
