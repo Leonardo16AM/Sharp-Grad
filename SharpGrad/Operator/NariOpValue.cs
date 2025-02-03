@@ -140,9 +140,21 @@ namespace SharpGrad.Operator
                     List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, index);
                     parameters.Add(index);
 
+                    // Build loop expression until index equals data.Length
+                    LabelTarget breakLabel = Expression.Label("LoopBreak");
+                    Expression loopBody = Expression.Block(forwardExpressionList.Append(Expression.PostIncrementAssign(index)));
+                    Expression loop = Expression.Loop(
+                        Expression.IfThenElse(
+                            Expression.LessThan(index, Expression.Constant(data.Length)),
+                            loopBody,
+                            Expression.Break(breakLabel)
+                        ),
+                        breakLabel
+                    );
+
                     // Build block and compile Expression
-                    Expression forwardExpression = Expression.Block(parameters, forwardExpressionList);
-                    forwardLambda = Expression.Lambda<Action>(forwardExpression).Compile();
+                    loop = Expression.Block(parameters, loop);
+                    forwardLambda = Expression.Lambda<Action>(loop).Compile();
                 }
                 return forwardLambda;
             }
@@ -192,15 +204,16 @@ namespace SharpGrad.Operator
                 {
                     Array.Fill(Grad, TType.Zero);
                     gradientExpressions.Clear();
-                    List<Expression> backwardExpressionList = [];
                     gradientExpressions.Add(this, Expression.Constant(TType.One));
 
                     ParameterExpression index = Expression.Parameter(typeof(int), "index");
+                    Expression init = Expression.Assign(index, Expression.Constant(0));
+                    List<Expression> backwardExpressionList = [init];
+
                     if (topOSort is null)
                     {
                         topOSort = [];
                         DFS(topOSort, []);
-                        // TODO: !!! DON'T USE Expression.Constant(0) !!!
                         backwardExpressionList.AddRange(BuildForwardExpressionList(variableExpressions, index, topOSort));
                         SaveParameters(variableExpressions, backwardExpressionList, index, false);
                     }
@@ -212,7 +225,6 @@ namespace SharpGrad.Operator
                             if (e.Value is ParameterExpression parameter)
                             {
                                 Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
-                                // TODO: !!! DON'T USE Expression.Constant(0) !!!
                                 Expression arrayAccess = Expression.ArrayAccess(field, index);
                                 backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
                             }
@@ -222,11 +234,21 @@ namespace SharpGrad.Operator
                     backwardExpressionList.AddRange(BuildBackwardExpressionList(variableExpressions, gradientExpressions, topOSort));
 
                     // Build block and compile Expression
-                    Expression backwardExpression = Expression.Block(
-                        variableExpressions.Values
-                        .Union(gradientExpressions.Values)
-                        .OfType<ParameterExpression>()
-                        .Append(index), backwardExpressionList);
+                    List<ParameterExpression> parameters = [index];
+                    parameters.AddRange(variableExpressions.Values.OfType<ParameterExpression>());
+                    parameters.AddRange(gradientExpressions.Values.OfType<ParameterExpression>());
+
+                    LabelTarget breakLabel = Expression.Label("LoopBreak");
+                    Expression loop = Expression.Loop(
+                        Expression.IfThenElse(
+                            Expression.LessThan(index, Expression.Constant(data.Length)),
+                            Expression.Block(backwardExpressionList.Append(Expression.PostIncrementAssign(index))),
+                            Expression.Break(breakLabel)
+                        ),
+                        breakLabel
+                    );
+
+                    Expression backwardExpression = Expression.Block(parameters, loop);
                     backwardLambda = Expression.Lambda<Action>(backwardExpression).Compile();
                 }
                 return backwardLambda;
