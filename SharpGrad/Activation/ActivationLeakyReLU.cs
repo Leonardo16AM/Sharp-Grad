@@ -9,7 +9,7 @@ using System.Reflection;
 namespace SharpGrad.Activation
 {
     public class ActivationLeakyReLU<TType> : Activation<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
+        where TType : INumber<TType>, IComparable<TType>
     {
         private readonly TType _alpha;
         private readonly Expression alphaExpression;

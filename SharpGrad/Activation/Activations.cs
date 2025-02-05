@@ -10,7 +10,7 @@ namespace SharpGrad.Activation
             => new(value);
 
         public static ActivationLeakyReLU<TType> LeakyReLU<TType>(this Value<TType> value, TType alpha)
-            where TType : IBinaryFloatingPointIeee754<TType>
+            where TType : INumber<TType>
             => new(value, alpha);
 
         public static ActivationTanh<TType> Tanh<TType>(this Value<TType> value)
