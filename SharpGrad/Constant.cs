@@ -10,25 +10,36 @@ namespace SharpGrad
     {
         private static int InstanceCount = 0;
 
-        private readonly Expression expression;
-        internal Expression Expression => expression;
-
-        public Constant(TType[] data, IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
-            : base(shape, name, childs)
+        private readonly Expression field;
+        internal Expression GetExpression(Expression index)
         {
-            base.data = data;
-            Expression field = Expression.Field(Expression.Constant(this), nameof(data));
-            // TODO: !!! DON'T USE Expression.Constant(0) !!!
-            Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
-            expression = arrayAccess;
+            if(this.Shape.Size() == 1)
+            {
+                return Expression.ArrayAccess(field, Expression.Constant(0));
+            }
+            else
+            {
+                return Expression.ArrayAccess(field, index);
+            }
         }
-        public Constant(TType data, string name, params Value<TType>[] childs)
-            : this([data], [], name, childs)
+
+        public Constant(TType[] data, IReadOnlyList<Dimension> shape, string name)
+            : base(shape, name)
+        {
+            if(shape.Size() != data.Length)
+            {
+                throw new System.ArgumentException($"The shape size {shape.Size()} is not equal to the data length {data.Length}");
+            }
+            base.data = data;
+            field = Expression.Field(Expression.Constant(this), nameof(data));
+        }
+        public Constant(TType data, string name)
+            : this([data], [], name)
         { }
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
-            operand = expression;
+            operand = GetExpression(index);
             return true;
         }
 

@@ -32,7 +32,7 @@ namespace SharpGrad.DifEngine
                 operand = Expression.Variable(typeof(TType), Name);
                 variableExpressions[this] = operand;
                 Expression field = Expression.Field(Expression.Constant(this), nameof(data));
-                Expression arrayAccess = Expression.ArrayAccess(field, index);
+                Expression arrayAccess = Expression.ArrayAccess(field, (Shape.Size() == 1) ? Expression.Constant(0) : index);
                 forwardExpressionList.Add(Expression.Assign(operand, arrayAccess));
             }
             return true;

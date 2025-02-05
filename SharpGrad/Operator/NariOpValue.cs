@@ -84,21 +84,25 @@ namespace SharpGrad.Operator
                 Debug.Assert(!variableExpressions.ContainsKey(e));
                 if (e is Constant<TType> c)
                 {
-                    variableExpressions[c] = c.Expression;
+                    variableExpressions[c] = c.GetExpression(index);
                 }
                 else if (e is Variable<TType> v)
                 {
                     Expression expression = Expression.Variable(typeof(TType), v.Name);
                     variableExpressions[v] = expression;
                     Expression field = Expression.Field(Expression.Constant(v), nameof(data));
+                    index = (v.Shape.Size() == 1) ? Expression.Constant(0) : index;
                     Expression element = Expression.ArrayAccess(field, index);
-                    forwardExpressionList.Add(Expression.Assign(expression, element));
+                    Expression assign = Expression.Assign(expression, element);
+                    forwardExpressionList.Add(assign);
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
                 {
                     Expression expression = Expression.Variable(typeof(TType), n.Name);
                     variableExpressions[n] = expression;
-                    forwardExpressionList.Add(Expression.Assign(expression, n.GetForwardComputation(variableExpressions, index)));
+                    Expression forwardComputation = n.GetForwardComputation(variableExpressions, index);
+                    Expression assign = Expression.Assign(expression, forwardComputation);
+                    forwardExpressionList.Add(assign);
                 }
                 else
                 {
@@ -120,7 +124,7 @@ namespace SharpGrad.Operator
                     if (all || e.Key.IsOutput)
                     {
                         Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
-                        Expression arrayAccess = Expression.ArrayAccess(field, index);
+                        Expression arrayAccess = Expression.ArrayAccess(field, (e.Key.Shape.Size() == 1) ? Expression.Constant(0) : index);
                         forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
                         parameters.Add(parameter);
                     }
@@ -174,7 +178,11 @@ namespace SharpGrad.Operator
         }
 
 
-        public static List<Expression> BuildBackwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Value<TType>> topOSort)
+        public static List<Expression> BuildBackwardExpressionList(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            Dictionary<Value<TType>, Expression> gradientExpressions,
+            ParameterExpression index,
+            List<Value<TType>> topOSort)
         {
             List<Expression> backwardExpressionList = [];
             for (int i = topOSort.Count - 1; i >= 0; i--)
@@ -189,8 +197,7 @@ namespace SharpGrad.Operator
                     // This is the last use of the variable.
                     // Save the gradient to Grad field.
                     Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
-                    // TODO: !!! DON'T USE Expression.Constant(0) !!!
-                    Expression arrayAccess = Expression.ArrayAccess(gradField, Expression.Constant(0));
+                    Expression arrayAccess = Expression.ArrayAccess(gradField, (v.Shape.Size() == 1) ? Expression.Constant(0) : index);
                     backwardExpressionList.Add(Expression.Assign(arrayAccess, gradientExpressions[v]));
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
@@ -238,13 +245,13 @@ namespace SharpGrad.Operator
                             if (e.Value is ParameterExpression parameter)
                             {
                                 Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
-                                Expression arrayAccess = Expression.ArrayAccess(field, index);
+                                Expression arrayAccess = Expression.ArrayAccess(field, (e.Key.Shape.Size() == 1) ? Expression.Constant(0) : index);
                                 backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
                             }
                         }
                     }
 
-                    backwardExpressionList.AddRange(BuildBackwardExpressionList(variableExpressions, gradientExpressions, topOSort));
+                    backwardExpressionList.AddRange(BuildBackwardExpressionList(variableExpressions, gradientExpressions, index, topOSort));
 
                     // Build block and compile Expression
                     List<ParameterExpression> parameters = [index];
