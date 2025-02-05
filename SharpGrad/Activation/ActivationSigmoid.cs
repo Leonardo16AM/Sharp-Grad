@@ -10,10 +10,8 @@ namespace SharpGrad.Activation
     public class ActivationSigmoid<TType> : Activation<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IExponentialFunctions<TType>
     {
-        public static int GetShape(Value<TType> value)
-            => value.Shape;
         public ActivationSigmoid(Value<TType> value)
-            : base(GetShape(value), "sigmoid", value)
+            : base("sigmoid", value)
         { }
 
         internal override Expr GetForwardComputation(Expr operand)

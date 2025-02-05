@@ -10,6 +10,8 @@ namespace SharpGrad.DifEngine
     public abstract class Value<TType>
         where TType : INumber<TType>
     {
+        public IReadOnlyList<Dimension> Shape { get; private set; }
+        public int Size => Shape.Size();
         /// <summary>
         /// If true, this value is an output of the computation graph and should be saved back to its data field.
         /// </summary>
@@ -22,19 +24,20 @@ namespace SharpGrad.DifEngine
         public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Variable<TType> Zero = new(TType.Zero, "0");
 
-        public Value(int shape, string name, params Value<TType>[] childs)
+        public Value(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
         {
-            Operands = childs;
             Name = name;
-            data = new TType[shape];
-            Grad = new TType[shape];
+            Shape = shape;
+            Operands = childs;
+            int length = Size;
+            data = new TType[length];
+            Grad = new TType[length];
         }
 
         public readonly Value<TType>[] Operands;
         public readonly string Name;
         protected TType[] data;
         public virtual TType[] Data => data;
-        public int Shape => data.Length;
 
         public TType[] Grad;
 
@@ -113,6 +116,6 @@ namespace SharpGrad.DifEngine
         #endregion
 
         public static implicit operator Value<TType>(TType d)
-            => new Constant<TType>([d], $"v{InstanceCount++}");
+            => new Constant<TType>(d, $"v{InstanceCount++}");
     }
 }

@@ -9,11 +9,8 @@ namespace SharpGrad.Operator
     public class NegValue<TType> : UnariOpValue<TType>
         where TType : INumber<TType>
     {
-        public static int GetShape(Value<TType> value)
-            => value.Shape;
-
         public NegValue(Value<TType> value)
-            : base(GetShape(value), "-", value)
+            : base("-", value)
         { }
 
         internal override Expr GetForwardComputation(Expr operand)

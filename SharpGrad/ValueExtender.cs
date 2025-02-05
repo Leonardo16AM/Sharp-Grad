@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace SharpGrad
 {
     public static class ValueExtender
-
     {
         public static bool IsOutput<TType>(this IEnumerable<Value<TType>> @this) where TType : INumber<TType>
         {

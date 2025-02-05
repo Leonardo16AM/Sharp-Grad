@@ -33,7 +33,7 @@ namespace SharpGrad.Operator
             }
         }
 
-        public NariOpValue(int shape, string name, params Value<TType>[] childs)
+        public NariOpValue(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
             : base(shape, name, childs)
         {
             if (childs.Length < 1)

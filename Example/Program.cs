@@ -53,7 +53,7 @@ internal class Program
             Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
 
             // Forward and backward pass
-            loss.ForwardLambda();
+            //loss.ForwardLambda();
             loss.BackwardLambda();
 
             for (int j = 0; j < Y.Length; j++)

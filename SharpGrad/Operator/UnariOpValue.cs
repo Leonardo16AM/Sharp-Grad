@@ -18,7 +18,8 @@ namespace SharpGrad.Operator
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList);
 
-        public UnariOpValue(int shape, string name, Value<TType> child) : base(shape, name, child)
+        public UnariOpValue(string name, Value<TType> child)
+            : base(child.Shape, name, child)
         {
             ChildrensCompute = [ComputeGradient];
         }

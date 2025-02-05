@@ -13,8 +13,8 @@ namespace SharpGrad
         private readonly Expression expression;
         internal Expression Expression => expression;
 
-        public Constant(TType[] data, string name, params Value<TType>[] childs)
-            : base(data.Length, name, childs)
+        public Constant(TType[] data, IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
+            : base(shape, name, childs)
         {
             base.data = data;
             Expression field = Expression.Field(Expression.Constant(this), nameof(data));
@@ -22,6 +22,9 @@ namespace SharpGrad
             Expression arrayAccess = Expression.ArrayAccess(field, Expression.Constant(0));
             expression = arrayAccess;
         }
+        public Constant(TType data, string name, params Value<TType>[] childs)
+            : this([data], [], name, childs)
+        { }
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
@@ -30,6 +33,6 @@ namespace SharpGrad
         }
 
         public static implicit operator Constant<TType>(TType d)
-            => new([d], $"c{InstanceCount++}");
+            => new(d, $"c{InstanceCount++}");
     }
 }
