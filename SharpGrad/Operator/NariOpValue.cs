@@ -33,8 +33,21 @@ namespace SharpGrad.Operator
             }
         }
 
-        public NariOpValue(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
-            : base(shape, name, childs)
+        public static IReadOnlyList<Dimension> GetShape(Value<TType>[] childs)
+        {
+            HashSet<Dimension> shape = [];
+            foreach (var child in childs)
+            {
+                foreach (var dim in child.Shape)
+                {
+                    shape.Add(dim);
+                }
+            }
+            return [.. shape];
+        }
+
+        public NariOpValue(string name, params Value<TType>[] childs)
+            : base(GetShape(childs), name, childs)
         {
             if (childs.Length < 1)
                 throw new ArgumentException($"Operator {name} must have at least one child.");

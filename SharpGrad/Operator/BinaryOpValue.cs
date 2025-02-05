@@ -26,14 +26,8 @@ namespace SharpGrad.Operators
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public static IReadOnlyList<Dimension> GetShape(Value<TType> left, Value<TType> right)
-            => left.Shape
-                .Union(right.Shape)
-                .Distinct()
-                .ToList();
-
         public BinaryOpValue(string name, Value<TType> left, Value<TType> right)
-            : base(GetShape(left, right), name, left, right)
+            : base(name, left, right)
         {
             ChildrensCompute = [ComputeLeftGradient, ComputeRightGradient];
         }
