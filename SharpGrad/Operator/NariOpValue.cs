@@ -91,8 +91,9 @@ namespace SharpGrad.Operator
                     Expression expression = Expression.Variable(typeof(TType), v.Name);
                     variableExpressions[v] = expression;
                     Expression field = Expression.Field(Expression.Constant(v), nameof(data));
-                    index = (v.Shape.Size() == 1) ? Expression.Constant(0) : index;
-                    Expression element = Expression.ArrayAccess(field, index);
+                    Expression element = Expression.ArrayAccess(field, v.IsScalar
+                        ? Expression.Constant(0)
+                        : index);
                     Expression assign = Expression.Assign(expression, element);
                     forwardExpressionList.Add(assign);
                 }
@@ -124,7 +125,7 @@ namespace SharpGrad.Operator
                     if (all || e.Key.IsOutput)
                     {
                         Expression field = Expression.Field(Expression.Constant(e.Key), nameof(data));
-                        Expression arrayAccess = Expression.ArrayAccess(field, (e.Key.Shape.Size() == 1) ? Expression.Constant(0) : index);
+                        Expression arrayAccess = Expression.ArrayAccess(field, (e.Key.IsScalar) ? Expression.Constant(0) : index);
                         forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
                         parameters.Add(parameter);
                     }
@@ -149,16 +150,14 @@ namespace SharpGrad.Operator
                     variableExpressions.Clear();
 
                     ParameterExpression index = Expression.Parameter(typeof(int), "index");
-                    Expression init = Expression.Assign(index, Expression.Constant(0));
                     List<Expression> forwardExpressionList = BuildForwardExpressionList(variableExpressions, index, topOSort);
-                    forwardExpressionList.Insert(0, init);
 
                     // Backup all parameters to data
                     List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, index);
                     parameters.Add(index);
 
                     // Build loop expression until index equals data.Length
-                    LabelTarget breakLabel = Expression.Label("LoopBreak");
+                    LabelTarget breakLabel = Expression.Label("ForwardLoopBreak");
                     Expression loopBody = Expression.Block(forwardExpressionList.Append(Expression.PostIncrementAssign(index)));
                     Expression loop = Expression.Loop(
                         Expression.IfThenElse(
@@ -170,7 +169,10 @@ namespace SharpGrad.Operator
                     );
 
                     // Build block and compile Expression
-                    loop = Expression.Block(parameters, loop);
+                    loop = Expression.Block(
+                        parameters,
+                        Expression.Assign(index, Expression.Constant(0)),
+                        loop);
                     forwardLambda = Expression.Lambda<Action>(loop).Compile();
                 }
                 return forwardLambda;

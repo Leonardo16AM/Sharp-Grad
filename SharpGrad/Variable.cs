@@ -11,18 +11,18 @@ namespace SharpGrad.DifEngine
 
         public new TType[] Data { get => data; set => data = value; }
 
-        public Variable(TType[] data, IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
-            : base(shape, name, childs)
+        public Variable(TType[] data, IReadOnlyList<Dimension> shape, string name)
+            : base(shape, name)
         {
             base.data = data;
         }
 
-        public Variable(TType data, string name, params Value<TType>[] childs)
-            : this([data], [], name, childs)
+        public Variable(TType data, string name)
+            : this([data], [], name)
         { }
 
-        public Variable(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs) :
-            this(new TType[shape.Size()], shape, name, childs)
+        public Variable(IReadOnlyList<Dimension> shape, string name) :
+            this(new TType[shape.Size()], shape, name)
         { }
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
