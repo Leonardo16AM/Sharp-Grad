@@ -11,7 +11,8 @@ namespace SharpGrad.DifEngine
         where TType : INumber<TType>
     {
         public IReadOnlyList<Dimension> Shape { get; private set; }
-        public int Size => Shape.Size();
+        public long Size => Shape.Size();
+        public bool IsScalar => Shape.IsScalar();
         /// <summary>
         /// If true, this value is an output of the computation graph and should be saved back to its data field.
         /// </summary>
