@@ -200,7 +200,7 @@ namespace SharpGrad.Operator
                     // Save the gradient to Grad field.
                     Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
                     Expression arrayAccess = Expression.ArrayAccess(gradField, (v.Shape.Size() == 1) ? Expression.Constant(0) : index);
-                    backwardExpressionList.Add(Expression.Assign(arrayAccess, gradientExpressions[v]));
+                    backwardExpressionList.Add(Expression.AddAssign(arrayAccess, gradientExpressions[v]));
                 }
                 else if (topOSort[i] is NariOpValue<TType> n)
                 {
@@ -229,8 +229,7 @@ namespace SharpGrad.Operator
                     gradientExpressions.Add(this, Expression.Constant(TType.One));
 
                     ParameterExpression index = Expression.Parameter(typeof(int), "index");
-                    Expression init = Expression.Assign(index, Expression.Constant(0));
-                    List<Expression> backwardExpressionList = [init];
+                    List<Expression> backwardExpressionList = [];
 
                     if (topOSort is null)
                     {
@@ -270,7 +269,10 @@ namespace SharpGrad.Operator
                         breakLabel
                     );
 
-                    Expression backwardExpression = Expression.Block(parameters, loop);
+                    Expression backwardExpression = Expression.Block(
+                        parameters,
+                        Expression.Assign(index, Expression.Constant(0)),
+                        loop);
                     backwardLambda = Expression.Lambda<Action>(backwardExpression).Compile();
                 }
                 return backwardLambda;

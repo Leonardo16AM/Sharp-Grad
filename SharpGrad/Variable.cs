@@ -14,6 +14,10 @@ namespace SharpGrad.DifEngine
         public Variable(TType[] data, IReadOnlyList<Dimension> shape, string name)
             : base(shape, name)
         {
+            if (shape.Size() != data.Length)
+            {
+                throw new System.ArgumentException($"The shape size {shape.Size()} is not equal to the data length {data.Length}");
+            }
             base.data = data;
         }
 

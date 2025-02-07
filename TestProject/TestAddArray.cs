@@ -4,6 +4,7 @@ using System.Numerics;
 
 namespace TestProject
 {
+    [TestCategory("Array")]
     [TestClass]
     public sealed class TestAddArray
     {
@@ -31,7 +32,7 @@ namespace TestProject
             Debug.WriteLine($"d[1] = {d.Data[1]}. Expected  {T.CreateTruncating(5.0)}");
             Debug.Assert(d.Data[2] == T.CreateTruncating(7.0), $"d[2] = {d.Data[2]}. Expected {T.CreateTruncating(7.0)}");
             Debug.WriteLine($"d[2] = {d.Data[2]} Expected {T.CreateTruncating(7.0)}");
-            
+
             Debug.WriteLine("e = d[3] + c");
             var e = d + c;
             var eFunc = e.ForwardLambda;
@@ -61,5 +62,26 @@ namespace TestProject
         public void AddFloat() => Add<float>();
         [TestMethod]
         public void AddDouble() => Add<double>();
+        [TestMethod]
+        public void AddDecimal() => Add<decimal>();
+
+        [TestMethod]
+        public void AddByte() => Add<byte>();
+        [TestMethod]
+        public void AddSByte() => Add<sbyte>();
+        [TestMethod]
+        public void AddShort() => Add<short>();
+        [TestMethod]
+        public void AddUShort() => Add<ushort>();
+        [TestMethod]
+        public void AddInt() => Add<int>();
+        [TestMethod]
+        public void AddUInt() => Add<uint>();
+        [TestMethod]
+        public void AddLong() => Add<long>();
+        [TestMethod]
+        public void AddULong() => Add<ulong>();
+        [TestMethod]
+        public void AddBigInteger() => Add<BigInteger>();
     }
 }
