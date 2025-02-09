@@ -23,7 +23,7 @@ namespace SharpGrad
             }
         }
 
-        public Constant(TType[] data, IReadOnlyList<Dimension> shape, string name)
+        public Constant(TType[] data, Dimension[] shape, string name)
             : base(shape, name)
         {
             if(shape.Size() != data.Length)

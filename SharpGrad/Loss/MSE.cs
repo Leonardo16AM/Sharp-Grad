@@ -15,12 +15,14 @@ namespace SharpGrad.NN
         {
             NariOpValue<TType> loss = Y[0] - Y_hat[0];
             loss *= loss;
+            TType count = TType.One;
             for (int i = 1; i < Y.Length; i++)
             {
                 var nl = Y[i] - Y_hat[i];
                 loss += nl * nl;
+                count++;
             }
-            return loss;
+            return loss / count;
         }
     }
 }

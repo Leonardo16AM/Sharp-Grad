@@ -44,7 +44,7 @@ namespace SharpGrad
                 for(int i = 0; i < w.Data.Length; i++)
                 {
                     // Console.WriteLine(w.data);
-                    w.Data[i] -= lr * w.Grad[i];
+                    w.Data[i] -= lr * w.Gradient[i];
                 }
             }
         }

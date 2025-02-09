@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpGrad.DifEngine
+namespace SharpGrad
 {
     public class Dimension
     {

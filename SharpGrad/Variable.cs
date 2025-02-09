@@ -11,7 +11,7 @@ namespace SharpGrad.DifEngine
 
         public new TType[] Data { get => data; set => data = value; }
 
-        public Variable(TType[] data, IReadOnlyList<Dimension> shape, string name)
+        public Variable(TType[] data, Dimension[] shape, string name)
             : base(shape, name)
         {
             if (shape.Size() != data.Length)
@@ -25,7 +25,7 @@ namespace SharpGrad.DifEngine
             : this([data], [], name)
         { }
 
-        public Variable(IReadOnlyList<Dimension> shape, string name) :
+        public Variable(Dimension[] shape, string name) :
             this(new TType[shape.Size()], shape, name)
         { }
 

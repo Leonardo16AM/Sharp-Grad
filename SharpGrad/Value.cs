@@ -10,9 +10,10 @@ namespace SharpGrad.DifEngine
     public abstract class Value<TType>
         where TType : INumber<TType>
     {
-        public IReadOnlyList<Dimension> Shape { get; private set; }
+        public Dimension[] Shape { get; private set; }
         public int Size => Shape.Size();
         public bool IsScalar => Shape.IsScalar();
+
         /// <summary>
         /// If true, this value is an output of the computation graph and should be saved back to its data field.
         /// </summary>
@@ -25,14 +26,14 @@ namespace SharpGrad.DifEngine
         public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Variable<TType> Zero = new(TType.Zero, "0");
 
-        public Value(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
+        public Value(Dimension[] shape, string name, params Value<TType>[] childs)
         {
             Name = name;
             Shape = shape;
             Operands = childs;
             int length = Size;
             data = new TType[length];
-            Grad = new TType[length];
+            Gradient = new TType[length];
         }
 
         public readonly Value<TType>[] Operands;
@@ -40,7 +41,7 @@ namespace SharpGrad.DifEngine
         protected TType[] data;
         public virtual TType[] Data => data;
 
-        public TType[] Grad;
+        public TType[] Gradient;
 
         protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
@@ -103,7 +104,7 @@ namespace SharpGrad.DifEngine
 
         public void ResetGradient()
         {
-            Array.Clear(Grad);
+            Array.Clear(Gradient);
             if (Operands.Length > 0)
             {
                 foreach (var child in Operands)

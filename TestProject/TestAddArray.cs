@@ -1,4 +1,5 @@
-﻿using SharpGrad.DifEngine;
+﻿using SharpGrad;
+using SharpGrad.DifEngine;
 using System.Diagnostics;
 using System.Numerics;
 

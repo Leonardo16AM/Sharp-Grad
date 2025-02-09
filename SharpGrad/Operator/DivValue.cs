@@ -19,6 +19,7 @@ namespace SharpGrad.Operators
 
         protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
+            // Gradient of 'l' in 'l / r' is 'g / r'
             Expression grad = gradientExpressions[this];
             Expression right = variableExpressions[RightOperand];
             Expression gr = Expression.Divide(grad, right);
@@ -27,13 +28,15 @@ namespace SharpGrad.Operators
 
         protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
+            // Gradient of 'r' in 'l / r' is '-l * g / r^2'
             Expression thisGrad = gradientExpressions[this];
             Expression leftVal = variableExpressions[LeftOperand];
             Expression rightVal = variableExpressions[RightOperand];
             Expression lg = Expression.Multiply(leftVal, thisGrad);
+            Expression neglg = Expression.Negate(lg);
             Expression rr = Expression.Multiply(rightVal, rightVal);
-            Expression lgrr = Expression.Divide(lg, rr);
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, lgrr);
+            Expression result = Expression.Divide(neglg, rr);
+            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, result);
         }
     }
 }

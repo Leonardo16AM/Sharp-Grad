@@ -2,6 +2,7 @@
 using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -33,16 +34,9 @@ namespace SharpGrad.Operator
             }
         }
 
-        public static IReadOnlyList<Dimension> GetShape(Value<TType>[] childs)
+        public static Dimension[] GetShape(Value<TType>[] childs)
         {
-            HashSet<Dimension> shape = [];
-            foreach (var child in childs)
-            {
-                foreach (var dim in child.Shape)
-                {
-                    shape.Add(dim);
-                }
-            }
+            HashSet<Dimension> shape = new(childs.SelectMany(c => c.Shape));
             return [.. shape];
         }
 
@@ -179,7 +173,6 @@ namespace SharpGrad.Operator
             }
         }
 
-
         public static List<Expression> BuildBackwardExpressionList(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
@@ -198,7 +191,7 @@ namespace SharpGrad.Operator
                 {
                     // This is the last use of the variable.
                     // Save the gradient to Grad field.
-                    Expression gradField = Expression.Field(Expression.Constant(v), nameof(Grad));
+                    Expression gradField = Expression.Field(Expression.Constant(v), nameof(Gradient));
                     Expression arrayAccess = Expression.ArrayAccess(gradField, (v.Shape.Size() == 1) ? Expression.Constant(0) : index);
                     backwardExpressionList.Add(Expression.AddAssign(arrayAccess, gradientExpressions[v]));
                 }
@@ -224,7 +217,7 @@ namespace SharpGrad.Operator
             {
                 if (backwardLambda is null)
                 {
-                    Array.Fill(Grad, TType.Zero);
+                    Array.Fill(Gradient, TType.Zero);
                     gradientExpressions.Clear();
                     gradientExpressions.Add(this, Expression.Constant(TType.One));
 

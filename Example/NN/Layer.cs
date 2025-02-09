@@ -37,7 +37,7 @@ namespace SharpGrad.NN
                 n.Step(lr);
                 for(int i = 0; i< n.Biai.Data.Length; i++)
                 {
-                    n.Biai.Data[i] -= lr * n.Biai.Grad[i];
+                    n.Biai.Data[i] -= lr * n.Biai.Gradient[i];
                 }
             }
         }
