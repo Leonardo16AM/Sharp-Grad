@@ -42,7 +42,7 @@ namespace SharpGrad.DifEngine
         protected TType[] data;
         public virtual TType[] Data => data;
 
-        private int[] GetLocalIndice(Dimdices indices)
+        private int[] GetLocalIndices(Dimdices indices)
         {
             if (indices.IsScalar)
             {
@@ -51,20 +51,30 @@ namespace SharpGrad.DifEngine
             int[] localIndice = new int[Shape.Length];
             for (int i = 0; i < localIndice.Length; i++)
             {
-                Index idx = indices[Shape[i]];
-                if (idx.IsFromEnd)
+                Dimension dim = Shape[i];
+                Index index = indices[dim];
+                int idx = index.Value;
+                if (index.IsFromEnd)
                 {
-                    localIndice[i] = Shape[i].Size - idx.Value;
+                    if (idx > dim.Size)
+                    {
+                        throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
+                    }
+                    localIndice[i] = dim.Size - idx;
                 }
                 else
                 {
-                    localIndice[i] = idx.Value;
+                    if (idx >= dim.Size)
+                    {
+                        throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
+                    }
+                    localIndice[i] = idx;
                 }
             }
             return localIndice;
         }
 
-        public TType this[Dimdices index]
+        public TType this[Dimdices indices]
         {
             get
             {
@@ -72,8 +82,8 @@ namespace SharpGrad.DifEngine
                 {
                     return data[0];
                 }
-                int[] localIndice = GetLocalIndice(index);
-                long i = Shape.GetLinearIndex(localIndice);
+                int[] localIndices = GetLocalIndices(indices);
+                long i = Shape.GetLinearIndex(localIndices);
                 return data[i];
             }
             set
@@ -83,8 +93,8 @@ namespace SharpGrad.DifEngine
                     data[0] = value;
                     return;
                 }
-                int[] localIndice = GetLocalIndice(index);
-                long i = Shape.GetLinearIndex(localIndice);
+                int[] localIndices = GetLocalIndices(indices);
+                long i = Shape.GetLinearIndex(localIndices);
                 data[i] = value;
             }
         }

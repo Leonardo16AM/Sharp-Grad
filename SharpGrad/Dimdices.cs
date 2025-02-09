@@ -125,6 +125,10 @@ namespace SharpGrad.DifEngine
         }
     }
 
+    /// <summary>
+    /// Represents an indexer for <see cref="Dimdices"/>.
+    /// Starts from the first index in each dimension and ends at the last index in each dimension.
+    /// </summary>
     public class Dimdexer(Dimension[] shape) : IEnumerable<Dimdices>
     {
         public readonly Dimension[] Shape = shape;
@@ -132,32 +136,35 @@ namespace SharpGrad.DifEngine
 
         public IEnumerator<Dimdices> GetEnumerator()
         {
-            int n = Shape.Length;
-            if(n == 0)
+            if (Shape.IsScalar())
             {
                 yield return Dimdices.Scalar;
                 yield break;
             }
+            Array.Fill(Indices, 0);
+            yield return new Dimdices(Shape, Indices);
 
-            int[] indices = new int[n];
-            for (int i = 0; i < n; i++)
-            {
-                indices[i] = 0;
-            }
             while (true)
             {
-                yield return new Dimdices(Shape, indices);
                 int i = 0;
-                while (i < n && indices[i] == Shape[i].Size - 1)
+                while (i < Shape.Length)
                 {
-                    indices[i] = 0;
-                    i++;
+                    Indices[i]++;
+                    if (Indices[i] == Shape[i].Size)
+                    {
+                        Indices[i] = 0;
+                        i++;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                if (i == n)
+                if (i == Shape.Length)
                 {
                     break;
                 }
-                indices[i]++;
+                yield return new Dimdices(Shape, Indices);
             }
         }
 
