@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 
 namespace SharpGrad.DifEngine
 {
@@ -41,12 +42,16 @@ namespace SharpGrad.DifEngine
         protected TType[] data;
         public virtual TType[] Data => data;
 
-        public int[] GetLocalIndice(Dimdices index)
+        private int[] GetLocalIndice(Dimdices indices)
         {
+            if (indices.IsScalar)
+            {
+                throw new ArgumentException("Trying to access a non-scalar value with scalar indices.");
+            }
             int[] localIndice = new int[Shape.Length];
             for (int i = 0; i < localIndice.Length; i++)
             {
-                Index idx = index[Shape[i]];
+                Index idx = indices[Shape[i]];
                 if (idx.IsFromEnd)
                 {
                     localIndice[i] = Shape[i].Size - idx.Value;
@@ -63,12 +68,21 @@ namespace SharpGrad.DifEngine
         {
             get
             {
+                if(IsScalar)
+                {
+                    return data[0];
+                }
                 int[] localIndice = GetLocalIndice(index);
                 long i = Shape.GetLinearIndex(localIndice);
                 return data[i];
             }
             set
             {
+                if (IsScalar)
+                {
+                    data[0] = value;
+                    return;
+                }
                 int[] localIndice = GetLocalIndice(index);
                 long i = Shape.GetLinearIndex(localIndice);
                 data[i] = value;
