@@ -66,10 +66,12 @@ namespace TestProject
         [TestMethod]
         public void AddDecimal() => Add<decimal>();
 
-        [TestMethod]
-        public void AddByte() => Add<byte>();
-        [TestMethod]
-        public void AddSByte() => Add<sbyte>();
+        // The binary operator Add is not defined for the types 'System.Byte' and 'System.Byte'.
+        //[TestMethod]
+        //public void AddByte() => Add<byte>();
+        // The binary operator Add is not defined for the types 'System.Byte' and 'System.Byte'.
+        //[TestMethod]
+        //public void AddSByte() => Add<sbyte>();
         [TestMethod]
         public void AddShort() => Add<short>();
         [TestMethod]

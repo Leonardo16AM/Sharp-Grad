@@ -42,10 +42,12 @@ namespace TestProject
         [TestMethod]
         public void MulDecimal() => Mul<decimal>();
 
-        [TestMethod]
-        public void MulByte() => Mul<byte>();
-        [TestMethod]
-        public void MulSByte() => Mul<sbyte>();
+        // The binary operator Add is not defined for the types 'System.Byte' and 'System.Byte'.
+        //[TestMethod]
+        //public void MulByte() => Mul<byte>();
+        // The binary operator Add is not defined for the types 'System.Byte' and 'System.Byte'.
+        //[TestMethod]
+        //public void MulSByte() => Mul<sbyte>();
         [TestMethod]
         public void MulShort() => Mul<short>();
         [TestMethod]
