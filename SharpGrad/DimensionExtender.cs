@@ -22,13 +22,13 @@ namespace SharpGrad.DifEngine
 
         public static long GetLinearIndex(this Dimension[] shape, int[] indices)
         {
-            if(shape.Size() != indices.Length)
+            if(shape.Length != indices.Length)
             {
                 throw new ArgumentException($"The shape size {shape.Size()} is not equal to the indices length {indices.Length}");
             }
             long index = 0;
             long stride = 1;
-            for (int i = 0; i < shape.Length; i++)
+            for (int i = shape.Length - 1; i >= 0; i--)
             {
                 index += indices[i] * stride;
                 stride *= shape[i].Size;

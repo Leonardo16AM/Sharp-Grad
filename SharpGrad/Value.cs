@@ -49,7 +49,7 @@ namespace SharpGrad.DifEngine
                 throw new ArgumentException("Trying to access a non-scalar value with scalar indices.");
             }
             int[] localIndice = new int[Shape.Length];
-            for (int i = 0; i < localIndice.Length; i++)
+            for (int i = localIndice.Length -1; i >= 0; i--)
             {
                 Dimension dim = Shape[i];
                 Index index = indices[dim];

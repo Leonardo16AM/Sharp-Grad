@@ -123,6 +123,8 @@ namespace SharpGrad.DifEngine
             }
             return index;
         }
+
+        public override string ToString() => $"[{string.Join(", ", Indices)}]";
     }
 
     /// <summary>
@@ -142,29 +144,32 @@ namespace SharpGrad.DifEngine
                 yield break;
             }
             Array.Fill(Indices, 0);
-            yield return new Dimdices(Shape, Indices);
+            yield return new(Shape, Indices);
 
             while (true)
             {
-                int i = 0;
-                while (i < Shape.Length)
+                int i = Shape.Length - 1;
+                while (true)
                 {
                     Indices[i]++;
-                    if (Indices[i] == Shape[i].Size)
+                    if (Indices[i] >= Shape[i].Size)
                     {
-                        Indices[i] = 0;
-                        i++;
+                        if (i <= 0)
+                        {
+                            yield break;
+                        }
+                        else
+                        {
+                            Indices[i] = 0;
+                            i--;
+                        }
                     }
                     else
                     {
                         break;
                     }
                 }
-                if (i == Shape.Length)
-                {
-                    break;
-                }
-                yield return new Dimdices(Shape, Indices);
+                yield return new(Shape, Indices);
             }
         }
 
