@@ -23,8 +23,8 @@ namespace SharpGrad.DifEngine
         public static readonly Expression ExpressionOne = Expression.Constant(TType.One);
 
         private static int InstanceCount = 0;
-        public static readonly Variable<TType> e = new(TType.CreateSaturating(Math.E), "e");
-        public static readonly Variable<TType> Zero = new(TType.Zero, "0");
+        public static readonly Constant<TType> e = new(TType.CreateSaturating(Math.E), "e");
+        public static readonly Constant<TType> Zero = new(TType.Zero, "0");
 
         public Value(Dimension[] shape, string name, params Value<TType>[] childs)
         {
@@ -40,6 +40,40 @@ namespace SharpGrad.DifEngine
         public readonly string Name;
         protected TType[] data;
         public virtual TType[] Data => data;
+
+        public int[] GetLocalIndice(Dimdices index)
+        {
+            int[] localIndice = new int[Shape.Length];
+            for (int i = 0; i < localIndice.Length; i++)
+            {
+                Index idx = index[Shape[i]];
+                if (idx.IsFromEnd)
+                {
+                    localIndice[i] = Shape[i].Size - idx.Value;
+                }
+                else
+                {
+                    localIndice[i] = idx.Value;
+                }
+            }
+            return localIndice;
+        }
+
+        public TType this[Dimdices index]
+        {
+            get
+            {
+                int[] localIndice = GetLocalIndice(index);
+                long i = Shape.GetLinearIndex(localIndice);
+                return data[i];
+            }
+            set
+            {
+                int[] localIndice = GetLocalIndice(index);
+                long i = Shape.GetLinearIndex(localIndice);
+                data[i] = value;
+            }
+        }
 
         public TType[] Gradient;
 
