@@ -21,8 +21,8 @@ namespace SharpGrad.Operator
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, Expression.Negate(grad));
+            Expr grad = gradientExpressions[this];
+            AssignGradientExpession(gradientExpressions, expressionList, Operand, -grad);
         }
     }
 }

@@ -34,7 +34,7 @@ namespace SharpGrad.DifEngine
             Operands = childs;
             int length = Size;
             data = new TType[length];
-            Gradient = new TType[length];
+            gradient = new TType[length];
         }
 
         public readonly Value<TType>[] Operands;
@@ -99,7 +99,33 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        public TType[] Gradient;
+        private TType[] gradient;
+        public TType GetGradient(Dimdices indices)
+        {
+            if (IsScalar)
+            {
+                return gradient[0];
+            }
+            int[] localIndices = GetLocalIndices(indices);
+            long i = Shape.GetLinearIndex(localIndices);
+            return gradient[i];
+        }
+
+        public void SetGradient(Dimdices indices, TType value)
+        {
+            if (IsScalar)
+            {
+                gradient[0] = value;
+                return;
+            }
+            int[] localIndices = GetLocalIndices(indices);
+            long i = Shape.GetLinearIndex(localIndices);
+            gradient[i] = value;
+        }
+        public void ClearGradient()
+        {
+            Array.Fill(gradient, TType.Zero);
+        }
 
         protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
@@ -162,7 +188,7 @@ namespace SharpGrad.DifEngine
 
         public void ResetGradient()
         {
-            Array.Clear(Gradient);
+            Array.Clear(gradient);
             if (Operands.Length > 0)
             {
                 foreach (var child in Operands)

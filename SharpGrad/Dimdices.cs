@@ -83,10 +83,6 @@ namespace SharpGrad.DifEngine
         /// </exception>
         public Dimdices(Dimension[] shape, int[] indices)
         {
-            if (shape.Length == 0)
-            {
-                throw new ArgumentException("Shape must have at least one dimension.");
-            }
             if (shape.Length != indices.Length)
             {
                 throw new ArgumentException($"The shape size {shape.Size()} is not equal to the indices length {indices.Length}");
@@ -131,48 +127,56 @@ namespace SharpGrad.DifEngine
     /// Represents an indexer for <see cref="Dimdices"/>.
     /// Starts from the first index in each dimension and ends at the last index in each dimension.
     /// </summary>
-    public class Dimdexer(Dimension[] shape) : IEnumerable<Dimdices>
+    public class Dimdexer(Dimension[] shape) : IEnumerable<Dimdices>, IEnumerator<Dimdices>
     {
         public readonly Dimension[] Shape = shape;
         public int[] Indices = new int[shape.Length];
 
-        public IEnumerator<Dimdices> GetEnumerator()
-        {
-            if (Shape.IsScalar())
-            {
-                yield return Dimdices.Scalar;
-                yield break;
-            }
-            Array.Fill(Indices, 0);
-            yield return new(Shape, Indices);
+        public Dimdices Current => new(Shape, Indices);
 
-            while (true)
+        object IEnumerator.Current => Current;
+
+        public void Dispose()
+        { }
+
+        public IEnumerator<Dimdices> GetEnumerator()
+            => this;
+        IEnumerator IEnumerable.GetEnumerator()
+            => GetEnumerator();
+
+        private bool isFirst = true;
+        private bool isFinished = false;
+        public bool MoveNext()
+        {
+            if (isFinished)
             {
-                int i = Shape.Length - 1;
-                while (true)
-                {
-                    Indices[i]++;
-                    if (Indices[i] >= Shape[i].Size)
-                    {
-                        if (i <= 0)
-                        {
-                            yield break;
-                        }
-                        else
-                        {
-                            Indices[i] = 0;
-                            i--;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                yield return new(Shape, Indices);
+                return false;
             }
+
+            if (isFirst)
+            {
+                Array.Fill(Indices, 0);
+                isFirst = !isFirst;
+                return true;
+            }
+
+            for (int i = Shape.Length - 1; i >= 0; i--)
+            {
+                Indices[i]++;
+                if (Indices[i] < Shape[i].Size)
+                {
+                    return true;
+                }
+                Indices[i] = 0;
+            }
+            isFinished = !isFinished;
+            return false;
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public void Reset()
+        {
+            isFirst = true;
+            isFinished = false;
+        }
     }
 }

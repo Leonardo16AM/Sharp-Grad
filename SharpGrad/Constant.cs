@@ -13,14 +13,7 @@ namespace SharpGrad
         private readonly Expression field;
         internal Expression GetExpression(Expression index)
         {
-            if(this.Shape.Size() == 1)
-            {
-                return Expression.ArrayAccess(field, Expression.Constant(0));
-            }
-            else
-            {
-                return Expression.ArrayAccess(field, index);
-            }
+            return Expression.MakeIndex(field, typeof(Value<TType>).GetProperty("Item"), [index]);
         }
 
         public Constant(TType[] data, Dimension[] shape, string name)
@@ -31,7 +24,7 @@ namespace SharpGrad
                 throw new System.ArgumentException($"The shape size {shape.Size()} is not equal to the data length {data.Length}");
             }
             base.data = data;
-            field = Expression.Field(Expression.Constant(this), nameof(data));
+            field = Expression.Constant(this);
         }
         public Constant(TType data, string name)
             : this([data], [], name)

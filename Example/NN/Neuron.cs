@@ -41,10 +41,10 @@ namespace SharpGrad
         {
             foreach (Variable<TType> w in Weights)
             {
-                for(int i = 0; i < w.Data.Length; i++)
+                Dimdexer dimdexer = new(w.Shape);
+                foreach (Dimdices dimdices in dimdexer)
                 {
-                    // Console.WriteLine(w.data);
-                    w.Data[i] -= lr * w.Gradient[i];
+                    w[dimdices] -= lr * w.GetGradient(dimdices);
                 }
             }
         }

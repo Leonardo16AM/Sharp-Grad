@@ -1,4 +1,5 @@
-﻿using SharpGrad.DifEngine;
+﻿using SharpGrad.Activation;
+using SharpGrad.DifEngine;
 using System.Numerics;
 
 namespace SharpGrad.NN
@@ -26,6 +27,10 @@ namespace SharpGrad.NN
             for (int i = 0; i < Neurons.Length; i++)
             {
                 Y[i] = Neurons[i].Forward(X);
+                if (ActFunc)
+                {
+                    Y[i] = Activations.ReLU(Y[i]);
+                }
             }
             return Y;
         }
@@ -35,9 +40,10 @@ namespace SharpGrad.NN
             foreach (Neuron<TType> n in Neurons)
             {
                 n.Step(lr);
-                for(int i = 0; i< n.Biai.Data.Length; i++)
+                Dimdexer dimdexer = new(n.Biai.Shape);
+                foreach(Dimdices dimdices in dimdexer)
                 {
-                    n.Biai.Data[i] -= lr * n.Biai.Gradient[i];
+                    n.Biai[dimdices] -= lr * n.Biai.GetGradient(dimdices);
                 }
             }
         }

@@ -19,23 +19,22 @@ namespace SharpGrad.Operators
 
         protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            Expression left = variableExpressions[LeftOperand];
-            Expression right = variableExpressions[RightOperand];
-            Expression r1 = Expression.Subtract(right, Expression.Constant(TType.One));
-            Expression lr1 = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, r1);
-            Expression gr = Expression.Multiply(grad, Expression.Multiply(right, lr1));
+            Expr grad = gradientExpressions[this];
+            Expr left = variableExpressions[LeftOperand];
+            Expr right = variableExpressions[RightOperand];
+            Expr pow = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, right - Expr.Constant(TType.One));
+            Expr gr = grad * right * pow;
             AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gr);
         }
 
         protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            Expression left = variableExpressions[LeftOperand];
-            Expression right = variableExpressions[RightOperand];
-            Expression logl = Expression.Call(typeof(TType).GetMethod("Log", [typeof(TType)])!, left);
-            Expression lr = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, right);
-            Expression gr = Expression.Multiply(grad, Expression.Multiply(lr, logl));
+            Expr grad = gradientExpressions[this];
+            Expr left = variableExpressions[LeftOperand];
+            Expr right = variableExpressions[RightOperand];
+            Expr logl = Expression.Call(typeof(TType).GetMethod("Log", [typeof(TType)])!, left);
+            Expr lr = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, right);
+            Expr gr = grad * lr * logl;
             AssignGradientExpession(gradientExpressions, expressionList, RightOperand, gr);
         }
     }
