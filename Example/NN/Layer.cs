@@ -27,10 +27,6 @@ namespace SharpGrad.NN
             for (int i = 0; i < Neurons.Length; i++)
             {
                 Y[i] = Neurons[i].Forward(X);
-                if (ActFunc)
-                {
-                    Y[i] = Activations.ReLU(Y[i]);
-                }
             }
             return Y;
         }

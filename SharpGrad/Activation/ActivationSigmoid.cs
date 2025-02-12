@@ -22,13 +22,12 @@ namespace SharpGrad.Activation
             return Expression.Divide(ExpressionOne, add);
         }
 
-        protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            Expression sigmoid = variableExpressions[this];
-            Expression sub = Expression.Subtract(ExpressionOne, sigmoid);
-            Expression gr = Expression.Multiply(grad, Expression.Multiply(sigmoid, sub));
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
+            Expr grad = gradientExpressions[this];
+            Expr sigmoid = variableExpressions[this];
+            Expr sub = ExpressionOne - sigmoid;
+            return grad * sigmoid * sub;
         }
     }
 }

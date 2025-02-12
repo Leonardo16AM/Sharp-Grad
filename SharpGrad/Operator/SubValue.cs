@@ -17,16 +17,14 @@ namespace SharpGrad.Operators
         protected override Expr GetForwardComputation(Expr left, Expr right)
             => left - right;
 
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, grad);
+            return gradientExpressions[this];
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = Expression.Negate(gradientExpressions[this]);
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, grad);
+            return Expression.Negate(gradientExpressions[this]);
         }
     }
 }

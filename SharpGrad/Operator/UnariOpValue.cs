@@ -13,7 +13,7 @@ namespace SharpGrad.Operator
         public Value<TType> Operand => Operands[0];
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
-        protected abstract void ComputeGradient(
+        protected abstract Expression ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList);

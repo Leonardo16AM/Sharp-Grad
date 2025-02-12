@@ -17,23 +17,21 @@ namespace SharpGrad.Operators
         protected override Expr GetForwardComputation(Expr left, Expr right)
             => left / right;
 
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             // Gradient of 'l' in 'l / r' is 'g / r'
-            Expr grad = gradientExpressions[this];
-            Expr right = variableExpressions[RightOperand];
-            Expr gr = grad / right;
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gr);
+            Expr thisGrad = gradientExpressions[this];
+            Expr rightVal = variableExpressions[RightOperand];
+            return thisGrad / rightVal;
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            // Gradient of 'r' in 'l / r' is '-l * g / r^2'
+            // Gradient of 'r' in 'l / r' is 'g * -l / r^2'
             Expr thisGrad = gradientExpressions[this];
-            Expression leftVal = variableExpressions[LeftOperand];
+            Expr leftVal = variableExpressions[LeftOperand];
             Expr rightVal = variableExpressions[RightOperand];
-            Expr result = -(leftVal * thisGrad) / rightVal * rightVal;
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, result);
+            return thisGrad * (-leftVal / (rightVal * rightVal));
         }
     }
 }

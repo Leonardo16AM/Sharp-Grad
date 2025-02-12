@@ -68,11 +68,14 @@ namespace TestProject
 
             Dimdexer dimdexer = new(shape);
             // Gradient of A in A * B is B
+            dimdexer.MoveNext();
             Assert.AreEqual(4, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(5, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(6, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
+            Assert.AreEqual(6, A.GetGradient(dimdexer.Current));
 
             // Gradient of B in A * B is A
+            dimdexer.Reset();
+            dimdexer.MoveNext();
             Assert.AreEqual(1, B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(2, B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(3, B.GetGradient(dimdexer.Current));
@@ -92,14 +95,17 @@ namespace TestProject
 
             Dimdexer dimdexer = new(shape);
             // Gradient of A in A / B is 1 / B
-            Assert.AreEqual(1.0f / 4f, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(1.0f / 5f, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(1.0f / 6f, A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
+            dimdexer.MoveNext();
+            Assert.AreEqual(A.GetGradient(dimdexer.Current), 1.0f / B.Data[0]); dimdexer.MoveNext();
+            Assert.AreEqual(A.GetGradient(dimdexer.Current), 1.0f / B.Data[1]); dimdexer.MoveNext();
+            Assert.AreEqual(A.GetGradient(dimdexer.Current), 1.0f / B.Data[2]);
 
             // Gradient of B in A / B is -A / B^2
-            Assert.AreEqual(-1.0f / 16f, B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(-2.0f / 25f, B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(-3.0f / 36f, B.GetGradient(dimdexer.Current));
+            dimdexer.Reset();
+            dimdexer.MoveNext();
+            Assert.AreEqual(B.GetGradient(dimdexer.Current), -A.Data[0] / (B.Data[0] * B.Data[0])); dimdexer.MoveNext();
+            Assert.AreEqual(B.GetGradient(dimdexer.Current), -A.Data[1] / (B.Data[1] * B.Data[1])); dimdexer.MoveNext();
+            Assert.AreEqual(B.GetGradient(dimdexer.Current), -A.Data[2] / (B.Data[2] * B.Data[2]));
 
             Console.WriteLine($"{nameof(TestDiv)}({A.Data.GetString()}, {B.Data.GetString()}) passed: {C.Data.GetString()}");
         }
@@ -116,11 +122,14 @@ namespace TestProject
 
             Dimdexer dimdexer = new(shape);
             // Gradient of A in A ^ B is B * A ^ (B - 1)
+            dimdexer.MoveNext();
             Assert.AreEqual(4 * MathF.Pow(1, 3), A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(5 * MathF.Pow(2, 4), A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
-            Assert.AreEqual(6 * MathF.Pow(3, 5), A.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
+            Assert.AreEqual(6 * MathF.Pow(3, 5), A.GetGradient(dimdexer.Current));
 
             // Gradient of B in A ^ B is A ^ B * log(A)
+            dimdexer.Reset();
+            dimdexer.MoveNext();
             Assert.AreEqual(MathF.Pow(1, 4) * MathF.Log(1), B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(MathF.Pow(2, 5) * MathF.Log(2), B.GetGradient(dimdexer.Current)); dimdexer.MoveNext();
             Assert.AreEqual(MathF.Pow(3, 6) * MathF.Log(3), B.GetGradient(dimdexer.Current));

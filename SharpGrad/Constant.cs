@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -13,7 +14,7 @@ namespace SharpGrad
         private readonly Expression field;
         internal Expression GetExpression(Expression index)
         {
-            return Expression.MakeIndex(field, typeof(Value<TType>).GetProperty("Item"), [index]);
+            return Expression.MakeIndex(field, typeof(Constant<TType>).GetProperty("Item"), [index]);
         }
 
         public Constant(TType[] data, Dimension[] shape, string name)
@@ -25,7 +26,9 @@ namespace SharpGrad
             }
             base.data = data;
             field = Expression.Constant(this);
+            IsOutput = false;
         }
+
         public Constant(TType data, string name)
             : this([data], [], name)
         { }
@@ -38,5 +41,17 @@ namespace SharpGrad
 
         public static implicit operator Constant<TType>(TType d)
             => new(d, $"c{InstanceCount++}");
+
+        public override string ToString()
+        {
+            if(Shape.IsScalar())
+            {
+                return data[0].ToString()!;
+            }
+            else
+            {
+                return '[' + String.Join(", ", data) + ']';
+            }
+        }
     }
 }

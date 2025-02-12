@@ -27,15 +27,14 @@ namespace SharpGrad.Activation
                 alphaExpression * operand,
                 operand);
 
-        protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expression grad = gradientExpressions[this];
             Expression relu = variableExpressions[this];
-            Expression gr = Expression.Condition(
+            return Expression.Condition(
                 Expression.LessThanOrEqual(relu, Expression.Constant(TType.Zero)),
                 Expression.Multiply(Expression.Constant(_alpha), grad),
                 grad);
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
         }
     }
 }

@@ -17,25 +17,23 @@ namespace SharpGrad.Operators
         protected override Expr GetForwardComputation(Expr left, Expr right)
             => Expression.Call(typeof(TType).GetMethod("Pow", new[] { typeof(TType), typeof(TType) })!, left, right);
 
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expr grad = gradientExpressions[this];
             Expr left = variableExpressions[LeftOperand];
             Expr right = variableExpressions[RightOperand];
             Expr pow = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, right - Expr.Constant(TType.One));
-            Expr gr = grad * right * pow;
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gr);
+            return grad * right * pow;
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expr grad = gradientExpressions[this];
             Expr left = variableExpressions[LeftOperand];
             Expr right = variableExpressions[RightOperand];
             Expr logl = Expression.Call(typeof(TType).GetMethod("Log", [typeof(TType)])!, left);
             Expr lr = Expression.Call(typeof(TType).GetMethod("Pow", [typeof(TType), typeof(TType)])!, left, right);
-            Expr gr = grad * lr * logl;
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, gr);
+            return grad * lr * logl;
         }
     }
 }

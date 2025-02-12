@@ -123,9 +123,7 @@ namespace SharpGrad.DifEngine
             gradient[i] = value;
         }
         public void ClearGradient()
-        {
-            Array.Fill(gradient, TType.Zero);
-        }
+            => Array.Fill(gradient, TType.Zero);
 
         protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
@@ -137,6 +135,24 @@ namespace SharpGrad.DifEngine
                 }
                 TopOSort.Add(this);
             }
+        }
+
+        private int gradientCount = 0;
+
+        internal void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList, Value<TType> LeftOperand, Expression gradientExpression)
+        {
+            Expression assign;
+            if (gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
+            {
+                assign = Expression.AddAssign(leftGrad, gradientExpression);
+            }
+            else
+            {
+                leftGrad = Expression.Variable(typeof(TType), $"grad{gradientCount++}");
+                gradientExpressions[LeftOperand] = leftGrad;
+                assign = Expression.Assign(leftGrad, gradientExpression);
+            }
+            expressionList.Add(assign);
         }
 
         public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand);
@@ -153,19 +169,6 @@ namespace SharpGrad.DifEngine
             else
             {
                 throw new InvalidOperationException($"Expression list should be empty. Found {forwardExpressionList.Count} expressions.");
-            }
-        }
-        protected void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> forwardExpressionList, Value<TType> LeftOperand, Expression gradientExpression)
-        {
-            if (!gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
-            {
-                leftGrad = Expression.Variable(typeof(TType), $"{LeftOperand.Name}_grad");
-                gradientExpressions[LeftOperand] = leftGrad;
-                forwardExpressionList.Add(Expression.Assign(leftGrad, gradientExpression));
-            }
-            else
-            {
-                forwardExpressionList.Add(Expression.AddAssign(leftGrad, gradientExpression));
             }
         }
 

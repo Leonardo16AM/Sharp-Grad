@@ -16,13 +16,12 @@ namespace SharpGrad.Operator
         internal override Expr GetForwardComputation(Expr operand)
             => -operand;
 
-        protected override void ComputeGradient(
+        protected override Expression ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList)
         {
-            Expr grad = gradientExpressions[this];
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, -grad);
+            return Expression.Negate(gradientExpressions[this]);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace SharpGrad.Operator
     public abstract class NariOpValue<TType> : Value<TType>
     where TType : INumber<TType>
     {
-        public delegate void ComputeGradientDelegate(
+        public delegate Expression ComputeGradientDelegate(
             Dictionary<Value<TType>, Expression> VariableExpressions,
             Dictionary<Value<TType>, Expression> GradientExpressions,
             List<Expression> expressionList);
@@ -69,6 +69,7 @@ namespace SharpGrad.Operator
         private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
+        #region Forward pass
         public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, List<Value<TType>> topOSort)
         {
             for (int i = 0; i < topOSort.Count; i++)
@@ -77,7 +78,10 @@ namespace SharpGrad.Operator
                 Debug.Assert(!variableExpressions.ContainsKey(e));
                 if (e is Constant<TType> c)
                 {
-                    variableExpressions[c] = c.GetExpression(index);
+                    Expression variable = Expression.Variable(typeof(TType), c.Name);
+                    variableExpressions[c] = variable;
+                    Expression element = c.GetExpression(index);
+                    Expression assign = Expression.Assign(variable, element);
                 }
                 else if (e is Variable<TType> v)
                 {
@@ -187,7 +191,9 @@ namespace SharpGrad.Operator
                 return forwardLambda;
             }
         }
+        #endregion
 
+        #region Backward pass
         public static List<Expression> BuildBackwardExpressionList(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
@@ -217,7 +223,10 @@ namespace SharpGrad.Operator
                 {
                     for (int j = 0; j < n.ChildrensCompute.Length; j++)
                     {
-                        n.ChildrensCompute[j](variableExpressions, gradientExpressions, backwardExpressionList);
+                        var grad = n.ChildrensCompute[j](variableExpressions, gradientExpressions, backwardExpressionList);
+                        var operand = n.Operands[j];
+                        operand.AssignGradientExpession(gradientExpressions, backwardExpressionList, operand, grad);
+
                     }
                 }
                 else
@@ -247,7 +256,7 @@ namespace SharpGrad.Operator
 
                     // Current index and assign it
                     ParameterExpression current = Expression.Variable(typeof(Dimdices), nameof(current));
-                    Expression currentExpression = Expression.PropertyOrField(dimdexer, nameof(Dimdexer.Current));
+                    Expression currentExpression = Expression.Property(dimdexer, nameof(Dimdexer.Current));
                     Expression assignCurrent = Expression.Assign(current, currentExpression);
 
 
@@ -280,8 +289,14 @@ namespace SharpGrad.Operator
                     BuildBackwardExpressionList(variableExpressions, gradientExpressions, backwardExpressionList, current, topOSort);
 
                     // Build block and compile Expression
-                    List<ParameterExpression> parameters = variableExpressions.Values.OfType<ParameterExpression>().ToList();
-                    parameters.AddRange(gradientExpressions.Values.OfType<ParameterExpression>());
+                    HashSet<ParameterExpression> parameters = [.. variableExpressions.Values.OfType<ParameterExpression>()];
+                    foreach (var e in gradientExpressions)
+                    {
+                        if (e.Value is ParameterExpression parameter)
+                        {
+                            parameters.Add(parameter);
+                        }
+                    }
                     parameters.Add(current);
                     parameters.Add(dimdexer);
 
@@ -307,6 +322,7 @@ namespace SharpGrad.Operator
                 }
                 return backwardLambda;
             }
+            #endregion
         }
     }
 }
