@@ -13,7 +13,7 @@ namespace TestProject
             Variable<T> a = new(T.CreateTruncating(1.5), "a");
             Variable<T> b = new(T.CreateTruncating(2.0), "b");
             var c = a.Pow(b);
-            var cFunc = c.ForwardLambda;
+            var cFunc = c.Forward;
             cFunc();
             Debug.Assert(c.Data[0] == T.Pow(T.CreateTruncating(1.5), T.CreateTruncating(2.0)));
 

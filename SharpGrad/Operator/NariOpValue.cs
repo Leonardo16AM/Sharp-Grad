@@ -37,7 +37,7 @@ namespace SharpGrad.Operator
 
         public static Dimension[] GetShape(Value<TType>[] childs)
         {
-            HashSet<Dimension> shape = new(childs.SelectMany(c => c.Shape));
+            HashSet<Dimension> shape = [.. childs.SelectMany(c => c.Shape)];
             return [.. shape];
         }
 
@@ -76,37 +76,22 @@ namespace SharpGrad.Operator
             {
                 Value<TType> e = topOSort[i];
                 Debug.Assert(!variableExpressions.ContainsKey(e));
-                if (e is Constant<TType> c)
-                {
-                    Expression variable = Expression.Variable(typeof(TType), c.Name);
-                    variableExpressions[c] = variable;
-                    Expression element = c.GetExpression(index);
-                    Expression assign = Expression.Assign(variable, element);
-                }
-                else if (e is Variable<TType> v)
-                {
-                    Expression variable = Expression.Variable(typeof(TType), v.Name);
-                    variableExpressions[v] = variable;
-                    Expression element = Expression.MakeIndex(Expression.Constant(v), typeof(Value<TType>).GetProperty("Item"), [index]);
-                    Expression assign = Expression.Assign(variable, element);
-                    forwardExpressionList.Add(assign);
-                }
-                else if (topOSort[i] is NariOpValue<TType> n)
-                {
-                    Expression variable = Expression.Variable(typeof(TType), n.Name);
-                    variableExpressions[n] = variable;
-                    Expression forwardComputation = n.GetForwardComputation(variableExpressions, index);
-                    Expression assign = Expression.Assign(variable, forwardComputation);
-                    forwardExpressionList.Add(assign);
-                }
-                else
-                {
-                    throw new InvalidOperationException("Unknown type");
-                }
-            }
 
+                Expression variable = Expression.Variable(typeof(TType), e.ToString().Replace(" ", string.Empty));
+                variableExpressions[e] = variable;
+                Expression element = e switch
+                {
+                    Constant<TType> c => Expression.MakeIndex(Expression.Constant(c), typeof(Constant<TType>).GetProperty("Item"), [index]),
+                    Variable<TType> v => Expression.MakeIndex(Expression.Constant(v), typeof(Variable<TType>).GetProperty("Item"), [index]),
+                    NariOpValue<TType> n => n.GetForwardComputation(variableExpressions, index),
+                    _ => throw new InvalidOperationException("Unknown type")
+                };
+                forwardExpressionList.Add(Expression.Assign(variable, element));
+            }
+            topOSort[^1].IsOutput = true;
             return forwardExpressionList;
         }
+
         public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, Expression index, List<Value<TType>> topOSort)
             => BuildForwardExpressionList(variableExpressions, [], index, topOSort);
 
@@ -121,8 +106,12 @@ namespace SharpGrad.Operator
                 {
                     if (all || e.Key.IsOutput)
                     {
-                        Expression arrayAccess = Expression.MakeIndex(Expression.Constant(e.Key), typeof(Value<TType>).GetProperty("Item"), [index]);
-                        forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
+                        if (e.Key is not Constant<TType>)
+                        {
+
+                            Expression arrayAccess = Expression.MakeIndex(Expression.Constant(e.Key), typeof(Value<TType>).GetProperty("Item"), [index]);
+                            forwardExpressionList.Add(Expression.Assign(arrayAccess, parameter));
+                        }
                         parameters.Add(parameter);
                     }
                 }
@@ -133,64 +122,62 @@ namespace SharpGrad.Operator
 
 
         private Action? forwardLambda;
-        public Action ForwardLambda
+        private Action GetForwardLambda()
         {
-            get
+            if (forwardLambda is null)
             {
-                if (forwardLambda is null)
+                if (topOSort is null)
                 {
-                    if (topOSort is null)
-                    {
-                        topOSort = [];
-                        DFS(topOSort, []);
-                    }
-                    variableExpressions.Clear();
-
-                    // Create Dimdexer and assign it
-                    ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
-                    Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
-                    Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
-                    Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
-
-                    // Current index and assign it
-                    ParameterExpression current = Expression.Variable(typeof(Dimdices), nameof(current));
-                    Expression currentExpression = Expression.PropertyOrField(dimdexer, nameof(Dimdexer.Current));
-                    Expression assignCurrent = Expression.Assign(current, currentExpression);
-
-                    // Get forward expression list
-                    List<Expression> forwardExpressionList = [assignCurrent];
-                    BuildForwardExpressionList(variableExpressions, forwardExpressionList, current, topOSort);
-
-                    // Backup all parameters to data
-                    List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, current);
-                    parameters.Add(current);
-                    parameters.Add(dimdexer);
-
-                    // Condition MoveNext
-                    MethodInfo methodMoveNext = typeof(Dimdexer).GetMethod(nameof(Dimdexer.MoveNext))!;
-
-                    // Build loop expression until 'dimdexer.MoveNext()' is false
-                    LabelTarget breakLabel = Expression.Label(nameof(breakLabel));
-                    Expression loop = Expression.Loop(
-                        Expression.IfThenElse(
-                            Expression.Call(dimdexer, methodMoveNext),
-                            Expression.Block(forwardExpressionList),
-                            Expression.Break(breakLabel)
-                        ),
-                        breakLabel
-                    );
-
-                    // Build block and compile Expression
-                    Expression finalBlock = Expression.Block(
-                        parameters,
-                        assignDimdexer,
-                        loop);
-
-                    forwardLambda = Expression.Lambda<Action>(finalBlock).Compile();
+                    topOSort = [];
+                    DFS(topOSort, []);
                 }
-                return forwardLambda;
+                variableExpressions.Clear();
+
+                // Create Dimdexer and assign it
+                ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
+                Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
+                Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
+
+                // Current index and assign it
+                ParameterExpression current = Expression.Variable(typeof(Dimdices), nameof(current));
+                Expression currentExpression = Expression.PropertyOrField(dimdexer, nameof(Dimdexer.Current));
+                Expression assignCurrent = Expression.Assign(current, currentExpression);
+
+                // Get forward expression list
+                List<Expression> forwardExpressionList = [assignCurrent];
+                BuildForwardExpressionList(variableExpressions, forwardExpressionList, current, topOSort);
+
+                // Backup all parameters to data
+                List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, current);
+                parameters.Add(current);
+                parameters.Add(dimdexer);
+
+                // Condition MoveNext
+                MethodInfo methodMoveNext = typeof(Dimdexer).GetMethod(nameof(Dimdexer.MoveNext))!;
+
+                // Build loop expression until 'dimdexer.MoveNext()' is false
+                LabelTarget breakLabel = Expression.Label(nameof(breakLabel));
+                Expression loop = Expression.Loop(
+                    Expression.IfThenElse(
+                        Expression.Call(dimdexer, methodMoveNext),
+                        Expression.Block(forwardExpressionList),
+                        Expression.Break(breakLabel)
+                    ),
+                    breakLabel
+                );
+
+                // Build block and compile Expression
+                Expression finalBlock = Expression.Block(
+                    parameters,
+                    assignDimdexer,
+                    loop);
+
+                forwardLambda = Expression.Lambda<Action>(finalBlock).Compile();
             }
+            return forwardLambda;
         }
+        public void Forward() => GetForwardLambda()();
         #endregion
 
         #region Backward pass
@@ -223,10 +210,10 @@ namespace SharpGrad.Operator
                 {
                     for (int j = 0; j < n.ChildrensCompute.Length; j++)
                     {
+                        /// TODO : Avoid computing gradient for constant or unnecessary variables
                         var grad = n.ChildrensCompute[j](variableExpressions, gradientExpressions, backwardExpressionList);
                         var operand = n.Operands[j];
-                        operand.AssignGradientExpession(gradientExpressions, backwardExpressionList, operand, grad);
-
+                        operand.AssignGradientExpession(gradientExpressions, backwardExpressionList, index, operand, grad);
                     }
                 }
                 else
@@ -238,91 +225,90 @@ namespace SharpGrad.Operator
         }
 
         private Action? backwardLambda;
-        public Action BackwardLambda
+        private Action GetBackwardLambda()
         {
-            get
+            if (backwardLambda is null)
             {
-                if (backwardLambda is null)
+                //InitGradient();
+                //gradientExpressions.Clear();
+                gradientExpressions.Add(this, Expression.Constant(TType.One));
+
+                // Create Dimdexer and assign it
+                ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
+                Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
+                Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
+
+                // Current index and assign it
+                ParameterExpression current = Expression.Variable(typeof(Dimdices), nameof(current));
+                Expression currentExpression = Expression.Property(dimdexer, nameof(Dimdexer.Current));
+                Expression assignCurrent = Expression.Assign(current, currentExpression);
+
+
+                List<Expression> backwardExpressionList = [assignCurrent];
+
+                if (topOSort is null)
                 {
-                    ClearGradient();
-                    gradientExpressions.Clear();
-                    gradientExpressions.Add(this, Expression.Constant(TType.One));
-
-                    // Create Dimdexer and assign it
-                    ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
-                    Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
-                    Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
-                    Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
-
-                    // Current index and assign it
-                    ParameterExpression current = Expression.Variable(typeof(Dimdices), nameof(current));
-                    Expression currentExpression = Expression.Property(dimdexer, nameof(Dimdexer.Current));
-                    Expression assignCurrent = Expression.Assign(current, currentExpression);
-
-
-                    List<Expression> backwardExpressionList = [assignCurrent];
-
-                    if (topOSort is null)
-                    {
-                        topOSort = [];
-                        DFS(topOSort, []);
-                        variableExpressions.Clear();
-                        BuildForwardExpressionList(variableExpressions, backwardExpressionList, current, topOSort);
-                        SaveParameters(variableExpressions, backwardExpressionList, current, false);
-                    }
-                    else
-                    {
-                        // Load data
-                        foreach (var e in variableExpressions)
-                        {
-                            if (e.Value is ParameterExpression parameter)
-                            {
-                                Expression arrayAccess = Expression.MakeIndex(
-                                    Expression.Constant(e.Key),
-                                    typeof(Value<TType>).GetProperty("Item"),
-                                    [current]);
-                                backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
-                            }
-                        }
-                    }
-
-                    BuildBackwardExpressionList(variableExpressions, gradientExpressions, backwardExpressionList, current, topOSort);
-
-                    // Build block and compile Expression
-                    HashSet<ParameterExpression> parameters = [.. variableExpressions.Values.OfType<ParameterExpression>()];
-                    foreach (var e in gradientExpressions)
+                    topOSort = [];
+                    DFS(topOSort, []);
+                    variableExpressions.Clear();
+                    BuildForwardExpressionList(variableExpressions, backwardExpressionList, current, topOSort);
+                    SaveParameters(variableExpressions, backwardExpressionList, current, false);
+                }
+                else
+                {
+                    // Load forward variables
+                    /// TODO : Limit to only load non-constant or scalar variables. Load constant and scalar should be done before the loop
+                    foreach (var e in variableExpressions)
                     {
                         if (e.Value is ParameterExpression parameter)
                         {
-                            parameters.Add(parameter);
+                            Expression arrayAccess = Expression.MakeIndex(
+                                Expression.Constant(e.Key),
+                                typeof(Value<TType>).GetProperty("Item"),
+                                [current]);
+                            backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
                         }
                     }
-                    parameters.Add(current);
-                    parameters.Add(dimdexer);
-
-                    // Condition MoveNext
-                    MethodInfo methodMoveNext = typeof(Dimdexer).GetMethod(nameof(Dimdexer.MoveNext))!;
-
-                    // Build loop expression until 'dimdexer.MoveNext()' is false
-                    LabelTarget breakLabel = Expression.Label(nameof(breakLabel));
-                    Expression loop = Expression.Loop(
-                        Expression.IfThenElse(
-                            Expression.Call(dimdexer, methodMoveNext),
-                            Expression.Block(backwardExpressionList),
-                            Expression.Break(breakLabel)
-                        ),
-                        breakLabel
-                    );
-
-                    Expression backwardExpression = Expression.Block(
-                        parameters,
-                        assignDimdexer,
-                        loop);
-                    backwardLambda = Expression.Lambda<Action>(backwardExpression).Compile();
                 }
-                return backwardLambda;
+
+                BuildBackwardExpressionList(variableExpressions, gradientExpressions, backwardExpressionList, current, topOSort);
+
+                // Build block and compile Expression
+                HashSet<ParameterExpression> parameters = [.. variableExpressions.Values.OfType<ParameterExpression>()];
+                foreach (var e in gradientExpressions)
+                {
+                    if (e.Value is ParameterExpression parameter)
+                    {
+                        parameters.Add(parameter);
+                    }
+                }
+                parameters.Add(current);
+                parameters.Add(dimdexer);
+
+                // Condition MoveNext
+                MethodInfo methodMoveNext = typeof(Dimdexer).GetMethod(nameof(Dimdexer.MoveNext))!;
+
+                // Build loop expression until 'dimdexer.MoveNext()' is false
+                LabelTarget breakLabel = Expression.Label(nameof(breakLabel));
+                Expression loop = Expression.Loop(
+                    Expression.IfThenElse(
+                        Expression.Call(dimdexer, methodMoveNext),
+                        Expression.Block(backwardExpressionList),
+                        Expression.Break(breakLabel)
+                    ),
+                    breakLabel
+                );
+
+                Expression backwardExpression = Expression.Block(
+                    parameters,
+                    assignDimdexer,
+                    loop);
+                backwardLambda = Expression.Lambda<Action>(backwardExpression).Compile();
             }
-            #endregion
+            return backwardLambda;
         }
+        public void Backward() => GetBackwardLambda()();
+        #endregion
     }
 }

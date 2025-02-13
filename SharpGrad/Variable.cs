@@ -9,7 +9,7 @@ namespace SharpGrad.DifEngine
     {
         private static int InstanceCount = 0;
 
-        public new TType[] Data { get => data; set => data = value; }
+        public new TType this[Dimdices indices] { get =>base[indices]; set => base[indices] = value; }
 
         public Variable(TType[] data, Dimension[] shape, string name)
             : base(shape, name)

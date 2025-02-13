@@ -25,7 +25,7 @@ namespace TestProject
 
             Debug.WriteLine("d[3] = a[3] + b[3]");
             var d = a + b;
-            var dFunc = d.ForwardLambda;
+            var dFunc = d.Forward;
             dFunc();
             Debug.Assert(d.Data[0] == T.CreateTruncating(3.5), $"d[0] = {d.Data[0]}. Expected {T.CreateTruncating(3.5)}");
             Debug.WriteLine($"d[0] = {d.Data[0]} Expected {T.CreateTruncating(3.5)}");
@@ -36,7 +36,7 @@ namespace TestProject
 
             Debug.WriteLine("e = d[3] + c");
             var e = d + c;
-            var eFunc = e.ForwardLambda;
+            var eFunc = e.Forward;
             eFunc();
             Debug.Assert(e.Data[0] == T.CreateTruncating(5.5), $"e[0] = {e.Data[0]}. Expected {T.CreateTruncating(5.5)}");
             Debug.WriteLine($"e[0] = {e.Data[0]} Expected {T.CreateTruncating(5.5)}");
@@ -47,7 +47,7 @@ namespace TestProject
 
             Debug.WriteLine("f[3] = c + d[3]");
             var f = c + d;
-            var fFunc = f.ForwardLambda;
+            var fFunc = f.Forward;
             fFunc();
             Debug.Assert(f.Data[0] == T.CreateTruncating(5.5), $"f[0] = {f.Data[0]}. Expected {T.CreateTruncating(5.5)}");
             Debug.WriteLine($"f[0] = {f.Data[0]} Expected {T.CreateTruncating(5.5)}");

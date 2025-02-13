@@ -1,13 +1,10 @@
 ﻿using SharpGrad;
-using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 using SharpGrad.Operator;
-using System.Diagnostics;
 
 internal class Program
 {
-
     private static void Main(string[] args)
     {
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
@@ -22,7 +19,7 @@ internal class Program
         DataSet.Data[] preds = new DataSet.Data[v.Count];
 
         Dimension batch = new(v.Count);
-        float lr = 1e-4f;
+        float lr = 1e-5f;
         // List of input data
         var x1 = v.Select(d => (float)d.X[0]).ToArray();
         var x2 = v.Select(d => (float)d.X[1]).ToArray();
@@ -33,22 +30,25 @@ internal class Program
 
         // Build execution expression graph (no computation done here)
         Value<float>[] Y = cerebrin.Forward(X);
-        NariOpValue<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
+        NariOpValue<float> loss = Loss.MSE(Y, Ygt);
         loss.IsOutput = true;
 
         // Training loop
         float minLoss = float.MaxValue;
+        float lastLoss = 0;
+        int wait = 128;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr:E2} | Epoch: {i} / {epochs}");
             // Forward and backward pass
-            loss.ForwardLambda();
-            loss.BackwardLambda();
+            loss.Forward();
+            loss.Backward();
 
             // Build prediction data
-            for (int j = 0; j < Y[0].Size; j++)
+            foreach (Dimdices dimdices in new Dimdexer(Y[0].Shape))
             {
+                int j = dimdices[batch];
                 float d = Y[0].Data[j];
                 int val = Math.Abs(d - 1) < Math.Abs(d - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
@@ -66,13 +66,22 @@ internal class Program
             {
                 minLoss = loss.Data[0];
             }
-            else if(minLoss < loss.Data[0])
+            if (lastLoss == loss.Data[0])
             {
-                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                Console.WriteLine("Final loss: " + loss.Data[0]);
-                Console.WriteLine("Last epoch: " + i);
-                Console.WriteLine("Loss is increasing. Stopping training...");
-                break;
+                wait--;
+                if (wait <= 0)
+                {
+                    Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
+                    Console.WriteLine("Final loss: " + loss.Data[0]);
+                    Console.WriteLine("Last epoch: " + i);
+                    Console.WriteLine("Loss not progress. Stopping training...");
+                    break;
+                }
+            }
+            else
+            {
+                lastLoss = loss.Data[0];
+                wait = 128;
             }
         }
     }

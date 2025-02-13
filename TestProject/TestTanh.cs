@@ -13,7 +13,7 @@ namespace TestProject
         {
             Variable<T> a = new(T.CreateTruncating(1.5), "a");
             var c = a.Tanh();
-            var cFunc = c.ForwardLambda;
+            var cFunc = c.Forward;
             cFunc();
             var r = T.Tanh(T.CreateTruncating(1.5));
             Debug.Assert(c.Data[0] == r);

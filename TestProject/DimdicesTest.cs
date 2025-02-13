@@ -23,7 +23,7 @@ namespace TestProject
             Variable<float> c = new([10, 11], [Y], "c");
 
             var d = a + b;
-            d.ForwardLambda();
+            d.Forward();
             Assert.AreEqual(d.Data[0], a.Data[0] + b.Data[0]);
             Assert.AreEqual(d.Data[1], a.Data[1] + b.Data[0]);
             Assert.AreEqual(d.Data[2], a.Data[2] + b.Data[1]);
@@ -32,7 +32,7 @@ namespace TestProject
             Assert.AreEqual(d.Data[5], a.Data[5] + b.Data[2]);
 
             var e = a + c;
-            e.ForwardLambda();
+            e.Forward();
             Assert.AreEqual(e.Data[0], a.Data[0] + c.Data[0]);
             Assert.AreEqual(e.Data[1], a.Data[1] + c.Data[1]);
             Assert.AreEqual(e.Data[2], a.Data[2] + c.Data[0]);
@@ -41,7 +41,7 @@ namespace TestProject
             Assert.AreEqual(e.Data[5], a.Data[5] + c.Data[1]);
 
             var f = b + c;
-            f.ForwardLambda();
+            f.Forward();
             Assert.AreEqual(f.Data[0], b.Data[0] + c.Data[0]);
             Assert.AreEqual(f.Data[1], b.Data[0] + c.Data[1]);  
             Assert.AreEqual(f.Data[2], b.Data[1] + c.Data[0]);
@@ -50,7 +50,7 @@ namespace TestProject
             Assert.AreEqual(f.Data[5], b.Data[2] + c.Data[1]);
 
             var g = a + b + c;
-            g.ForwardLambda();
+            g.Forward();
             Assert.AreEqual(g.Data[0], a.Data[0] + b.Data[0] + c.Data[0]);
             Assert.AreEqual(g.Data[1], a.Data[1] + b.Data[0] + c.Data[1]);
             Assert.AreEqual(g.Data[2], a.Data[2] + b.Data[1] + c.Data[0]);

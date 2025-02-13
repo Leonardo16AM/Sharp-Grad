@@ -13,7 +13,7 @@ namespace TestProject
         {
             Variable<T> a = new(T.CreateTruncating(1.5), "a");
             var c = a.ReLU();
-            var cFunc = c.ForwardLambda;
+            var cFunc = c.Forward;
             cFunc();
             var r = T.Max(T.Zero, T.CreateTruncating(1.5));
             Debug.Assert(c.Data[0] == r);

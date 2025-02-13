@@ -2,6 +2,7 @@
 using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
@@ -82,19 +83,37 @@ namespace SharpGrad.DifEngine
                 {
                     return data[0];
                 }
-                int[] localIndices = GetLocalIndices(indices);
-                long i = Shape.GetLinearIndex(localIndices);
+
+                long i;
+                if (indices.Shape.SequenceEqual(Shape))
+                {
+                    i = indices.GetLinearIndex();
+                }
+                else
+                {
+                    int[] localIndices = GetLocalIndices(indices);
+                    i = Shape.GetLinearIndex(localIndices);
+                }
                 return data[i];
             }
-            set
+            internal set
             {
                 if (IsScalar)
                 {
                     data[0] = value;
                     return;
                 }
-                int[] localIndices = GetLocalIndices(indices);
-                long i = Shape.GetLinearIndex(localIndices);
+
+                long i;
+                if(indices.Shape.SequenceEqual(Shape))
+                {
+                    i = indices.GetLinearIndex();
+                }
+                else
+                {
+                    int[] localIndices = GetLocalIndices(indices);
+                    i = Shape.GetLinearIndex(localIndices);
+                }
                 data[i] = value;
             }
         }
@@ -106,8 +125,17 @@ namespace SharpGrad.DifEngine
             {
                 return gradient[0];
             }
-            int[] localIndices = GetLocalIndices(indices);
-            long i = Shape.GetLinearIndex(localIndices);
+
+            long i;
+            if (indices.Shape.SequenceEqual(Shape))
+            {
+                i = indices.GetLinearIndex();
+            }
+            else
+            {
+                int[] localIndices = GetLocalIndices(indices);
+                i = Shape.GetLinearIndex(localIndices);
+            }
             return gradient[i];
         }
 
@@ -118,12 +146,22 @@ namespace SharpGrad.DifEngine
                 gradient[0] = value;
                 return;
             }
-            int[] localIndices = GetLocalIndices(indices);
-            long i = Shape.GetLinearIndex(localIndices);
+            long i;
+
+            if (indices.Shape.SequenceEqual(Shape))
+            {
+                i = indices.GetLinearIndex();
+            }
+            else
+            {
+                int[] localIndices = GetLocalIndices(indices);
+                i = Shape.GetLinearIndex(localIndices);
+            }
             gradient[i] = value;
         }
-        public void ClearGradient()
-            => Array.Fill(gradient, TType.Zero);
+
+        public void InitGradient()
+            => Array.Fill(gradient, TType.One);
 
         protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
         {
@@ -137,22 +175,27 @@ namespace SharpGrad.DifEngine
             }
         }
 
-        private int gradientCount = 0;
+        private static int gradientCount = 0;
 
-        internal void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList, Value<TType> LeftOperand, Expression gradientExpression)
+        internal void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList, Expression index, Value<TType> LeftOperand, Expression gradientExpression)
         {
-            Expression assign;
-            if (gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
-            {
-                assign = Expression.AddAssign(leftGrad, gradientExpression);
-            }
-            else
+            if (!gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
             {
                 leftGrad = Expression.Variable(typeof(TType), $"grad{gradientCount++}");
                 gradientExpressions[LeftOperand] = leftGrad;
-                assign = Expression.Assign(leftGrad, gradientExpression);
+                // Get the gradient of the left operand
+                MethodInfo getGradientMethod = typeof(Value<TType>).GetMethod(nameof(GetGradient), [typeof(Dimdices)])!;
+                Expression getGradientCall = Expression.Call(Expression.Constant(LeftOperand), getGradientMethod, index);
+                // Assign the gradient to the left operand
+                expressionList.Add(Expression.Assign(leftGrad, getGradientCall));
             }
-            expressionList.Add(assign);
+            expressionList.Add(Expression.AddAssign(leftGrad, gradientExpression));
+
+
+            // Add this grad to this value using a call to AddGradient
+            MethodInfo addGradientMethod = typeof(Value<TType>).GetMethod(nameof(SetGradient), [typeof(Dimdices), typeof(TType)])!;
+            Expression addGradientCall = Expression.Call(Expression.Constant(this), addGradientMethod, index, leftGrad);
+            expressionList.Add(addGradientCall);
         }
 
         public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand);
