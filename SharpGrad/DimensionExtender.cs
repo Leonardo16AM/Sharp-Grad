@@ -22,6 +22,8 @@ namespace SharpGrad.DifEngine
 
         public static long GetLinearIndex(this Dimension[] shape, int[] indices)
         {
+            if (shape.Length == 0 && indices.Length == 1)
+                return 0;
             if(shape.Length != indices.Length)
             {
                 throw new ArgumentException($"The shape size {shape.Size()} is not equal to the indices length {indices.Length}");

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace SharpGrad.DifEngine
 {
@@ -47,73 +48,53 @@ namespace SharpGrad.DifEngine
         {
             if (indices.IsScalar)
             {
-                throw new ArgumentException("Trying to access a non-scalar value with scalar indices.");
+                return [0];
             }
-            int[] localIndice = new int[Shape.Length];
-            for (int i = localIndice.Length -1; i >= 0; i--)
+            if (indices.Shape.SequenceEqual(Shape))
             {
-                Dimension dim = Shape[i];
-                Index index = indices[dim];
-                int idx = index.Value;
-                if (index.IsFromEnd)
-                {
-                    if (idx > dim.Size)
-                    {
-                        throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
-                    }
-                    localIndice[i] = dim.Size - idx;
-                }
-                else
-                {
-                    if (idx >= dim.Size)
-                    {
-                        throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
-                    }
-                    localIndice[i] = idx;
-                }
+                return [.. indices.Indices];
             }
-            return localIndice;
+            else
+            {
+                int[] localIndice = new int[Shape.Length];
+                for (int i = localIndice.Length - 1; i >= 0; i--)
+                {
+                    Dimension dim = Shape[i];
+                    Index index = indices[dim];
+                    int idx = index.Value;
+                    if (index.IsFromEnd)
+                    {
+                        if (idx > dim.Size)
+                        {
+                            throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
+                        }
+                        localIndice[i] = dim.Size - idx;
+                    }
+                    else
+                    {
+                        if (idx >= dim.Size)
+                        {
+                            throw new IndexOutOfRangeException($"Index {idx} is out of range for dimension {dim.Size}");
+                        }
+                        localIndice[i] = idx;
+                    }
+                }
+                return localIndice;
+            }
         }
 
         public TType this[Dimdices indices]
         {
             get
             {
-                if(IsScalar)
-                {
-                    return data[0];
-                }
-
-                long i;
-                if (indices.Shape.SequenceEqual(Shape))
-                {
-                    i = indices.GetLinearIndex();
-                }
-                else
-                {
-                    int[] localIndices = GetLocalIndices(indices);
-                    i = Shape.GetLinearIndex(localIndices);
-                }
+                int[] localIndices = GetLocalIndices(indices);
+                long i = Shape.GetLinearIndex(localIndices);
                 return data[i];
             }
             internal set
             {
-                if (IsScalar)
-                {
-                    data[0] = value;
-                    return;
-                }
-
-                long i;
-                if(indices.Shape.SequenceEqual(Shape))
-                {
-                    i = indices.GetLinearIndex();
-                }
-                else
-                {
-                    int[] localIndices = GetLocalIndices(indices);
-                    i = Shape.GetLinearIndex(localIndices);
-                }
+                int[] localIndices = GetLocalIndices(indices);
+                long i = Shape.GetLinearIndex(localIndices);
                 data[i] = value;
             }
         }
@@ -121,57 +102,32 @@ namespace SharpGrad.DifEngine
         private TType[] gradient;
         public TType GetGradient(Dimdices indices)
         {
-            if (IsScalar)
-            {
-                return gradient[0];
-            }
-
-            long i;
-            if (indices.Shape.SequenceEqual(Shape))
-            {
-                i = indices.GetLinearIndex();
-            }
-            else
-            {
-                int[] localIndices = GetLocalIndices(indices);
-                i = Shape.GetLinearIndex(localIndices);
-            }
+            int[] localIndices = GetLocalIndices(indices);
+            long i = Shape.GetLinearIndex(localIndices);
             return gradient[i];
         }
 
         public void SetGradient(Dimdices indices, TType value)
         {
-            if (IsScalar)
-            {
-                gradient[0] = value;
-                return;
-            }
-            long i;
-
-            if (indices.Shape.SequenceEqual(Shape))
-            {
-                i = indices.GetLinearIndex();
-            }
-            else
-            {
-                int[] localIndices = GetLocalIndices(indices);
-                i = Shape.GetLinearIndex(localIndices);
-            }
+            int[] localIndices = GetLocalIndices(indices);
+            long i = Shape.GetLinearIndex(localIndices);
             gradient[i] = value;
         }
 
-        public void InitGradient()
-            => Array.Fill(gradient, TType.One);
-
-        protected void DFS(List<Value<TType>> TopOSort, HashSet<Value<TType>> Visited)
+        protected void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
         {
-            if (Visited.Add(this))
+            if (usageCount.TryAdd(this, 0))
             {
                 foreach (var child in Operands)
                 {
-                    child.DFS(TopOSort, Visited);
+                    child.DFS(topOSort, usageCount);
+                    usageCount[child]++;
                 }
-                TopOSort.Add(this);
+                topOSort.Add(this);
+            }
+            else
+            {
+                usageCount[this]++;
             }
         }
 

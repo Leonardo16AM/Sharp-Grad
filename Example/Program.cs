@@ -59,7 +59,7 @@ internal class Program
 
             // Print loss and scatter plot
             Console.WriteLine($"Loss: {loss.Data[0]:E3} / {minLoss:E3}");
-            DataSet.Scatter(v, preds);
+            if (i % 10 == 0) DataSet.Scatter(v, preds);
             if (minLoss > loss.Data[0])
             {
                 minLoss = loss.Data[0];

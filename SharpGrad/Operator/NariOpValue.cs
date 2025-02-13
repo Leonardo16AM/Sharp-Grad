@@ -66,6 +66,8 @@ namespace SharpGrad.Operator
         }
 
         private List<Value<TType>>? topOSort = null;
+        Dictionary<Value<TType>, int>? usageCount = null;
+
         private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
@@ -126,10 +128,11 @@ namespace SharpGrad.Operator
         {
             if (forwardLambda is null)
             {
-                if (topOSort is null)
+                if (topOSort is null || usageCount is null)
                 {
                     topOSort = [];
-                    DFS(topOSort, []);
+                    usageCount = [];
+                    DFS(topOSort, usageCount);
                 }
                 variableExpressions.Clear();
 
@@ -247,10 +250,12 @@ namespace SharpGrad.Operator
 
                 List<Expression> backwardExpressionList = [assignCurrent];
 
-                if (topOSort is null)
+                if (topOSort is null || usageCount is null)
                 {
                     topOSort = [];
-                    DFS(topOSort, []);
+                    usageCount = [];
+                    DFS(topOSort, usageCount);
+
                     variableExpressions.Clear();
                     BuildForwardExpressionList(variableExpressions, backwardExpressionList, current, topOSort);
                     SaveParameters(variableExpressions, backwardExpressionList, current, false);
