@@ -35,8 +35,6 @@ internal class Program
 
         // Training loop
         float minLoss = float.MaxValue;
-        float lastLoss = 0;
-        int wait = 128;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
@@ -65,23 +63,6 @@ internal class Program
             if (minLoss > loss.Data[0])
             {
                 minLoss = loss.Data[0];
-            }
-            if (lastLoss == loss.Data[0])
-            {
-                wait--;
-                if (wait <= 0)
-                {
-                    Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                    Console.WriteLine("Final loss: " + loss.Data[0]);
-                    Console.WriteLine("Last epoch: " + i);
-                    Console.WriteLine("Loss not progress. Stopping training...");
-                    break;
-                }
-            }
-            else
-            {
-                lastLoss = loss.Data[0];
-                wait = 128;
             }
         }
     }
