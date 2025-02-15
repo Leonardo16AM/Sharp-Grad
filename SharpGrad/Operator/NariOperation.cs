@@ -254,11 +254,7 @@ namespace SharpGrad.Operator
                     {
                         if (e.Value is ParameterExpression parameter)
                         {
-                            Expression arrayAccess = Expression.MakeIndex(
-                                Expression.Constant(e.Key),
-                                typeof(Value<TType>).GetProperty("Item"),
-                                [current]);
-                            backwardExpressionList.Add(Expression.Assign(parameter, arrayAccess));
+                            backwardExpressionList.Add(Expression.Assign(parameter, e.Key.Get(current)));
                         }
                     }
                 }
