@@ -7,7 +7,7 @@ using System.Numerics;
 namespace SharpGrad.Operators
 {
     public class PowValue<TType> :
-            BinaryOpValue<TType>
+            BinaryOperation<TType>
             where TType : INumber<TType>, IPowerFunctions<TType>, ILogarithmicFunctions<TType>
     {
         public PowValue(Value<TType> left, Value<TType> right)

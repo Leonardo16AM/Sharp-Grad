@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace SharpGrad.Operator
 {
-    public class NegValue<TType> : UnariOpValue<TType>
+    public class NegValue<TType> : UnariOperation<TType>
         where TType : INumber<TType>
     {
         public NegValue(Value<TType> value)

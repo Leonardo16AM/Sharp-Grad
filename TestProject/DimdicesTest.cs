@@ -15,8 +15,8 @@ namespace TestProject
         [TestMethod]
         public void AddMatrixAndVector()
         {
-            Dimension X = new(3);
-            Dimension Y = new(2);
+            Dimension X = new(nameof(X), 3);
+            Dimension Y = new(nameof(Y), 2);
 
             Variable<float> a = new([1, 2, 3, 4, 5, 6], [X, Y], "a");
             Variable<float> b = new([7, 8, 9], [X], "b");
@@ -64,8 +64,8 @@ namespace TestProject
         [TestMethod]
         public void TestIndices()
         {
-            Dimension X = new(3);
-            Dimension Y = new(2);
+            Dimension X = new(nameof(X), 3);
+            Dimension Y = new(nameof(Y), 2);
             Dimension[] shape = [X, Y];
 
             Variable<float> a = new([1, 2, 3, 4, 5, 6], shape, "a");

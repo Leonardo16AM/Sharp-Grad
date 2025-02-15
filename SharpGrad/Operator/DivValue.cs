@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class DivValue<TType> : BinaryOpValue<TType>
+    public class DivValue<TType> : BinaryOperation<TType>
         where TType : INumber<TType>
     {
         public DivValue(Value<TType> left, Value<TType> right)

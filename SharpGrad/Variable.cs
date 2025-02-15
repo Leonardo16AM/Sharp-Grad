@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 
 namespace SharpGrad.DifEngine
 {
@@ -40,6 +41,13 @@ namespace SharpGrad.DifEngine
                 forwardExpressionList.Add(Expression.Assign(operand, arrayAccess));
             }
             return true;
+        }
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
+        {
+            Expression variable = Expression.Variable(typeof(TType), Name);
+            variableExpressions[this] = variable;
+            forwardExpressionList.Add(Expression.Assign(variable, Get(index)));
+            return variable;
         }
 
         public static implicit operator Variable<TType>(TType d)

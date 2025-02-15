@@ -2,6 +2,7 @@
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 using SharpGrad.Operator;
+using System.Text.RegularExpressions;
 
 internal class Program
 {
@@ -18,7 +19,7 @@ internal class Program
 
         DataSet.Data[] preds = new DataSet.Data[v.Count];
 
-        Dimension batch = new(v.Count);
+        Dimension batch = new(nameof(batch), v.Count);
         float lr = 1e-4f;
         // List of input data
         var x1 = v.Select(d => (float)d.X[0]).ToArray();
@@ -30,7 +31,7 @@ internal class Program
 
         // Build execution expression graph (no computation done here)
         Value<float>[] Y = cerebrin.Forward(X);
-        NariOpValue<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
+        NariOperation<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
         loss.IsOutput = true;
 
         // Training loop

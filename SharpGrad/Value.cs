@@ -13,6 +13,8 @@ namespace SharpGrad.DifEngine
     public abstract class Value<TType>
         where TType : INumber<TType>
     {
+        protected static PropertyInfo thisIndexerProperty = typeof(Value<TType>).GetProperty("Item")!;
+
         public Dimension[] Shape { get; private set; }
         public int Size => Shape.Size();
         public bool IsScalar => Shape.IsScalar();
@@ -99,6 +101,9 @@ namespace SharpGrad.DifEngine
             }
         }
 
+        public Expression Get(Expression index)
+            => Expression.MakeIndex(Expression.Constant(this), thisIndexerProperty, [index]);
+
         private TType[] gradient;
         public TType GetGradient(Dimdices indices)
         {
@@ -132,7 +137,6 @@ namespace SharpGrad.DifEngine
         }
 
         private static int gradientCount = 0;
-
         internal void AssignGradientExpession(Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList, Expression index, Value<TType> LeftOperand, Expression gradientExpression)
         {
             if (!gradientExpressions.TryGetValue(LeftOperand, out Expression? leftGrad))
@@ -155,6 +159,8 @@ namespace SharpGrad.DifEngine
         }
 
         public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand);
+        internal abstract Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index);
+
         public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
             => _ = GetAsOperand(variableExpressions, forwardExpressionList, index, out var _);
         public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)

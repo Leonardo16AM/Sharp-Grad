@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class AddValue<TType> : BinaryOpValue<TType>
+    public class AddValue<TType> : BinaryOperation<TType>
         where TType : INumber<TType>
     {
         public AddValue(Value<TType> left, Value<TType> right)

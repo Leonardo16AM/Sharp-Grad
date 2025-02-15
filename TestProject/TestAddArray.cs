@@ -17,7 +17,7 @@ namespace TestProject
             T _three = T.CreateTruncating(3.0);
             T _four = T.CreateTruncating(4.0);
 
-            Dimension dim = new(3);
+            Dimension dim = new(nameof(dim), 3);
             Dimension[] shape = [dim];
             Variable<T> a = new([_oneAndHalf, _two, _three], shape, "a");
             Variable<T> b = new([_two, _three, _four], shape, "b");

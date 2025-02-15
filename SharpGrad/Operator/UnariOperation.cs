@@ -6,8 +6,8 @@ using System.Numerics;
 
 namespace SharpGrad.Operator
 {
-    public abstract class UnariOpValue<TType> :
-        NariOpValue<TType>
+    public abstract class UnariOperation<TType> :
+        NariOperation<TType>
         where TType : INumber<TType>
     {
         public Value<TType> Operand => Operands[0];
@@ -18,17 +18,23 @@ namespace SharpGrad.Operator
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList);
 
-        public UnariOpValue(string name, Value<TType> child)
+        public UnariOperation(string name, Value<TType> child)
             : base(name, child)
         {
             ChildrensCompute = [ComputeGradient];
         }
         internal abstract Expr GetForwardComputation(Expr operand);
 
-        internal sealed override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+        internal sealed override Expression GetForwardComputation(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList,
+            Expression index)
         {
+            Expression variable = Expression.Variable(typeof(TType), Name);
+            variableExpressions[this] = variable;
             Expression operand = Operand.GetAsOperand(variableExpressions, index);
-            return GetForwardComputation(operand);
+            forwardExpressionList.Add(Expression.Assign(variable, GetForwardComputation(operand)));
+            return variable;
         }
 
         public override string ToString()

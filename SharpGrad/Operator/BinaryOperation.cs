@@ -1,14 +1,14 @@
 ﻿using SharpGrad.DifEngine;
 using SharpGrad.ExprLambda;
 using SharpGrad.Operator;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public abstract class BinaryOpValue<TType> :
-        NariOpValue<TType>
+    public abstract class BinaryOperation<TType> : NariOperation<TType>
         where TType : INumber<TType>
     {
         public Value<TType> LeftOperand => Operands[0];
@@ -25,18 +25,24 @@ namespace SharpGrad.Operators
 
         public sealed override ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public BinaryOpValue(string name, Value<TType> left, Value<TType> right)
+        public BinaryOperation(string name, Value<TType> left, Value<TType> right)
             : base(name, left, right)
         {
             ChildrensCompute = [ComputeLeftGradient, ComputeRightGradient];
         }
 
         protected abstract Expr GetForwardComputation(Expr left, Expr right);
-        internal sealed override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)
+        internal sealed override Expression GetForwardComputation(
+            Dictionary<Value<TType>, Expression> variableExpressions, 
+            List<Expression> forwardExpressionList,
+            Expression index)
         {
             Expression left = LeftOperand.GetAsOperand(variableExpressions, index);
             Expression right = RightOperand.GetAsOperand(variableExpressions, index);
-            return GetForwardComputation(left, right);
+            Expression variable = Expression.Variable(typeof(TType), Name);
+            variableExpressions[this] = variable;
+            forwardExpressionList.Add(Expression.Assign(variable, GetForwardComputation(left, right)));
+            return variable;
         }
 
         public override string ToString()

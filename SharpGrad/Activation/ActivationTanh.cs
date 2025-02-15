@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace SharpGrad.Activation
 {
-    public class ActivationTanh<TType> : UnariOpValue<TType>
+    public class ActivationTanh<TType> : UnariOperation<TType>
         where TType : IBinaryFloatingPointIeee754<TType>, IHyperbolicFunctions<TType>
     {
         public ActivationTanh(Value<TType> value)

@@ -1,9 +1,6 @@
 ﻿using SharpGrad.DifEngine;
-using SharpGrad.Operators;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,7 +9,7 @@ using System.Reflection;
 
 namespace SharpGrad.Operator
 {
-    public abstract class NariOpValue<TType> : Value<TType>
+    public abstract class NariOperation<TType> : Value<TType>
     where TType : INumber<TType>
     {
         public delegate Expression ComputeGradientDelegate(
@@ -41,14 +38,15 @@ namespace SharpGrad.Operator
             return [.. shape];
         }
 
-        public NariOpValue(string name, params Value<TType>[] childs)
-            : base(GetShape(childs), name, childs)
+        protected NariOperation(Dimension[] shape, string name, params Value<TType>[] childs)
+            : base(shape, name, childs)
+        { }
+        public NariOperation(string name, params Value<TType>[] childs)
+            : this(GetShape(childs), name, childs)
         {
             if (childs.Length < 1)
                 throw new ArgumentException($"Operator {name} must have at least one child.");
         }
-
-        internal abstract Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, Expression index);
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
@@ -58,9 +56,7 @@ namespace SharpGrad.Operator
                 {
                     Operands[i].BuildForward(variableExpressions, forwardExpressionList, index);
                 }
-                operand = Expression.Variable(typeof(TType), Name);
-                variableExpressions[this] = operand;
-                forwardExpressionList.Add(Expression.Assign(operand, GetForwardComputation(variableExpressions, index)));
+                GetForwardComputation(variableExpressions, forwardExpressionList, index);
             }
             return true;
         }
@@ -78,17 +74,7 @@ namespace SharpGrad.Operator
             {
                 Value<TType> e = topOSort[i];
                 Debug.Assert(!variableExpressions.ContainsKey(e));
-
-                Expression variable = Expression.Variable(typeof(TType), e.ToString().Replace(" ", string.Empty));
-                variableExpressions[e] = variable;
-                Expression element = e switch
-                {
-                    Constant<TType> c => Expression.MakeIndex(Expression.Constant(c), typeof(Constant<TType>).GetProperty("Item"), [index]),
-                    Variable<TType> v => Expression.MakeIndex(Expression.Constant(v), typeof(Variable<TType>).GetProperty("Item"), [index]),
-                    NariOpValue<TType> n => n.GetForwardComputation(variableExpressions, index),
-                    _ => throw new InvalidOperationException("Unknown type")
-                };
-                forwardExpressionList.Add(Expression.Assign(variable, element));
+                e.GetForwardComputation(variableExpressions, forwardExpressionList, index);
             }
             topOSort[^1].IsOutput = true;
             return forwardExpressionList;
@@ -209,7 +195,7 @@ namespace SharpGrad.Operator
                         [index, gradientExpressions[v]]);
                     backwardExpressionList.Add(setGradient);
                 }
-                else if (topOSort[i] is NariOpValue<TType> n)
+                else if (topOSort[i] is NariOperation<TType> n)
                 {
                     for (int j = 0; j < n.ChildrensCompute.Length; j++)
                     {

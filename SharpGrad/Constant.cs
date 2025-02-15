@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Xml.Linq;
 
 namespace SharpGrad
 {
@@ -12,10 +13,6 @@ namespace SharpGrad
         private static int InstanceCount = 0;
 
         private readonly Expression thisExpression;
-        internal Expression GetExpression(Expression index)
-        {
-            return Expression.MakeIndex(thisExpression, GetType().GetProperty("Item"), [index]);
-        }
 
         public Constant(TType[] data, Dimension[] shape, string name)
             : base(shape, name)
@@ -35,7 +32,10 @@ namespace SharpGrad
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
-            operand = GetExpression(index);
+            if (!variableExpressions.TryGetValue(this, out operand))
+            {
+                operand = GetForwardComputation(variableExpressions, forwardExpressionList, index);
+            }
             return true;
         }
 
@@ -52,6 +52,14 @@ namespace SharpGrad
             {
                 return '[' + String.Join(", ", data) + ']';
             }
+        }
+
+        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
+        {
+            Expression variable = Expression.Variable(typeof(TType), ToString().Replace(" ", string.Empty));
+            variableExpressions[this] = variable;
+            forwardExpressionList.Add(Expression.Assign(variable, Get(index)));
+            return variable;
         }
     }
 }
