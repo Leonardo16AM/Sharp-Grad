@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace SharpGrad.Operator
 {
-    public class Sum<TType> : Reduce<TType>
+    public class SumValue<TType> : ReduceOperation<TType>
         where TType : INumber<TType>
     {
         public void Init()
@@ -15,16 +15,22 @@ namespace SharpGrad.Operator
             Array.Fill(data, TType.AdditiveIdentity);
         }
 
-        public Sum(Dimension[] shape, string name, Value<TType> child) : base(shape, name, child)
+        public SumValue(Dimension[] shape, string name, Value<TType> child) : base(shape, name, child)
         {
         }
 
-        public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
+        public override bool GetAsOperand(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList, Expression index,
+            out Expression? operand)
         {
             throw new NotImplementedException();
         }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
+        internal override Expression GetForwardComputation(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList, 
+            Expression index)
         {
             Expression operand = variableExpressions[Operands[0]];
             Expression thisExpression = Expression.Constant(this);
@@ -33,6 +39,14 @@ namespace SharpGrad.Operator
             Expression addAssign = Expression.AddAssign(accumulator, operand);
             forwardExpressionList.Add(addAssign);
             return accumulator;
+        }
+
+        protected override Expression ComputeGradient(
+            Dictionary<Value<TType>, Expression> VariableExpressions,
+            Dictionary<Value<TType>, Expression> GradientExpressions,
+            List<Expression> expressionList)
+        {
+            return GradientExpressions[this];
         }
     }
 }

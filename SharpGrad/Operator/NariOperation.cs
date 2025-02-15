@@ -64,11 +64,14 @@ namespace SharpGrad.Operator
         private List<Value<TType>>? topOSort = null;
         Dictionary<Value<TType>, int>? usageCount = null;
 
-        private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
+        private readonly Dictionary<Value<TType>, Expression> _variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
         #region Forward pass
-        public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, List<Value<TType>> topOSort)
+        public static List<Expression> BuildForwardExpressionList(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList, Expression index,
+            List<Value<TType>> topOSort)
         {
             for (int i = 0; i < topOSort.Count; i++)
             {
@@ -80,11 +83,18 @@ namespace SharpGrad.Operator
             return forwardExpressionList;
         }
 
-        public static List<Expression> BuildForwardExpressionList(Dictionary<Value<TType>, Expression> variableExpressions, Expression index, List<Value<TType>> topOSort)
+        public static List<Expression> BuildForwardExpressionList(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            Expression index,
+            List<Value<TType>> topOSort)
             => BuildForwardExpressionList(variableExpressions, [], index, topOSort);
 
 
-        public static List<ParameterExpression> SaveParameters(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, bool all = true)
+        public static List<ParameterExpression> SaveParameters(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList,
+            Expression index,
+            bool all = true)
         {
             List<ParameterExpression> parameters = [];
 
@@ -110,7 +120,7 @@ namespace SharpGrad.Operator
 
 
         private Action? forwardLambda;
-        private Action GetForwardLambda()
+        private Action GetForwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
         {
             if (forwardLambda is null)
             {
@@ -119,12 +129,20 @@ namespace SharpGrad.Operator
                     topOSort = [];
                     usageCount = [];
                     DFS(topOSort, usageCount);
+                    variableExpressions.Clear();
                 }
-                variableExpressions.Clear();
 
                 // Create Dimdexer and assign it
                 ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
-                Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                Expression getShape;
+                if (this is ReduceOperation<TType>)
+                {
+                    getShape = Expression.PropertyOrField(Expression.Constant(Operands[0]), nameof(Shape));
+                }
+                else
+                {
+                    getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                }
                 Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
                 Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
 
@@ -166,7 +184,7 @@ namespace SharpGrad.Operator
             }
             return forwardLambda;
         }
-        public void Forward() => GetForwardLambda()();
+        public void Forward() => GetForwardLambda(_variableExpressions)();
         #endregion
 
         #region Backward pass
@@ -214,7 +232,7 @@ namespace SharpGrad.Operator
         }
 
         private Action? backwardLambda;
-        private Action GetBackwardLambda()
+        private Action GetBackwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
         {
             if (backwardLambda is null)
             {
@@ -224,7 +242,15 @@ namespace SharpGrad.Operator
 
                 // Create Dimdexer and assign it
                 ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
-                Expression getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                Expression getShape;
+                if (this is ReduceOperation<TType>)
+                {
+                    getShape = Expression.PropertyOrField(Expression.Constant(Operands[0]), nameof(Shape));
+                }
+                else
+                {
+                    getShape = Expression.PropertyOrField(Expression.Constant(this), nameof(Shape));
+                }
                 Expression newDimdexer = Expression.New(typeof(Dimdexer).GetConstructor([typeof(Dimension[])])!, getShape);
                 Expression assignDimdexer = Expression.Assign(dimdexer, newDimdexer);
 
@@ -295,7 +321,7 @@ namespace SharpGrad.Operator
             }
             return backwardLambda;
         }
-        public void Backward() => GetBackwardLambda()();
+        public void Backward() => GetBackwardLambda(_variableExpressions)();
         #endregion
     }
 }
