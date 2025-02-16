@@ -225,18 +225,18 @@ namespace SharpGrad.Operator
                 {
                     continue;
                 }
-                else if (e is Variable<TType> v)
+                else if (e is Variable<TType> || (i != topOSort.Count-1 && e is ReduceOperation<TType>))
                 {
                     // This is the last use of the variable.
                     // Save the gradient to gradient using SetGradient method
                     MethodInfo setGradientMethod = typeof(Variable<TType>).GetMethod(nameof(SetGradient))!;
                     Expression setGradient = Expression.Call(
-                        Expression.Constant(v),
+                        Expression.Constant(e),
                         setGradientMethod, 
-                        [index, gradientExpressions[v]]);
+                        [index, gradientExpressions[e]]);
                     backwardExpressionList.Add(setGradient);
                 }
-                else if (topOSort[i] is NariOperation<TType> n)
+                else if (e is NariOperation<TType> n)
                 {
                     for (int j = 0; j < n.ChildrensCompute.Length; j++)
                     {
@@ -356,7 +356,6 @@ namespace SharpGrad.Operator
                 if (operand is ReduceOperation<TType> reduce)
                     reduce.Forward();
             }
-            Init();
             backwardLambda();
             foreach (Value<TType> operand in Operands)
             {

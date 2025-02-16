@@ -58,7 +58,7 @@ namespace SharpGrad.Operator
             forwardExpressionList.Add(addAssign);
             return accumulator;
         }
-        protected override Expression ComputeGradient(
+        public override Expression ComputeGradient(
             Dictionary<Value<TType>, Expression> VariableExpressions,
             Dictionary<Value<TType>, Expression> GradientExpressions,
             List<Expression> expressionList)
