@@ -82,7 +82,6 @@ namespace TestProject
             Debug.Assert(sum3.Data[1] == T.CreateTruncating(3 + 4));
             Debug.Assert(sum3.Data[2] == T.CreateTruncating(5 + 6));
 
-
             // Sum along the first dimension
             SumValue<T> sum4 = new([dim2], "sum4", b);
             sum4.Forward();
