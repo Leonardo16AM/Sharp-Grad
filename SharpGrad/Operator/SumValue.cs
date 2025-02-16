@@ -1,6 +1,7 @@
 ﻿using SharpGrad.DifEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
@@ -10,13 +11,18 @@ namespace SharpGrad.Operator
     public class SumValue<TType> : ReduceOperation<TType>
         where TType : INumber<TType>
     {
-        public void Init()
+        public override void Init()
         {
             Array.Fill(data, TType.AdditiveIdentity);
         }
 
-        public SumValue(Dimension[] shape, string name, Value<TType> child) : base(shape, name, child)
+        public SumValue(Dimension[] shape, string name, Value<TType> child)
+            : base(shape, name, child)
         {
+            if (!shape.All(e => child.Shape.Contains(e)))
+            {
+                throw new ArgumentException($"Shape of '{Name}' [{string.Join(", ", shape.AsEnumerable())}] is not a subset of '{child.Name}' shape [{string.Join(", ", child.Shape.AsEnumerable())}].");
+            }
         }
 
         public override bool GetAsOperand(

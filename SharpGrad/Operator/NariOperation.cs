@@ -185,7 +185,12 @@ namespace SharpGrad.Operator
         }
         public Action BuildForwardLambda()
             => BuildForwardLambda(_variableExpressions);
-        public void Forward() => BuildForwardLambda()();
+        public void Forward()
+        {
+            Action forwardLambda = BuildForwardLambda();
+            Init();
+            forwardLambda();
+        }
         #endregion
 
         #region Backward pass
@@ -233,7 +238,7 @@ namespace SharpGrad.Operator
         }
 
         private Action? backwardLambda;
-        private Action GetBackwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
+        private Action BuildBackwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
         {
             if (backwardLambda is null)
             {
@@ -322,7 +327,16 @@ namespace SharpGrad.Operator
             }
             return backwardLambda;
         }
-        public void Backward() => GetBackwardLambda(_variableExpressions)();
+
+        public Action BuildBackwardLambda()
+            => BuildBackwardLambda(_variableExpressions);
+
+        public void Backward()
+        {
+            Action backwardLambda = BuildBackwardLambda();
+            Init();
+            backwardLambda();
+        }
         #endregion
     }
 }

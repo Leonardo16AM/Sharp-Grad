@@ -30,7 +30,7 @@ namespace SharpGrad.DifEngine
         private static int InstanceCount = 0;
         public static readonly Constant<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Constant<TType> Zero = new(TType.Zero, "0");
-
+        public virtual void Init() { }
         public Value(Dimension[] shape, string name, params Value<TType>[] childs)
         {
             Name = name;
@@ -119,21 +119,10 @@ namespace SharpGrad.DifEngine
             gradient[i] = value;
         }
 
-        protected void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
+        internal virtual void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
         {
             if (usageCount.TryAdd(this, 0))
             {
-                foreach (var child in Operands)
-                {
-                    if (child is ReduceOperation<TType> reduce)
-                    {
-                        reduce.BuildForwardLambda();
-                    }
-                    else
-                    {
-                        child.DFS(topOSort, usageCount);
-                    }
-                }
                 topOSort.Add(this);
             }
             else
