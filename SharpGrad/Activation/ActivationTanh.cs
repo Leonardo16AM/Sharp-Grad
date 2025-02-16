@@ -1,6 +1,6 @@
 using SharpGrad.DifEngine;
 using SharpGrad.ExprLambda;
-using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;

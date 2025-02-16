@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
 
-namespace SharpGrad.Operator
+namespace SharpGrad.Operators
 {
     public abstract class NariOperation<TType> : Value<TType>
     where TType : INumber<TType>

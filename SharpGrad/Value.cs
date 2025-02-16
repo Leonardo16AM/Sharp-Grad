@@ -1,4 +1,4 @@
-﻿using SharpGrad.Operator;
+﻿using SharpGrad.Operators;
 using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;

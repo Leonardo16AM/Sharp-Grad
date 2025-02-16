@@ -1,7 +1,7 @@
 ﻿using SharpGrad;
 using SharpGrad.Activation;
 using SharpGrad.DifEngine;
-using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System.Diagnostics;
 using System.Numerics;
 

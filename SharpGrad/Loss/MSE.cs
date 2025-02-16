@@ -1,5 +1,5 @@
 ﻿using SharpGrad.DifEngine;
-using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -30,6 +30,10 @@ namespace SharpGrad.DifEngine
             this(new TType[shape.Size()], shape, name)
         { }
 
+        public Variable(Dimension shape, string name) :
+            this([shape], name)
+        { }
+
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)
         {
             if (!variableExpressions.TryGetValue(this, out operand))

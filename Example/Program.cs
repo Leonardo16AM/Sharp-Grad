@@ -1,7 +1,7 @@
 ﻿using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
-using SharpGrad.Operator;
+using SharpGrad.Operators;
 using System.Text.RegularExpressions;
 
 internal class Program
@@ -24,7 +24,8 @@ internal class Program
         // List of input data
         var x1 = v.Select(d => (float)d.X[0]).ToArray();
         var x2 = v.Select(d => (float)d.X[1]).ToArray();
-        Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
+        //Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
+        Variable<float> X = new([batch, cerebrin.Inputs], "X");
         // List of ground truth data
         var ygt = v.Select(d => (float)d.Y[0]).ToArray();
         Variable<float>[] Ygt = [new(ygt, [batch], "Ygt")];

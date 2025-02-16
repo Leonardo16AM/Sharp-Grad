@@ -1,5 +1,6 @@
 ﻿using SharpGrad.Activation;
 using SharpGrad.DifEngine;
+using SharpGrad.Operators;
 using System.Numerics;
 
 namespace SharpGrad.NN
@@ -7,40 +8,51 @@ namespace SharpGrad.NN
     public class Layer<TType>
         where TType : IBinaryFloatingPointIeee754<TType>
     {
-        public Neuron<TType>[] Neurons;
-        public int NeuronsCount;
-        public int Inputs;
+        public static readonly Random Rand = new();
+
+        public readonly Dimension[] Shape;
+
+        public readonly Variable<TType> Weights;
+        public readonly Variable<TType> Biai;
+        public int NeuronsCount => Shape[0].Size;
+        public int Inputs => Shape[1].Size;
         public bool ActFunc;
 
-        public Layer(int neurons, int inputs, bool act_func)
+        public Layer(Dimension output, Dimension input, bool act_func)
         {
-            Neurons = new Neuron<TType>[neurons];
-            for (int i = 0; i < neurons; i++)
+            Shape = [output, input];
+
+            Weights = new Variable<TType>(Shape, "W");
+            Dimdexer dimdexer = new(Shape);
+            foreach (Dimdices dimdices in dimdexer)
             {
-                Neurons[i] = new Neuron<TType>(inputs, act_func);
+                Weights[dimdices] = TType.CreateSaturating(Rand.NextDouble());
             }
+
+            Biai = new Variable<TType>([output], "B");
+            dimdexer = new(Biai.Shape);
+            foreach (Dimdices dimdices in dimdexer)
+            {
+                Biai[dimdices] = TType.CreateSaturating(Rand.NextDouble());
+            }
+
+            ActFunc = act_func;
         }
 
-        public Value<TType>[] Forward(Value<TType>[] X)
+        public NariOperation<TType> Forward(Value<TType> X)
         {
-            Value<TType>[] Y = new Value<TType>[Neurons.Length];
-            for (int i = 0; i < Neurons.Length; i++)
-            {
-                Y[i] = Neurons[i].Forward(X);
-            }
-            return Y;
+            MulValue<TType> mul = X * Weights;
+            SumValue<TType> sum = VMath.Sum(mul, Shape[1]);
+            AddValue<TType> sumB = sum + Biai;
+            return ActFunc ? sumB.ReLU() : sumB;
         }
 
         public void Step(TType lr)
         {
-            foreach (Neuron<TType> n in Neurons)
+            Dimdexer dimdexer = new(Weights.Shape);
+            foreach (Dimdices dimdices in dimdexer)
             {
-                n.Step(lr);
-                Dimdexer dimdexer = new(n.Biai.Shape);
-                foreach(Dimdices dimdices in dimdexer)
-                {
-                    n.Biai[dimdices] -= lr * n.Biai.GetGradient(dimdices);
-                }
+                Weights[dimdices] -= lr * Weights.GetGradient(dimdices);
             }
         }
     }

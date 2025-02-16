@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
 
-namespace SharpGrad.Operator
+namespace SharpGrad.Operators
 {
     public class SumValue<TType> : ReduceOperation<TType>
         where TType : INumber<TType>
