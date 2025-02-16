@@ -11,9 +11,15 @@ namespace SharpGrad.Operator
         where TType : INumber<TType>
     {
         public override ComputeGradientDelegate[] ChildrensCompute { get; }
+        public Value<TType> Operand => Operands[0];
+        internal abstract Expression GetForwardComputationEnding(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList,
+            Expression index);
+
         protected abstract Expression ComputeGradient(
-            Dictionary<Value<TType>, Expression> VariableExpressions,
-            Dictionary<Value<TType>, Expression> GradientExpressions,
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList);
 
         protected ReduceOperation(Dimension[] shape, string name, Value<TType> child)

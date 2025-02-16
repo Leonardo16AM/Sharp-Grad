@@ -39,6 +39,7 @@ namespace SharpGrad.DifEngine
             int length = Size;
             data = new TType[length];
             gradient = new TType[length];
+            Init();
         }
 
         public readonly Value<TType>[] Operands;
@@ -119,10 +120,25 @@ namespace SharpGrad.DifEngine
             gradient[i] = value;
         }
 
-        internal virtual void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
+        internal void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
         {
             if (usageCount.TryAdd(this, 0))
             {
+                for (int i = 0; i < Operands.Length; i++)
+                {
+                    if (Operands[i] is ReduceOperation<TType> r)
+                    {
+                        if (usageCount.TryAdd(r, 0))
+                        {
+                            topOSort.Add(r);
+                        }
+                        usageCount[r]++;
+                    }
+                    else
+                    {
+                        Operands[i].DFS(topOSort, usageCount);
+                    }
+                }
                 topOSort.Add(this);
             }
             else
@@ -155,7 +171,6 @@ namespace SharpGrad.DifEngine
 
         public abstract bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand);
         internal abstract Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index);
-
         public void BuildForward(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index)
             => _ = GetAsOperand(variableExpressions, forwardExpressionList, index, out var _);
         public Expression GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, Expression index)

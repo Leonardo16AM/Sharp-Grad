@@ -17,8 +17,8 @@ namespace SharpGrad.Activation
         internal override Expr GetForwardComputation(Expr operand)
         {
             Expr negated = -operand;
-            Expr call = Expr.Call(typeof(TType).GetMethod("Exp")!, negated);
-            Expr add = ExpressionOne + call;
+            Expr exp = Expr.Call(typeof(TType).GetMethod("Exp")!, negated);
+            Expr add = ExpressionOne + exp;
             return Expression.Divide(ExpressionOne, add);
         }
 

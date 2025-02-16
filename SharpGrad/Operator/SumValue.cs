@@ -38,15 +38,26 @@ namespace SharpGrad.Operator
             List<Expression> forwardExpressionList, 
             Expression index)
         {
-            Expression operand = variableExpressions[Operands[0]];
+            Expression variable = Expression.Variable(typeof(TType), Name);
+            variableExpressions[this] = variable;
+            forwardExpressionList.Add(Expression.Assign(variable, Get(index)));
+            return variable;
+        }
+
+        internal override Expression GetForwardComputationEnding(
+            Dictionary<Value<TType>, Expression> variableExpressions,
+            List<Expression> forwardExpressionList,
+            Expression index)
+        {
+            Expression operand = variableExpressions[Operand];
             Expression thisExpression = Expression.Constant(this);
             PropertyInfo thisItem = typeof(Value<TType>).GetProperty("Item")!;
             Expression accumulator = Expression.MakeIndex(thisExpression, thisItem, [index]);
             Expression addAssign = Expression.AddAssign(accumulator, operand);
+            //variableExpressions[this] = accumulator;
             forwardExpressionList.Add(addAssign);
             return accumulator;
         }
-
         protected override Expression ComputeGradient(
             Dictionary<Value<TType>, Expression> VariableExpressions,
             Dictionary<Value<TType>, Expression> GradientExpressions,

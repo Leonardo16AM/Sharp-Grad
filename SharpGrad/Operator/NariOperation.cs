@@ -73,13 +73,25 @@ namespace SharpGrad.Operator
             List<Expression> forwardExpressionList, Expression index,
             List<Value<TType>> topOSort)
         {
-            for (int i = 0; i < topOSort.Count; i++)
+            int iMax = topOSort.Count - 1;
+            for (int i = 0; i < iMax; i++)
             {
                 Value<TType> e = topOSort[i];
                 Debug.Assert(!variableExpressions.ContainsKey(e));
                 e.GetForwardComputation(variableExpressions, forwardExpressionList, index);
             }
-            topOSort[^1].IsOutput = true;
+
+            Value<TType> last = topOSort[^1];
+            if (last is ReduceOperation<TType> r)
+            {
+                r.GetForwardComputationEnding(variableExpressions, forwardExpressionList, index);
+            }
+            else
+            {
+                last.GetForwardComputation(variableExpressions, forwardExpressionList, index);
+            }
+            last.IsOutput = true;
+
             return forwardExpressionList;
         }
 
@@ -188,6 +200,11 @@ namespace SharpGrad.Operator
         public void Forward()
         {
             Action forwardLambda = BuildForwardLambda();
+            foreach(Value<TType> operand in Operands.Except([this]))
+            {
+                if(operand is ReduceOperation<TType> reduce)
+                    reduce.Forward();
+            }
             Init();
             forwardLambda();
         }
@@ -334,8 +351,18 @@ namespace SharpGrad.Operator
         public void Backward()
         {
             Action backwardLambda = BuildBackwardLambda();
+            foreach (Value<TType> operand in Operands)
+            {
+                if (operand is ReduceOperation<TType> reduce)
+                    reduce.Forward();
+            }
             Init();
             backwardLambda();
+            foreach (Value<TType> operand in Operands)
+            {
+                if (operand is ReduceOperation<TType> reduce)
+                    reduce.Backward();
+            }
         }
         #endregion
     }

@@ -45,20 +45,6 @@ namespace SharpGrad.Operators
             return variable;
         }
 
-        internal override void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
-        {
-            if (usageCount.TryAdd(this, 0))
-            {
-                LeftOperand.DFS(topOSort, usageCount);
-                RightOperand.DFS(topOSort, usageCount);
-                topOSort.Add(this);
-            }
-            else
-            {
-                usageCount[this]++;
-            }
-        }
-
         public override string ToString()
             => $"({LeftOperand} {Name} {RightOperand})";
     }
