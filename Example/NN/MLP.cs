@@ -25,7 +25,7 @@ namespace SharpGrad.NN
 
             Shape = shape;
             Layers = new Layer<TType>[shape.Length - 1];
-            Layers[0] = new Layer<TType>(shape[1], Inputs, false);
+            Layers[0] = new Layer<TType>(shape[1], shape[0], false);
             for (int i = 2; i < shape.Length; i++)
             {
                 Layers[i - 1] = new Layer<TType>(shape[i], shape[i - 1], true);
@@ -37,7 +37,7 @@ namespace SharpGrad.NN
             Value<TType>? output = X;
             for(int i = 0; i < Layers.Length; i++)
             {
-                output = Layers[i].Forward(X);
+                output = Layers[i].Forward(output);
             }
             output!.IsOutput = true;
             return output;

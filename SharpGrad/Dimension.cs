@@ -4,6 +4,13 @@ namespace SharpGrad
 {
     public class Dimension
     {
+        public static readonly Dimension Scalar = new();
+        private Dimension()
+        {
+            Name = "Scalar";
+            Size = 1;
+        }
+
         public string Name { get; set; }
         public int Size { get; }
 

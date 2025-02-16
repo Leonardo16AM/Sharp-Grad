@@ -30,7 +30,11 @@ namespace SharpGrad.Operators
             List<Expression> forwardExpressionList, Expression index,
             out Expression? operand)
         {
-            throw new NotImplementedException();
+            if (!variableExpressions.TryGetValue(this, out operand))
+            {
+                operand = GetForwardComputation(variableExpressions, forwardExpressionList, index);
+            }
+            return true;
         }
 
         internal override Expression GetForwardComputation(

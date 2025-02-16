@@ -9,30 +9,38 @@ internal class Program
     private static void Main(string[] args)
     {
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
-        var v = DataSet.GetDataSet(400);
-        if (v.Count == 0)
-            throw new ArgumentException("Empty dataset.");
 
-        MLP<float> cerebrin = new(2, 8, 1);
+        Dimension batch = new(nameof(batch), 400);
+        var v = DataSet.GetDataSet(batch.Size);
+
+        Dimension input = new(nameof(input), 2);
+        Dimension hidden = new(nameof(hidden), 8);
+        Dimension output = Dimension.Scalar;
+        MLP<float> cerebrin = new([input, hidden, output]);
 
         int epochs = 1000;
 
-        DataSet.Data[] preds = new DataSet.Data[v.Count];
+        DataSet.Data[] preds = new DataSet.Data[batch.Size];
 
-        Dimension batch = new(nameof(batch), v.Count);
         float lr = 1e-4f;
         // List of input data
         var x1 = v.Select(d => (float)d.X[0]).ToArray();
         var x2 = v.Select(d => (float)d.X[1]).ToArray();
         //Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
-        Variable<float> X = new([batch, cerebrin.Inputs], "X");
+        Variable<float> X = new([batch, input], "X");
+        Dimdexer dimdexer = new(X.Shape);
+        foreach (Dimdices dimdices in dimdexer)
+        {
+            X[dimdices] = v[dimdices[batch]].X[dimdices[input]];
+        }
+
         // List of ground truth data
         var ygt = v.Select(d => (float)d.Y[0]).ToArray();
-        Variable<float>[] Ygt = [new(ygt, [batch], "Ygt")];
+        Variable<float> Ygt = new(ygt, [output, batch], "Ygt");
 
         // Build execution expression graph (no computation done here)
-        Value<float>[] Y = cerebrin.Forward(X);
-        NariOperation<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
+        Value<float> Y = cerebrin.Forward(X);
+        NariOperation<float> loss = Loss.MSE(Y, Ygt, batch);
         loss.IsOutput = true;
 
         // Training loop
@@ -46,10 +54,10 @@ internal class Program
             loss.Backward();
 
             // Build prediction data
-            foreach (Dimdices dimdices in new Dimdexer(Y[0].Shape))
+            foreach (Dimdices dimdices in new Dimdexer(Y.Shape))
             {
                 int j = dimdices[batch];
-                float d = Y[0].Data[j];
+                float d = Y.Data[j];
                 int val = Math.Abs(d - 1) < Math.Abs(d - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
             }

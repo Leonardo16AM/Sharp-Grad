@@ -14,7 +14,7 @@ namespace SharpGrad.DifEngine
             => new(@this, operand);
 
         public static SumValue<TType> Sum<TType>(this Value<TType> @this, params Dimension[] toReduce)
-            where TType : IBinaryFloatingPointIeee754<TType>
+            where TType : INumber<TType>
         {
             if (toReduce.Length == 0)
             {
@@ -33,5 +33,9 @@ namespace SharpGrad.DifEngine
                 return new SumValue<TType>([.. newShape], "∑", @this);
             }
         }
+        public static SumValue<TType> Sum<TType>(this Value<TType> @this,  Dimension toReduce)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => Sum(@this, [toReduce]);
+
     }
 }

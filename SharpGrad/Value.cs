@@ -31,10 +31,10 @@ namespace SharpGrad.DifEngine
         public static readonly Constant<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Constant<TType> Zero = new(TType.Zero, "0");
         public virtual void Init() { }
-        public Value(Dimension[] shape, string name, params Value<TType>[] childs)
+        public Value(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
         {
             Name = name;
-            Shape = shape;
+            Shape = [.. shape.Except([Dimension.Scalar]).Distinct()];
             Operands = childs;
             int length = Size;
             data = new TType[length];
