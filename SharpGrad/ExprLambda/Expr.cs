@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SharpGrad.ExprLambda
 {
-    internal class Expr(Expression expression)
+    public class Expr(Expression expression)
     {
         public readonly Expression Expression = expression;
 
@@ -166,6 +168,16 @@ namespace SharpGrad.ExprLambda
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Expr LessThanOrEqual(Expr left, Expr right)
             => new BinaryExpr(ExpressionType.LessThanOrEqual, left, right);
+
+        public static Expr Condition(Expr test, Expr ifTrue, Expr ifFalse)
+            => Expression.Condition(test, ifTrue, ifFalse);
+
+        public static MethodCallExpression Call(MethodInfo method, Expression arg0)
+            => Expression.Call(method, arg0);
+
+        public static Expr Constant(object? value)
+            => Expression.Constant(value);
+
         public static Expr operator <=(Expr left, Expr right)
             => LessThanOrEqual(left, right);
         public static Expr operator <=(Expr left, Expression right)

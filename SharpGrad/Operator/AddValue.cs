@@ -1,30 +1,33 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class AddValue<TType> : BinaryOpValue<TType>
+    public class AddValue<TType> : BinaryOperation<TType>
         where TType : INumber<TType>
     {
         public AddValue(Value<TType> left, Value<TType> right)
             : base("+", left, right)
         { }
 
+        protected override Expr GetForwardComputation(Expr left, Expr right)
+            => left + right;
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Add(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
-
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gradientExpressions[this]);
+            // Gradient of 'l' in 'l + r' is 1 * 'g'
+            return gradientExpressions[this];
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, gradientExpressions[this]);
+            // Gradient of 'r' in 'l + r' is 1 * 'g'
+            return gradientExpressions[this];
         }
     }
 }

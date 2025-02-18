@@ -1,41 +1,40 @@
 using SharpGrad.DifEngine;
-using SharpGrad.Operator;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 
 namespace SharpGrad.Activation
 {
-    public abstract class Activation<TType>(string name, Value<TType> child) : UnariOpValue<TType>(name, child)
-        where TType : INumber<TType>
-    {
-    }
-
     public class ActivationLeakyReLU<TType> : Activation<TType>
-        where TType : IBinaryFloatingPointIeee754<TType>, IComparable<TType>
+        where TType : INumber<TType>, IComparable<TType>
     {
         private readonly TType _alpha;
+        private readonly Expression alphaExpression;
 
         public ActivationLeakyReLU(Value<TType> value, TType alpha)
             : base("leaky_relu", value)
-        { }
+        {
+            _alpha = alpha;
+            alphaExpression = Expression.Constant(alpha);
+        }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Condition(
-                Expression.LessThanOrEqual(Operand.GetAsOperand(variableExpressions), ExpressionZero),
-                Expression.Multiply(Expression.Constant(_alpha), Operand.GetAsOperand(variableExpressions)),
-                Operand.GetAsOperand(variableExpressions));
+        internal override Expr GetForwardComputation(Expr operand)
+            => Expr.Condition(
+                Expr.LessThanOrEqual(operand, ExpressionZero),
+                alphaExpression * operand,
+                operand);
 
-        protected override void ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
             Expression grad = gradientExpressions[this];
             Expression relu = variableExpressions[this];
-            Expression gr = Expression.Condition(
+            return Expression.Condition(
                 Expression.LessThanOrEqual(relu, Expression.Constant(TType.Zero)),
                 Expression.Multiply(Expression.Constant(_alpha), grad),
                 grad);
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, gr);
         }
     }
 }

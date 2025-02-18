@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -6,34 +7,31 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class DivValue<TType> : BinaryOpValue<TType>
+    public class DivValue<TType> : BinaryOperation<TType>
         where TType : INumber<TType>
     {
         public DivValue(Value<TType> left, Value<TType> right)
             : base("/", left, right)
         { }
 
+        protected override Expr GetForwardComputation(Expr left, Expr right)
+            => left / right;
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Divide(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
-
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            Expression right = variableExpressions[RightOperand];
-            Expression gr = Expression.Divide(grad, right);
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, gr);
+            // Gradient of 'l' in 'l / r' is 'g / r'
+            Expr thisGrad = gradientExpressions[this];
+            Expr rightVal = variableExpressions[RightOperand];
+            return thisGrad / rightVal;
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression thisGrad = gradientExpressions[this];
-            Expression leftVal = variableExpressions[LeftOperand];
-            Expression rightVal = variableExpressions[RightOperand];
-            Expression lg = Expression.Multiply(leftVal, thisGrad);
-            Expression rr = Expression.Multiply(rightVal, rightVal);
-            Expression lgrr = Expression.Divide(lg, rr);
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, lgrr);
+            // Gradient of 'r' in 'l / r' is 'g * -l / r^2'
+            Expr thisGrad = gradientExpressions[this];
+            Expr leftVal = variableExpressions[LeftOperand];
+            Expr rightVal = variableExpressions[RightOperand];
+            return thisGrad * (-leftVal / (rightVal * rightVal));
         }
     }
 }

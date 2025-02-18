@@ -1,27 +1,27 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
 namespace SharpGrad.Operator
 {
-    public class NegValue<TType> : UnariOpValue<TType>
+    public class NegValue<TType> : UnariOperation<TType>
         where TType : INumber<TType>
     {
         public NegValue(Value<TType> value)
             : base("-", value)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Negate(Operand.GetAsOperand(variableExpressions));
+        internal override Expr GetForwardComputation(Expr operand)
+            => -operand;
 
-        protected override void ComputeGradient(
+        protected override Expression ComputeGradient(
             Dictionary<Value<TType>, Expression> variableExpressions,
             Dictionary<Value<TType>, Expression> gradientExpressions,
             List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            AssignGradientExpession(gradientExpressions, expressionList, Operand, Expression.Negate(grad));
+            return Expression.Negate(gradientExpressions[this]);
         }
     }
 }

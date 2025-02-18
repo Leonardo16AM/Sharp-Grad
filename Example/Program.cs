@@ -1,83 +1,69 @@
 ﻿using SharpGrad;
-using SharpGrad.Activation;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 using SharpGrad.Operator;
-using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 internal class Program
 {
-
     private static void Main(string[] args)
     {
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
         var v = DataSet.GetDataSet(400);
+        if (v.Count == 0)
+            throw new ArgumentException("Empty dataset.");
 
         MLP<float> cerebrin = new(2, 8, 1);
 
         int epochs = 1000;
-        float lr = 1e-4f;
 
         DataSet.Data[] preds = new DataSet.Data[v.Count];
 
+        Dimension batch = new(nameof(batch), v.Count);
+        float lr = 1e-4f;
         // List of input data
-        Variable<float>[][] X = new Variable<float>[v.Count][];
+        var x1 = v.Select(d => (float)d.X[0]).ToArray();
+        var x2 = v.Select(d => (float)d.X[1]).ToArray();
+        Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
         // List of ground truth data
-        Variable<float>[][] Ygt = new Variable<float>[v.Count][];
-        // List of predicted data
-        Value<float>[][] Y = new Value<float>[v.Count][];
-
+        var ygt = v.Select(d => (float)d.Y[0]).ToArray();
+        Variable<float>[] Ygt = [new(ygt, [batch], "Ygt")];
 
         // Build execution expression graph (no computation done here)
-        NariOpValue<float>? loss = null;
-        for (int i = 0; i < v.Count; i++)
-        {
-            X[i] = [v[i].X[0], v[i].X[1]];
-            Ygt[i] = [v[i].Y[0]];
-            Y[i] = cerebrin.Forward(X[i]);
-            if (loss is null)
-                loss = Loss.MSE(Y[i], Ygt[i]) / v.Count;
-            else
-                loss += Loss.MSE(Y[i], Ygt[i]) / v.Count;
-        }
-        if(loss is null)
-            throw new Exception("No loss function defined.");
-        else
-            loss.IsOutput = true;
+        Value<float>[] Y = cerebrin.Forward(X);
+        NariOperation<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
+        loss.IsOutput = true;
 
         // Training loop
-        float lastLoss = float.MaxValue;
+        float minLoss = float.MaxValue;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
-            Console.WriteLine($"LR: {lr} | Epoch: {i} / {epochs}");
-
+            Console.WriteLine($"LR: {lr:E2} | Epoch: {i} / {epochs}");
             // Forward and backward pass
-            //loss.ForwardLambda();
-            loss.BackwardLambda();
+            loss.Forward();
+            loss.Backward();
 
-            for (int j = 0; j < Y.Length; j++)
+            // Build prediction data
+            foreach (Dimdices dimdices in new Dimdexer(Y[0].Shape))
             {
-                int val = Math.Abs(Y[j][0].Data - 1) < Math.Abs(Y[j][0].Data - 2) ? 1 : 2;
+                int j = dimdices[batch];
+                float d = Y[0].Data[j];
+                int val = Math.Abs(d - 1) < Math.Abs(d - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
             }
 
+            // Update weights
             cerebrin.Step(lr);
+            // Reset gradients
             loss.ResetGradient();
 
-            Console.WriteLine("Loss: " + loss.Data);
-            DataSet.Scatter(v, preds);
-            if (lastLoss > loss.Data)
+            // Print loss and scatter plot
+            Console.WriteLine($"Loss: {loss.Data[0]:E3} / {minLoss:E3}");
+            if (i % 10 == 0) DataSet.Scatter(v, preds);
+            if (minLoss > loss.Data[0])
             {
-                lastLoss = loss.Data;
-            }
-            else
-            {
-                Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 15);
-                Console.WriteLine("Final loss: " + loss.Data);
-                Console.WriteLine("Last epoch: " + i);
-                Console.WriteLine("Loss is increasing. Stopping training...");
-                break;
+                minLoss = loss.Data[0];
             }
         }
     }

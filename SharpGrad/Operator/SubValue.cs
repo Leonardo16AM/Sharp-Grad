@@ -1,4 +1,5 @@
 ﻿using SharpGrad.DifEngine;
+using SharpGrad.ExprLambda;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -6,26 +7,24 @@ using System.Numerics;
 
 namespace SharpGrad.Operators
 {
-    public class SubValue<TType> : BinaryOpValue<TType>
+    public class SubValue<TType> : BinaryOperation<TType>
         where TType : INumber<TType>
     {
         public SubValue(Value<TType> left, Value<TType> right)
             : base("-", left, right)
         { }
 
-        internal override Expression GetForwardComputation(Dictionary<Value<TType>, Expression> variableExpressions)
-            => Expression.Subtract(LeftOperand.GetAsOperand(variableExpressions), RightOperand.GetAsOperand(variableExpressions));
+        protected override Expr GetForwardComputation(Expr left, Expr right)
+            => left - right;
 
-        protected override void ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeLeftGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = gradientExpressions[this];
-            AssignGradientExpession(gradientExpressions, expressionList, LeftOperand, grad);
+            return gradientExpressions[this];
         }
 
-        protected override void ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
+        protected override Expression ComputeRightGradient(Dictionary<Value<TType>, Expression> variableExpressions, Dictionary<Value<TType>, Expression> gradientExpressions, List<Expression> expressionList)
         {
-            Expression grad = Expression.Negate(gradientExpressions[this]);
-            AssignGradientExpession(gradientExpressions, expressionList, RightOperand, grad);
+            return Expression.Negate(gradientExpressions[this]);
         }
     }
 }
