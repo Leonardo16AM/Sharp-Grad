@@ -1,5 +1,4 @@
 using SharpGrad.DifEngine;
-using SharpGrad.Operators;
 using System.Numerics;
 
 namespace SharpGrad.NN
@@ -35,7 +34,7 @@ namespace SharpGrad.NN
         public Value<TType> Forward(Value<TType> X)
         {
             Value<TType>? output = X;
-            for(int i = 0; i < Layers.Length; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
                 output = Layers[i].Forward(output);
             }

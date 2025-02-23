@@ -2,7 +2,6 @@
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
 using SharpGrad.Operators;
-using System.Text.RegularExpressions;
 
 internal class Program
 {
@@ -45,6 +44,7 @@ internal class Program
 
         // Training loop
         float minLoss = float.MaxValue;
+        DateTime lastShow = DateTime.Now;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
@@ -69,7 +69,11 @@ internal class Program
 
             // Print loss and scatter plot
             Console.WriteLine($"Loss: {loss.Data[0]:E3} / {minLoss:E3}");
-            if (i % 10 == 0) DataSet.Scatter(v, preds);
+            if ((DateTime.Now - lastShow).TotalMilliseconds > 250)
+            {
+                lastShow = DateTime.Now;
+                DataSet.Scatter(v, preds);
+            }
             if (minLoss > loss.Data[0])
             {
                 minLoss = loss.Data[0];

@@ -1,6 +1,5 @@
 ﻿using SharpGrad.DifEngine;
 using SharpGrad.Operators;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace SharpGrad.Activation

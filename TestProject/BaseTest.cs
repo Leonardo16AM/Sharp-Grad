@@ -1,7 +1,6 @@
 ﻿using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
-using System.Linq.Expressions;
 
 namespace TestProject
 {

@@ -1,8 +1,6 @@
 ﻿using SharpGrad.Operators;
-using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace SharpGrad.DifEngine
@@ -33,7 +31,7 @@ namespace SharpGrad.DifEngine
                 return new SumValue<TType>([.. newShape], "∑", @this);
             }
         }
-        public static SumValue<TType> Sum<TType>(this Value<TType> @this,  Dimension toReduce)
+        public static SumValue<TType> Sum<TType>(this Value<TType> @this, Dimension toReduce)
             where TType : IBinaryFloatingPointIeee754<TType>
             => Sum(@this, [toReduce]);
 

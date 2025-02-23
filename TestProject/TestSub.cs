@@ -1,5 +1,4 @@
 ﻿using SharpGrad.DifEngine;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace TestProject

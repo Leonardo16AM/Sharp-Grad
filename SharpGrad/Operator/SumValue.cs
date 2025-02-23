@@ -39,7 +39,7 @@ namespace SharpGrad.Operators
 
         internal override Expression GetForwardComputation(
             Dictionary<Value<TType>, Expression> variableExpressions,
-            List<Expression> forwardExpressionList, 
+            List<Expression> forwardExpressionList,
             Expression index)
         {
             Expression variable = Expression.Variable(typeof(TType), Name);

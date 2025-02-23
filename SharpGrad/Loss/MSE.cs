@@ -1,9 +1,5 @@
 ﻿using SharpGrad.DifEngine;
 using SharpGrad.Operators;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
 
 namespace SharpGrad.NN

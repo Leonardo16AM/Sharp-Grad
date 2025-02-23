@@ -1,12 +1,10 @@
 ﻿using SharpGrad.Operators;
-using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace SharpGrad.DifEngine
 {
@@ -47,13 +45,29 @@ namespace SharpGrad.DifEngine
         protected TType[] data;
         public virtual TType[] Data => data;
 
+        private bool IsShapeEqual(Dimension[] shape)
+        {
+            if (shape.Length != Shape.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < shape.Length; i++)
+            {
+                if (shape[i] != Shape[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private int[] GetLocalIndices(Dimdices indices)
         {
             if (indices.IsScalar)
             {
                 return [0];
             }
-            if (indices.Shape.SequenceEqual(Shape))
+            if (IsShapeEqual(indices.Shape))
             {
                 return [.. indices.Indices];
             }

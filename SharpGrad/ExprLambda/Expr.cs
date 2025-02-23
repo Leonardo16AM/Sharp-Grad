@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Numerics;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpGrad.ExprLambda
 {
@@ -154,7 +148,7 @@ namespace SharpGrad.ExprLambda
             => GreaterThanOrEqual(left, right);
         public static Expr operator >=(Expression left, Expr right)
             => GreaterThanOrEqual(left, right);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Expr LessThan(Expr left, Expr right)
             => new BinaryExpr(ExpressionType.LessThan, left, right);

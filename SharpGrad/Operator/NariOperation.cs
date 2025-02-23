@@ -19,18 +19,7 @@ namespace SharpGrad.Operators
 
         public abstract ComputeGradientDelegate[] ChildrensCompute { get; }
 
-        public override TType[] Data
-        {
-            get
-            {
-                //if (!isComputed)
-                //{
-                //    ForwardLambda();
-                //    isComputed = true;
-                //}
-                return data;
-            }
-        }
+        public override TType[] Data => data;
 
         public IEnumerable<ReduceOperation<TType>> Dependencies
         {
@@ -92,18 +81,7 @@ namespace SharpGrad.Operators
             {
                 foreach (var child in Dependencies)
                 {
-                    if (child is ReduceOperation<TType> r)
-                    {
-                        if (usageCount.TryAdd(r, 0))
-                        {
-                            topoSort.Add(r);
-                        }
-                        usageCount[r]++;
-                    }
-                    else
-                    {
-                        child.OutterDFS(topoSort, usageCount);
-                    }
+                    child.OutterDFS(topoSort, usageCount);
                 }
                 topoSort.Add(this);
             }
@@ -258,14 +236,21 @@ namespace SharpGrad.Operators
         }
         public Action BuildForwardLambda()
             => BuildForwardLambda(_variableExpressions);
+
+        private void OutterForward()
+        {
+            Init();
+            Action forwardLambda = BuildForwardLambda();
+            forwardLambda();
+        }
+
         public void Forward()
         {
-            Action forwardLambda = BuildForwardLambda();
-            foreach(var dependency in Dependencies)
+            foreach (var dependency in Dependencies)
             {
                 dependency.Forward();
             }
-            Init();
+            Action forwardLambda = BuildForwardLambda();
             forwardLambda();
         }
         #endregion
@@ -285,14 +270,14 @@ namespace SharpGrad.Operators
                 {
                     continue;
                 }
-                else if (e is Variable<TType> || (i != topOSort.Count-1 && e is ReduceOperation<TType>))
+                else if (e is Variable<TType> || (i != topOSort.Count - 1 && e is ReduceOperation<TType>))
                 {
                     // This is the last use of the variable.
                     // Save the gradient to gradient using SetGradient method
                     MethodInfo setGradientMethod = typeof(Variable<TType>).GetMethod(nameof(SetGradient))!;
                     Expression setGradient = Expression.Call(
                         Expression.Constant(e),
-                        setGradientMethod, 
+                        setGradientMethod,
                         [index, gradientExpressions[e]]);
                     backwardExpressionList.Add(setGradient);
                 }
@@ -411,25 +396,26 @@ namespace SharpGrad.Operators
         public Action BuildBackwardLambda()
             => BuildBackwardLambda(_variableExpressions);
 
-        private void Backward(bool forwardBefore)
+        private void OutterBackward()
         {
             Action backwardLambda = BuildBackwardLambda();
-            if (forwardBefore)
-                foreach (var dependency in Dependencies)
-                {
-                    dependency.Forward();
-                }
             backwardLambda();
-            foreach (var dependency in Dependencies.Reverse())
-            {
-                dependency.Backward(false);
-            }
         }
 
         public void Backward()
         {
             InitGradientForBackward();
-            Backward(true);
+            OutterTopologicalSort();
+            foreach (var dependency in outterTopOSort)
+            {
+                dependency.OutterForward();
+            }
+            Action backwardLambda = BuildBackwardLambda();
+            backwardLambda();
+            foreach (var dependency in outterTopOSort.AsEnumerable().Reverse())
+            {
+                dependency.OutterBackward();
+            }
         }
         #endregion
     }
