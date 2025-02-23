@@ -50,7 +50,7 @@ internal class Program
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr:E2} | Epoch: {i} / {epochs}");
             // Forward and backward pass
-            loss.Forward();
+            //loss.Forward();
             loss.Backward();
 
             // Build prediction data

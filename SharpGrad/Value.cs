@@ -120,7 +120,7 @@ namespace SharpGrad.DifEngine
             gradient[i] = value;
         }
 
-        internal void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
+        internal void InnerDFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
         {
             if (usageCount.TryAdd(this, 0))
             {
@@ -136,7 +136,7 @@ namespace SharpGrad.DifEngine
                     }
                     else
                     {
-                        Operands[i].DFS(topOSort, usageCount);
+                        Operands[i].InnerDFS(topOSort, usageCount);
                     }
                 }
                 topOSort.Add(this);
@@ -203,6 +203,11 @@ namespace SharpGrad.DifEngine
         public static MulValue<TType> operator *(Value<TType> left, Value<TType> right) => Mul(left, right);
 
         public static DivValue<TType> Div(Value<TType> left, Value<TType> right) => new(left, right);
+
+        protected void InitGradientForBackward()
+        {
+            Array.Fill(gradient, TType.One);
+        }
 
         public void ResetGradient()
         {
