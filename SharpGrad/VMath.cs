@@ -1,6 +1,7 @@
 ﻿using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace SharpGrad.DifEngine
@@ -20,15 +21,7 @@ namespace SharpGrad.DifEngine
             }
             else
             {
-                List<Dimension> newShape = [.. @this.Shape];
-                foreach (Dimension dim in toReduce)
-                {
-                    if (!newShape.Remove(dim))
-                    {
-                        throw new ArgumentException($"The dimension {dim} is not present in the shape {@this.Shape}");
-                    }
-                }
-                return new SumValue<TType>([.. newShape], "∑", @this);
+                return new SumValue<TType>([.. @this.Shape.Except(toReduce)], "∑", @this);
             }
         }
         public static SumValue<TType> Sum<TType>(this Value<TType> @this, Dimension toReduce)

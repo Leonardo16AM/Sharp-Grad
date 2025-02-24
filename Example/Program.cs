@@ -35,7 +35,8 @@ internal class Program
 
         // Build execution expression graph (no computation done here)
         Value<float> Y = cerebrin.Forward(X);
-        NariOperation<float> loss = Loss.MSE(Y, Ygt, batch);
+        NariOperation<float> loss = Loss.MSE(Y, Ygt, output);
+        loss = VMath.Sum(loss, batch) / batch.Size;
         loss.IsOutput = true;
 
         // Training loop
@@ -65,7 +66,7 @@ internal class Program
 
             // Print loss and scatter plot
             Console.WriteLine($"Loss: {loss.Data[0]:E3} / {minLoss:E3}");
-            if ((DateTime.Now - lastShow).TotalMilliseconds > 250)
+            if ((DateTime.Now - lastShow).TotalMilliseconds > 125)
             {
                 lastShow = DateTime.Now;
                 DataSet.Scatter(v, preds);
