@@ -11,7 +11,7 @@ namespace SharpGrad.Operators
     public class SumValue<TType> : ReduceOperation<TType>
         where TType : INumber<TType>
     {
-        public override void Init()
+        public override void InitValueForForward()
         {
             Array.Fill(data, TType.AdditiveIdentity);
         }

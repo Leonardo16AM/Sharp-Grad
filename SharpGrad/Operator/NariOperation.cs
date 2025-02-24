@@ -22,15 +22,7 @@ namespace SharpGrad.Operators
         public override TType[] Data => data;
 
         public IEnumerable<ReduceOperation<TType>> Dependencies
-        {
-            get
-            {
-                InnerTopologicalSort();
-                return innerTopoSort
-                    .SkipLast(1)
-                    .OfType<ReduceOperation<TType>>();
-            }
-        }
+            => InnerTopoSort.SkipLast(1).OfType<ReduceOperation<TType>>();
 
         public static Dimension[] GetShape(Value<TType>[] childs)
         {
@@ -63,16 +55,19 @@ namespace SharpGrad.Operators
 
         private List<Value<TType>>? innerTopoSort = null;
         Dictionary<Value<TType>, int>? innerUsageCount = null;
-        private bool InnerTopologicalSort()
+
+        private List<Value<TType>> InnerTopoSort
         {
-            if (innerTopoSort is null || innerUsageCount is null)
+            get
             {
-                innerTopoSort = [];
-                innerUsageCount = [];
-                InnerDFS(innerTopoSort, innerUsageCount);
-                return true;
+                if (innerTopoSort is null || innerUsageCount is null)
+                {
+                    innerTopoSort = [];
+                    innerUsageCount = [];
+                    InnerDFS(innerTopoSort, innerUsageCount);
+                }
+                return innerTopoSort;
             }
-            return false;
         }
 
         private void OutterDFS(List<NariOperation<TType>> topoSort, Dictionary<NariOperation<TType>, int> usageCount)
@@ -91,27 +86,29 @@ namespace SharpGrad.Operators
             }
         }
 
-        private List<NariOperation<TType>>? outterTopOSort = null;
+        private List<NariOperation<TType>>? outterTopoSort = null;
         private Dictionary<NariOperation<TType>, int>? outterUsageCount = null;
-        private bool OutterTopologicalSort()
+
+        private List<NariOperation<TType>> OutterTopoSort
         {
-            if (outterTopOSort is null || outterUsageCount is null)
+            get
             {
-                outterTopOSort = [];
-                outterUsageCount = [];
-                OutterDFS(outterTopOSort, outterUsageCount);
-                return true;
+                if (outterTopoSort is null || outterUsageCount is null)
+                {
+                    outterTopoSort = [];
+                    outterUsageCount = [];
+                    OutterDFS(outterTopoSort, outterUsageCount);
+                }
+                return outterTopoSort;
             }
-            return false;
         }
 
 
-        private readonly Dictionary<Value<TType>, Expression> _variableExpressions = [];
+        private readonly Dictionary<Value<TType>, Expression> variableExpressions = [];
         private readonly Dictionary<Value<TType>, Expression> gradientExpressions = [];
 
         #region Forward pass
-        public static List<Expression> BuildForwardExpressionList(
-            Dictionary<Value<TType>, Expression> variableExpressions,
+        public List<Expression> BuildForwardExpressionList(
             List<Expression> forwardExpressionList, Expression index,
             List<Value<TType>> topOSort)
         {
@@ -137,15 +134,8 @@ namespace SharpGrad.Operators
             return forwardExpressionList;
         }
 
-        public static List<Expression> BuildForwardExpressionList(
-            Dictionary<Value<TType>, Expression> variableExpressions,
-            Expression index,
-            List<Value<TType>> topOSort)
-            => BuildForwardExpressionList(variableExpressions, [], index, topOSort);
 
-
-        public static List<ParameterExpression> SaveParameters(
-            Dictionary<Value<TType>, Expression> variableExpressions,
+        public List<ParameterExpression> SaveParameters(
             List<Expression> forwardExpressionList,
             Expression index,
             bool all = true)
@@ -173,15 +163,10 @@ namespace SharpGrad.Operators
         }
 
         private Action? forwardLambda;
-        private Action BuildForwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
+        private Action BuildForwardLambda()
         {
             if (forwardLambda is null)
             {
-                if (InnerTopologicalSort())
-                {
-                    variableExpressions.Clear();
-                }
-
                 // Create Dimdexer and assign it
                 ParameterExpression dimdexer = Expression.Parameter(typeof(Dimdexer), nameof(dimdexer));
                 Expression getShape;
@@ -203,10 +188,10 @@ namespace SharpGrad.Operators
 
                 // Get forward expression list
                 List<Expression> forwardExpressionList = [assignCurrent];
-                BuildForwardExpressionList(variableExpressions, forwardExpressionList, current, innerTopoSort);
+                BuildForwardExpressionList(forwardExpressionList, current, InnerTopoSort);
 
                 // Backup all parameters to data
-                List<ParameterExpression> parameters = SaveParameters(variableExpressions, forwardExpressionList, current);
+                List<ParameterExpression> parameters = SaveParameters(forwardExpressionList, current);
                 parameters.Add(current);
                 parameters.Add(dimdexer);
 
@@ -234,31 +219,26 @@ namespace SharpGrad.Operators
             }
             return forwardLambda;
         }
-        public Action BuildForwardLambda()
-            => BuildForwardLambda(_variableExpressions);
 
-        private void OutterForward()
+        protected void ForwardPass()
         {
-            Init();
+            InitValueForForward();
             Action forwardLambda = BuildForwardLambda();
             forwardLambda();
         }
 
         public void Forward()
         {
-            foreach (var dependency in Dependencies)
+            List<NariOperation<TType>> topoSort = OutterTopoSort;
+            for(int i = 0; i < topoSort.Count; i++)
             {
-                dependency.Forward();
+                topoSort[i].ForwardPass();
             }
-            Action forwardLambda = BuildForwardLambda();
-            forwardLambda();
         }
         #endregion
 
         #region Backward pass
-        public static List<Expression> BuildBackwardExpressionList(
-            Dictionary<Value<TType>, Expression> variableExpressions,
-            Dictionary<Value<TType>, Expression> gradientExpressions,
+        public List<Expression> BuildBackwardExpressionList(
             List<Expression> backwardExpressionList,
             ParameterExpression index,
             List<Value<TType>> topOSort)
@@ -300,7 +280,7 @@ namespace SharpGrad.Operators
         }
 
         private Action? backwardLambda;
-        private Action BuildBackwardLambda(Dictionary<Value<TType>, Expression> variableExpressions)
+        private Action BuildBackwardLambda()
         {
             if (backwardLambda is null)
             {
@@ -337,11 +317,11 @@ namespace SharpGrad.Operators
 
                 List<Expression> backwardExpressionList = [assignCurrent, assignThisGradient];
 
-                if (InnerTopologicalSort())
+                if (innerTopoSort is null)
                 {
                     variableExpressions.Clear();
-                    BuildForwardExpressionList(variableExpressions, backwardExpressionList, current, innerTopoSort);
-                    SaveParameters(variableExpressions, backwardExpressionList, current, false);
+                    BuildForwardExpressionList(backwardExpressionList, current, InnerTopoSort);
+                    SaveParameters(backwardExpressionList, current, false);
                 }
                 else
                 {
@@ -356,7 +336,7 @@ namespace SharpGrad.Operators
                     }
                 }
 
-                BuildBackwardExpressionList(variableExpressions, gradientExpressions, backwardExpressionList, current, innerTopoSort);
+                BuildBackwardExpressionList(backwardExpressionList, current, innerTopoSort);
 
                 // Build block and compile Expression
                 HashSet<ParameterExpression> parameters = [.. variableExpressions.Values.OfType<ParameterExpression>()];
@@ -393,10 +373,7 @@ namespace SharpGrad.Operators
             return backwardLambda;
         }
 
-        public Action BuildBackwardLambda()
-            => BuildBackwardLambda(_variableExpressions);
-
-        private void OutterBackward()
+        private void BackwardPass()
         {
             Action backwardLambda = BuildBackwardLambda();
             backwardLambda();
@@ -405,16 +382,14 @@ namespace SharpGrad.Operators
         public void Backward()
         {
             InitGradientForBackward();
-            OutterTopologicalSort();
-            foreach (var dependency in outterTopOSort)
+            List<NariOperation<TType>> topoSort = OutterTopoSort;
+            for (int i = 0; i < topoSort.Count; i++)
             {
-                dependency.OutterForward();
+                topoSort[i].ForwardPass();
             }
-            Action backwardLambda = BuildBackwardLambda();
-            backwardLambda();
-            foreach (var dependency in outterTopOSort.AsEnumerable().Reverse())
+            for (int i = topoSort.Count - 1; i >= 0; i--)
             {
-                dependency.OutterBackward();
+                topoSort[i].BackwardPass();
             }
         }
         #endregion

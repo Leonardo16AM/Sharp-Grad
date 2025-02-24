@@ -23,12 +23,8 @@ internal class Program
 
         float lr = 1e-4f;
         // List of input data
-        var x1 = v.Select(d => (float)d.X[0]).ToArray();
-        var x2 = v.Select(d => (float)d.X[1]).ToArray();
-        //Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
         Variable<float> X = new([batch, input], "X");
-        Dimdexer dimdexer = new(X.Shape);
-        foreach (Dimdices dimdices in dimdexer)
+        foreach (Dimdices dimdices in new Dimdexer(X.Shape))
         {
             X[dimdices] = v[dimdices[batch]].X[dimdices[input]];
         }
