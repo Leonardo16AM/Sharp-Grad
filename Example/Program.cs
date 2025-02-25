@@ -1,54 +1,60 @@
 ﻿using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
-using SharpGrad.Operator;
-using System.Text.RegularExpressions;
+using SharpGrad.Operators;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         Console.SetWindowSize(DataSet.N * 2 + 4, DataSet.N + 4);
-        var v = DataSet.GetDataSet(400);
-        if (v.Count == 0)
-            throw new ArgumentException("Empty dataset.");
 
-        MLP<float> cerebrin = new(2, 8, 1);
+        Dimension batch = new(nameof(batch), 400);
+        var v = DataSet.GetDataSet(batch.Size);
+
+        Dimension input = new(nameof(input), 2);
+        Dimension hidden = new(nameof(hidden), 8);
+        Dimension output = Dimension.Scalar;
+        MLP<float> cerebrin = new([input, hidden, output]);
 
         int epochs = 1000;
 
-        DataSet.Data[] preds = new DataSet.Data[v.Count];
+        DataSet.Data[] preds = new DataSet.Data[batch.Size];
 
-        Dimension batch = new(nameof(batch), v.Count);
         float lr = 1e-4f;
         // List of input data
-        var x1 = v.Select(d => (float)d.X[0]).ToArray();
-        var x2 = v.Select(d => (float)d.X[1]).ToArray();
-        Variable<float>[] X = [new(x1, [batch], "X0"), new(x2, [batch], "X1")];
+        Variable<float> X = new([batch, input], "X");
+        foreach (Dimdices dimdices in new Dimdexer(X.Shape))
+        {
+            X[dimdices] = v[dimdices[batch]].X[dimdices[input]];
+        }
+
         // List of ground truth data
         var ygt = v.Select(d => (float)d.Y[0]).ToArray();
-        Variable<float>[] Ygt = [new(ygt, [batch], "Ygt")];
+        Variable<float> Ygt = new(ygt, [output, batch], "Ygt");
 
         // Build execution expression graph (no computation done here)
-        Value<float>[] Y = cerebrin.Forward(X);
-        NariOperation<float> loss = Loss.MSE(Y, Ygt) / batch.Size;
+        Value<float> Y = cerebrin.Forward(X);
+        NariOperation<float> loss = Loss.MSE(Y, Ygt, output);
+        loss = VMath.Sum(loss, batch) / batch.Size;
         loss.IsOutput = true;
 
         // Training loop
         float minLoss = float.MaxValue;
+        DateTime lastShow = DateTime.Now;
         for (int i = 0; i < epochs; i++)
         {
             Console.SetCursorPosition(0, 0);
             Console.WriteLine($"LR: {lr:E2} | Epoch: {i} / {epochs}");
             // Forward and backward pass
-            loss.Forward();
+            //loss.Forward();
             loss.Backward();
 
             // Build prediction data
-            foreach (Dimdices dimdices in new Dimdexer(Y[0].Shape))
+            foreach (Dimdices dimdices in new Dimdexer(Y.Shape))
             {
                 int j = dimdices[batch];
-                float d = Y[0].Data[j];
+                float d = Y.Data[j];
                 int val = Math.Abs(d - 1) < Math.Abs(d - 2) ? 1 : 2;
                 preds[j] = new(v[j].X, [val]);
             }
@@ -60,7 +66,11 @@ internal class Program
 
             // Print loss and scatter plot
             Console.WriteLine($"Loss: {loss.Data[0]:E3} / {minLoss:E3}");
-            if (i % 10 == 0) DataSet.Scatter(v, preds);
+            if ((DateTime.Now - lastShow).TotalMilliseconds > 125)
+            {
+                lastShow = DateTime.Now;
+                DataSet.Scatter(v, preds);
+            }
             if (minLoss > loss.Data[0])
             {
                 minLoss = loss.Data[0];

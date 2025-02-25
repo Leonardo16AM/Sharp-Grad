@@ -1,7 +1,5 @@
 ﻿using SharpGrad.DifEngine;
 using SharpGrad.ExprLambda;
-using SharpGrad.Operator;
-using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
@@ -33,7 +31,7 @@ namespace SharpGrad.Operators
 
         protected abstract Expr GetForwardComputation(Expr left, Expr right);
         internal sealed override Expression GetForwardComputation(
-            Dictionary<Value<TType>, Expression> variableExpressions, 
+            Dictionary<Value<TType>, Expression> variableExpressions,
             List<Expression> forwardExpressionList,
             Expression index)
         {

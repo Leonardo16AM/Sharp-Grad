@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
-namespace SharpGrad.Operator
+namespace SharpGrad.Operators
 {
     public class NegValue<TType> : UnariOperation<TType>
         where TType : INumber<TType>

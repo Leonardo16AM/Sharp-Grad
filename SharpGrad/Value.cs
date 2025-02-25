@@ -1,12 +1,10 @@
-﻿using SharpGrad.Operator;
-using SharpGrad.Operators;
+﻿using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace SharpGrad.DifEngine
 {
@@ -30,16 +28,16 @@ namespace SharpGrad.DifEngine
         private static int InstanceCount = 0;
         public static readonly Constant<TType> e = new(TType.CreateSaturating(Math.E), "e");
         public static readonly Constant<TType> Zero = new(TType.Zero, "0");
-        public virtual void Init() { }
-        public Value(Dimension[] shape, string name, params Value<TType>[] childs)
+        public virtual void InitValueForForward() { }
+        public Value(IReadOnlyList<Dimension> shape, string name, params Value<TType>[] childs)
         {
             Name = name;
-            Shape = shape;
+            Shape = [.. shape.Except([Dimension.Scalar]).Distinct()];
             Operands = childs;
             int length = Size;
             data = new TType[length];
             gradient = new TType[length];
-            Init();
+            InitValueForForward();
         }
 
         public readonly Value<TType>[] Operands;
@@ -47,13 +45,29 @@ namespace SharpGrad.DifEngine
         protected TType[] data;
         public virtual TType[] Data => data;
 
+        private bool IsShapeEqual(Dimension[] shape)
+        {
+            if (shape.Length != Shape.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < shape.Length; i++)
+            {
+                if (shape[i] != Shape[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private int[] GetLocalIndices(Dimdices indices)
         {
             if (indices.IsScalar)
             {
                 return [0];
             }
-            if (indices.Shape.SequenceEqual(Shape))
+            if (IsShapeEqual(indices.Shape))
             {
                 return [.. indices.Indices];
             }
@@ -120,7 +134,7 @@ namespace SharpGrad.DifEngine
             gradient[i] = value;
         }
 
-        internal void DFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
+        internal void InnerDFS(List<Value<TType>> topOSort, Dictionary<Value<TType>, int> usageCount)
         {
             if (usageCount.TryAdd(this, 0))
             {
@@ -136,7 +150,7 @@ namespace SharpGrad.DifEngine
                     }
                     else
                     {
-                        Operands[i].DFS(topOSort, usageCount);
+                        Operands[i].InnerDFS(topOSort, usageCount);
                     }
                 }
                 topOSort.Add(this);
@@ -203,6 +217,11 @@ namespace SharpGrad.DifEngine
         public static MulValue<TType> operator *(Value<TType> left, Value<TType> right) => Mul(left, right);
 
         public static DivValue<TType> Div(Value<TType> left, Value<TType> right) => new(left, right);
+
+        protected void InitGradientForBackward()
+        {
+            Array.Fill(gradient, TType.One);
+        }
 
         public void ResetGradient()
         {

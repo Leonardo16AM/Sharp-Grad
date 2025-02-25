@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
 
-namespace SharpGrad.Operator
+namespace SharpGrad.Operators
 {
     public abstract class UnariOperation<TType> :
         NariOperation<TType>

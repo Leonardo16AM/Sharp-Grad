@@ -1,8 +1,6 @@
-﻿using SharpGrad.DifEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace SharpGrad.DifEngine
 {
@@ -24,7 +22,7 @@ namespace SharpGrad.DifEngine
         {
             if (shape.Length == 0 && indices.Length == 1)
                 return 0;
-            if(shape.Length != indices.Length)
+            if (shape.Length != indices.Length)
             {
                 throw new ArgumentException($"The shape size {shape.Size()} is not equal to the indices length {indices.Length}");
             }

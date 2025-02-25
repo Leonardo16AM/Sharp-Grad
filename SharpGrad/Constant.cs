@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
-using System.Xml.Linq;
 
 namespace SharpGrad
 {
@@ -17,7 +16,7 @@ namespace SharpGrad
         public Constant(TType[] data, Dimension[] shape, string name)
             : base(shape, name)
         {
-            if(shape.Size() != data.Length)
+            if (shape.Size() != data.Length)
             {
                 throw new System.ArgumentException($"The shape size {shape.Size()} is not equal to the data length {data.Length}");
             }
@@ -44,7 +43,7 @@ namespace SharpGrad
 
         public override string ToString()
         {
-            if(Shape.IsScalar())
+            if (Shape.IsScalar())
             {
                 return data[0].ToString()!;
             }

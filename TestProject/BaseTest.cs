@@ -1,7 +1,6 @@
 ﻿using SharpGrad;
 using SharpGrad.DifEngine;
 using SharpGrad.NN;
-using System.Linq.Expressions;
 
 namespace TestProject
 {
@@ -40,12 +39,20 @@ namespace TestProject
         [TestMethod]
         public void TestMSE()
         {
-            Dimension[] shape = [new(nameof(shape), 5)];
-            var Y = new Value<float>[] { new Variable<float>([1, 2, 3, 4, 5], shape, "Y") };
-            var Y_hat = new Value<float>[] { new Variable<float>([1, 2, 3, 4, 5], shape, "Y_hat") };
-            var loss = Loss.MSE(Y, Y_hat);
+            Dimension batch = new(nameof(batch), 5);
+            Dimension[] shape = [batch];
+            Value<float> Y = new Variable<float>([1, 2, 3, 4, 5], shape, "Y");
+            Value<float> Y_hat = new Variable<float>([1, 2, 3, 4, 5], shape, "Y_hat");
+            var loss = Loss.MSE(Y, Y_hat, batch);
+            loss.Forward();
             Assert.AreEqual(0, loss.Data[0]);
-            Console.WriteLine($"{nameof(TestMSE)}({Y[0].Data.GetString()}, {Y_hat[0].Data.GetString()}) passed: {loss.Data.GetString()}");
+            Console.WriteLine($"{nameof(TestMSE)}({Y.Data.GetString()}, {Y_hat.Data.GetString()}) passed: {loss.Data.GetString()}");
+
+            Y_hat = new Variable<float>([5, 4, 3, 2, 1], shape, "Y_hat");
+            loss = Loss.MSE(Y, Y_hat, batch);
+            loss.Forward();
+            Assert.AreEqual(8, loss.Data[0]);
+            Console.WriteLine($"{nameof(TestMSE)}({Y.Data.GetString()}, {Y_hat.Data.GetString()}) passed: {loss.Data.GetString()}");
         }
         [TestMethod]
         public void TestDimensionExtender()

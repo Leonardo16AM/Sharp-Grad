@@ -1,5 +1,4 @@
-﻿using SharpGrad.Operator;
-using SharpGrad.Operators;
+﻿using SharpGrad.Operators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace SharpGrad.DifEngine
             => new(@this, operand);
 
         public static SumValue<TType> Sum<TType>(this Value<TType> @this, params Dimension[] toReduce)
-            where TType : IBinaryFloatingPointIeee754<TType>
+            where TType : INumber<TType>
         {
             if (toReduce.Length == 0)
             {
@@ -22,16 +21,12 @@ namespace SharpGrad.DifEngine
             }
             else
             {
-                List<Dimension> newShape = [.. @this.Shape];
-                foreach (Dimension dim in toReduce)
-                {
-                    if (!newShape.Remove(dim))
-                    {
-                        throw new ArgumentException($"The dimension {dim} is not present in the shape {@this.Shape}");
-                    }
-                }
-                return new SumValue<TType>([.. newShape], "∑", @this);
+                return new SumValue<TType>([.. @this.Shape.Except(toReduce)], "∑", @this);
             }
         }
+        public static SumValue<TType> Sum<TType>(this Value<TType> @this, Dimension toReduce)
+            where TType : IBinaryFloatingPointIeee754<TType>
+            => Sum(@this, [toReduce]);
+
     }
 }

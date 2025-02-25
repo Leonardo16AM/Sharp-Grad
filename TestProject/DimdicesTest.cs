@@ -1,10 +1,5 @@
 ﻿using SharpGrad;
 using SharpGrad.DifEngine;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TestProject
 {
@@ -43,7 +38,7 @@ namespace TestProject
             var f = b + c;
             f.Forward();
             Assert.AreEqual(f.Data[0], b.Data[0] + c.Data[0]);
-            Assert.AreEqual(f.Data[1], b.Data[0] + c.Data[1]);  
+            Assert.AreEqual(f.Data[1], b.Data[0] + c.Data[1]);
             Assert.AreEqual(f.Data[2], b.Data[1] + c.Data[0]);
             Assert.AreEqual(f.Data[3], b.Data[1] + c.Data[1]);
             Assert.AreEqual(f.Data[4], b.Data[2] + c.Data[0]);

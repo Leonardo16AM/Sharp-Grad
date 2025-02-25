@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Numerics;
-using System.Reflection;
 
 namespace SharpGrad.DifEngine
 {
@@ -10,7 +9,7 @@ namespace SharpGrad.DifEngine
     {
         private static int InstanceCount = 0;
 
-        public new TType this[Dimdices indices] { get =>base[indices]; set => base[indices] = value; }
+        public new TType this[Dimdices indices] { get => base[indices]; set => base[indices] = value; }
 
         public Variable(TType[] data, Dimension[] shape, string name)
             : base(shape, name)
@@ -28,6 +27,10 @@ namespace SharpGrad.DifEngine
 
         public Variable(Dimension[] shape, string name) :
             this(new TType[shape.Size()], shape, name)
+        { }
+
+        public Variable(Dimension shape, string name) :
+            this([shape], name)
         { }
 
         public override bool GetAsOperand(Dictionary<Value<TType>, Expression> variableExpressions, List<Expression> forwardExpressionList, Expression index, out Expression? operand)

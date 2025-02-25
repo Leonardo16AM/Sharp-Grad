@@ -6,12 +6,12 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
 
-namespace SharpGrad.Operator
+namespace SharpGrad.Operators
 {
     public class SumValue<TType> : ReduceOperation<TType>
         where TType : INumber<TType>
     {
-        public override void Init()
+        public override void InitValueForForward()
         {
             Array.Fill(data, TType.AdditiveIdentity);
         }
@@ -30,12 +30,16 @@ namespace SharpGrad.Operator
             List<Expression> forwardExpressionList, Expression index,
             out Expression? operand)
         {
-            throw new NotImplementedException();
+            if (!variableExpressions.TryGetValue(this, out operand))
+            {
+                operand = GetForwardComputation(variableExpressions, forwardExpressionList, index);
+            }
+            return true;
         }
 
         internal override Expression GetForwardComputation(
             Dictionary<Value<TType>, Expression> variableExpressions,
-            List<Expression> forwardExpressionList, 
+            List<Expression> forwardExpressionList,
             Expression index)
         {
             Expression variable = Expression.Variable(typeof(TType), Name);
